@@ -13,14 +13,14 @@ Create and add your keys to this file: `$HOME/.apikeys/apikeys.py`
     COMPANIES_HOUSE_APIKEY = 'your_companies_house_api_key'
 
 ### Python 3 Packages
-pip install lxml
-pip install bs4
-pip install nltk
-pip install requests
-pip install numpy
-pip install pandas
-pip install tabula-py
-pip install spacy
+ - pip install lxml
+ - pip install bs4
+ - pip install nltk
+ - pip install requests
+ - pip install numpy
+ - pip install pandas
+ - pip install tabula-py
+   pip install spacy
 
 Alternatively, a virtual env script is provided:
 
