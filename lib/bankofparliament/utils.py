@@ -9,6 +9,7 @@ import json
 import logging
 
 # third party libs
+import pandas
 import requests
 import tabula
 
@@ -73,3 +74,11 @@ def read_pdf_table(path):
         dataframe_list = tabula.read_pdf(path, pages="all", multiple_tables=True)
         return dataframe_list[1:]  # we don't need the first table
     return None
+
+
+def read_csv_as_dataframe(path):
+    """Read csv input file"""
+    if path:
+        dataframe = pandas.read_csv(path)
+        return dataframe.where(pandas.notnull(dataframe), None)
+    return []

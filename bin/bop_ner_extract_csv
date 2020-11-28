@@ -1,0 +1,53 @@
+#!/usr/bin/env python
+"""
+Script to extract entity data from csv data
+"""
+# -*- coding: utf-8 -*-
+
+# sys libs
+import sys
+import argparse
+
+# local libs
+from bankofparliament.extraction import NamedEntityExtract
+from bankofparliament.utils import get_logger
+from apikeys import COMPANIES_HOUSE_APIKEY, OPENCORPORATES_APIKEY
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--debug",
+        help="Debug prints",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "--entities", help="Entities file", action="store", default=None
+    )
+    parser.add_argument(
+        "--relationships", help="Relationships file", action="store", default=None
+    )
+    parser.add_argument(
+        "--custom_entities", help="Custom entities file", action="store", default=None
+    )
+    parser.add_argument(
+        "--custom_relationships",
+        help="Custom relationships file",
+        action="store",
+        default=None,
+    )
+
+    args = parser.parse_args()
+    if not args.entities and args.relationships:
+        sys.exit()
+
+    extract = NamedEntityExtract(
+        entities=args.entities,
+        relationships=args.relationships,
+        custom_entities=args.custom_entities,
+        custom_relationships=args.custom_relationships,
+        companies_house_apikey=COMPANIES_HOUSE_APIKEY,
+        opencorporates_apikey=OPENCORPORATES_APIKEY,
+        logger=get_logger("extract", args.debug),
+    )
+    extract.execute()
