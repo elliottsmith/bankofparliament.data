@@ -180,5 +180,5 @@ class Download:
             os.makedirs(os.path.dirname(output_path))
 
         with open(output_path, "w") as file:
-            json.dump(self.data, file, indent=4, sort_keys=True)
+            json.dump(self.data, file, sort_keys=True)
         self.logger.info("Saved: {}".format((output_path)))
