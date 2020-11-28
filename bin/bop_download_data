@@ -1,0 +1,42 @@
+#!/usr/bin/env python
+"""
+Script to download data on members of parliament
+"""
+# -*- coding: utf-8 -*-
+
+# sys libs
+import os
+import datetime
+import argparse
+
+# local libs
+from bankofparliament.download import Download
+from bankofparliament.utils import get_logger
+from apikeys import THEYWORKFORYOU_APIKEY
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--debug",
+        help="Debug prints",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument("--output", help="Ouptut Path", action="store", default=None)
+
+    args = parser.parse_args()
+    timestamp = datetime.datetime.now().strftime("%Y%m%d")
+    DEFAULT_OUTPUT_PATH = os.path.join(
+        os.path.dirname(__file__),
+        "../data/members/{0}/{0}.json".format(timestamp),
+    )
+
+    output_path = args.output if args.output else DEFAULT_OUTPUT_PATH
+
+    download = Download(
+        output_path=output_path,
+        theyworkforyou_apikey=THEYWORKFORYOU_APIKEY,
+        logger=get_logger("download", args.debug),
+    )
+    download.execute()

@@ -1,0 +1,44 @@
+#!/usr/bin/env python
+"""
+Script to convert raw json data to csv
+"""
+# -*- coding: utf-8 -*-
+
+# sys libs
+import os
+import sys
+import argparse
+
+# local libs
+from bankofparliament.convert import Convert
+from bankofparliament.utils import get_logger
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--debug",
+        help="Debug prints",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "--members", help="Members Input Path", action="store", default=None
+    )
+    parser.add_argument(
+        "--spads", help="Spads Input Path", action="store", default=None
+    )
+
+    args = parser.parse_args()
+    if not args.members:
+        sys.exit()
+
+    output_dir = os.path.join(os.path.dirname(args.members))
+
+    convert = Convert(
+        output_dir=output_dir,
+        members_path=args.members,
+        spads_path=args.spads,
+        logger=get_logger("convert_to_csv", args.debug),
+    )
+    convert.execute()
