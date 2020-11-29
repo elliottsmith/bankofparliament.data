@@ -36,6 +36,7 @@ if __name__ == "__main__":
         action="store",
         default=None,
     )
+    parser.add_argument("--ner_model", help="NER model", action="store", default=None)
 
     args = parser.parse_args()
     if not args.entities and args.relationships:
