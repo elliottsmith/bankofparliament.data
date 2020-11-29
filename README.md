@@ -20,7 +20,8 @@ Create and add your keys to this file: `$HOME/.apikeys/apikeys.py`
  - pip install numpy
  - pip install pandas
  - pip install tabula-py
-   pip install spacy
+ - pip install spacy
+ - pip install spacy-lookups-data
 
 Alternatively, a virtual env script is provided:
 
