@@ -60,7 +60,7 @@ class NamedEntityExtract:
 
         self.logger.info("*" * 100)
         self.logger.info(
-            "Missing: {}/{}".format(len(self.missing), len(self.relationships))
+            "Unknown Entities: {}/{}".format(len(self.missing), len(self.relationships))
         )
         self.logger.info("*" * 100)
 
@@ -259,6 +259,8 @@ class NamedEntityExtract:
                 target,
             )
         )
+        if target == "UNKNOWN":
+            self.missing.append(relationship)
 
     def save(self):
         """Dump the rows to csv"""
