@@ -5,6 +5,7 @@ Module for convert related tasks
 
 # sys libs
 import os
+import re
 
 # third party libs
 import pandas
@@ -144,7 +145,7 @@ class Convert:
                     delimeter = "?????"
                     for line_break in div.findAll("br"):
                         line_break.replaceWith(delimeter)
-                    text = div.get_text().split(delimeter)
+                    text = [re.sub("\r|\n", " ", div.get_text()).split(delimeter)]
 
                     self.add_relationship(
                         relationship_type=last_category,
@@ -224,7 +225,7 @@ class Convert:
                             relationship_type=last_category,
                             source=member["DisplayAs"],
                             target="UNKNOWN",
-                            text=[entry["RegisteredInterest"]],
+                            text=[re.sub("\r|\n", " ", entry["RegisteredInterest"])],
                             link=DATA_PARLIAMENT_LINK_URL.format(
                                 member["@Member_Id"], "registeredinterests"
                             ),

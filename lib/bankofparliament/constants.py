@@ -113,7 +113,7 @@ LORDS_CATEGORIES = {
 ENTITY_TYPES = {
     1: "politician",
     2: "advisor",
-    3: "political party",
+    3: "political_party",
     4: "government_body",
 }
 RELATIONSHIP_TYPES = {1: "member_of", 2: "employed_by"}
