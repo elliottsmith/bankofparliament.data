@@ -348,10 +348,10 @@ class Convert:
                 self.logger.debug("Found laying minister: {}".format(member))
                 return member
 
-            else:
-                self.logger.warning(
-                    "Could not find laying minister: {}".format(laying_minister_name)
-                )
+        else:
+            self.logger.warning(
+                "Could not find laying minister: {}".format(laying_minister_name)
+            )
         return None
 
     def convert_donations(self):

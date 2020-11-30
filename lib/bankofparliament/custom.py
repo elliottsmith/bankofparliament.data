@@ -1,5 +1,5 @@
 """
-Module for download related tasks
+Module for custom values
 """
 # -*- coding: utf-8 -*-
 
