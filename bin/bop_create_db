@@ -1,0 +1,44 @@
+#!/usr/bin/env python
+"""
+Script to create neo4j database from entities and relationship
+"""
+# -*- coding: utf-8 -*-
+
+# sys libs
+import sys
+import argparse
+
+# local libs
+from bankofparliament.graphdb import GraphDB
+from bankofparliament.utils import get_logger
+from apikeys import NEO4J_HOST, NEO4J_BOLT_PORT, NEO4J_PASSWORD, NEO4J_USER
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--debug",
+        help="Debug prints",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "--relationships", help="Relationships file", action="store", default=None
+    )
+    parser.add_argument(
+        "--entities", help="Entities file", action="store", default=None
+    )
+
+    args = parser.parse_args()
+    if not args.relationships or not args.entities:
+        sys.exit()
+
+    graphdb = GraphDB(
+        host=NEO4J_HOST,
+        port=NEO4J_BOLT_PORT,
+        user=NEO4J_USER,
+        password=NEO4J_PASSWORD,
+        entities=args.entities,
+        relationships=args.relationships,
+        logger=get_logger("graphdb", args.debug),
+    )
+    graphdb.execute()

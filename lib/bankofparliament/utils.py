@@ -76,9 +76,9 @@ def read_pdf_table(path):
     return None
 
 
-def read_csv_as_dataframe(path):
+def read_csv_as_dataframe(path, null_replace=None):
     """Read csv input file"""
     if path:
         dataframe = pandas.read_csv(path)
-        return dataframe.where(pandas.notnull(dataframe), None)
+        return dataframe.where(pandas.notnull(dataframe), null_replace)
     return []
