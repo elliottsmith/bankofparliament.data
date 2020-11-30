@@ -14,13 +14,13 @@ import spacy
 
 # local libs
 from .utils import read_csv_as_dataframe
-from .constants import NER_BASE_MODEL
+from .constants import ENTITY_TEMPLATE, NER_BASE_MODEL
 
 
 class NamedEntityExtract:
     """Class to extract entities from raw data"""
 
-    LIMIT = 10000000
+    LIMIT = -1
 
     def __init__(
         self,
@@ -129,6 +129,7 @@ class NamedEntityExtract:
         self.logger.debug("{}: {} ({})".format(_text, _type, _target))
 
         target = "UNKNOWN"
+        target_entity_type = None
         text = self.eval_list_as_strings(_text)[0]
 
         result = self.nlp(text)
@@ -136,12 +137,16 @@ class NamedEntityExtract:
         for entity in entities:
             if entity[1] in ner_types:
                 target = entity[0].title()
+                target_entity_type = self.get_target_type(entity[1])
                 break
 
         relationship["target"] = target
         relationship["date"] = self.extract_date_from_text(text)
         relationship["amount"] = self.extract_amount_from_text(text)
         self.log_relationship(index, relationship)
+
+        if target != "UNKNOWN":
+            self.add_entity(entity_type=target_entity_type, name=target, aliases=target)
 
     def _process_property(self, index, relationship):
         """
@@ -153,6 +158,7 @@ class NamedEntityExtract:
         self.logger.debug("{}: {} ({})".format(_text, _type, _target))
 
         target = "UNKNOWN"
+        target_entity_type = None
         text = self.eval_list_as_strings(_text)[0]
 
         amount = 0
@@ -167,12 +173,16 @@ class NamedEntityExtract:
         for entity in entities:
             if entity[1] in ["GPE", "LOC"]:
                 target = entity[0].title()
+                target_entity_type = self.get_target_type(entity[1])
                 break
 
         relationship["target"] = target
         relationship["date"] = self.extract_date_from_text(text)
         relationship["amount"] = amount
         self.log_relationship(index, relationship)
+
+        if target != "UNKNOWN":
+            self.add_entity(entity_type=target_entity_type, name=target, aliases=target)
 
     def _process_multi_from(self, index, relationship):
         """
@@ -184,6 +194,7 @@ class NamedEntityExtract:
         self.logger.debug("{}: {} ({})".format(_text, _type, _target))
 
         target = "UNKNOWN"
+        target_entity_type = None
         text = self.eval_list_as_strings(_text)
 
         _data = {}
@@ -206,6 +217,7 @@ class NamedEntityExtract:
         for entity in entities:
             if entity[1] in ["PERSON", "ORG", "NORP"]:
                 target = entity[0].title()
+                target_entity_type = self.get_target_type(entity[1])
                 break
 
         relationship["target"] = target
@@ -216,11 +228,40 @@ class NamedEntityExtract:
 
         self.log_relationship(index, relationship)
 
+        if target != "UNKNOWN":
+            self.add_entity(entity_type=target_entity_type, name=target, aliases=target)
+
     ##########################################################################################
     # Genral Methods
     ##########################################################################################
+
+    def add_entity(self, **kwargs):
+        """Add entity data"""
+        data = dict.fromkeys(ENTITY_TEMPLATE)
+        for (key, value) in kwargs.items():
+            if key in data:
+                data[key] = value
+            else:
+                self.logger.debug("Key not found in template: {}".format(key))
+
+        new_entity = pandas.DataFrame([data])
+        self._all_entities = pandas.concat(
+            [self._all_entities, new_entity], ignore_index=True
+        )
+
+    def get_target_type(self, ner_type):
+        """Convert NER type to node type"""
+        _data = {
+            "PERSON": "person",
+            "ORG": "company",
+            "NORP": "company",
+            "LOC": "place",
+            "GPE": "place",
+        }
+        return _data[ner_type]
+
     def eval_list_as_strings(self, _list):
-        """"""
+        """Eval the string to list"""
         lines = [line.strip() for line in ast.literal_eval(_list)] if _list else []
         return lines
 
@@ -244,11 +285,10 @@ class NamedEntityExtract:
         return 0
 
     def log_relationship(self, index, relationship, prefix="Relationship"):
-        """"""
+        """Log the relationship"""
         source = relationship["source"]
         relationship_type = relationship["relationship_type"]
         target = relationship["target"]
-        text = relationship["text"]
         self.logger.info(
             "{:05d}/{:05d} - {}: {} ({}) {}".format(
                 index,
