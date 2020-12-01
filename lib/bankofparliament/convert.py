@@ -450,10 +450,10 @@ class Convert:
 
         relationships_csv = os.path.join(output_dir, "relationships.csv")
         relationships_dataframe = pandas.DataFrame(self.relationships)
-        relationships_dataframe.to_csv(relationships_csv, index=False)
+        relationships_dataframe.to_csv(relationships_csv, index_label="id")
 
         entities_csv = os.path.join(output_dir, "entities.csv")
         entities_dataframe = pandas.DataFrame(self.entities)
-        entities_dataframe.to_csv(entities_csv, index=False)
+        entities_dataframe.to_csv(entities_csv, index_label="id")
 
         self.logger.info("Saved: {}".format((output_dir)))
