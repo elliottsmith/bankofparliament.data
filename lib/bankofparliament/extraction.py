@@ -317,7 +317,10 @@ class NamedEntityExtract:
             os.makedirs(self.output_dir)
 
         self.relationships.to_csv(
-            os.path.join(self.output_dir, "relationships_extracted.csv")
+            os.path.join(self.output_dir, "relationships_extracted.csv"),
+            index_label="id",
         )
-        self.entities.to_csv(os.path.join(self.output_dir, "entities_extracted.csv"))
+        self.entities.to_csv(
+            os.path.join(self.output_dir, "entities_extracted.csv"), index_label="id"
+        )
         self.logger.info("Saved: {}".format(self.output_dir))
