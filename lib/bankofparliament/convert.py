@@ -390,6 +390,7 @@ class Convert:
         email = None
         twitter = None
         facebook = None
+        company_registration = None
         address_line = ""
         for address in addresses:
 
@@ -430,6 +431,7 @@ class Convert:
         self.add_entity(
             entity_type=ENTITY_TYPES[1],
             name=member["DisplayAs"],
+            company_registration=company_registration,
             address=address_line,
             gender=gender,
             email=email,

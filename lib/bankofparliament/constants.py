@@ -65,7 +65,7 @@ HEADERS = {"Accept": "application/json", "Content-Type": "application/json"}
 ENTITY_TEMPLATE = [
     "entity_type",
     "name",
-    "companies_house",
+    "company_registration",
     "address",
     "date_of_birth",
     "email",
