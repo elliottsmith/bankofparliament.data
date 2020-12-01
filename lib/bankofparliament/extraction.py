@@ -7,14 +7,28 @@ Module for extracting entities from relationship text
 import os
 import re
 import ast
+import json
 
 # third party
 import pandas
 import spacy
 
 # local libs
-from .utils import read_csv_as_dataframe
-from .constants import ENTITY_TEMPLATE, NER_BASE_MODEL
+from .utils import (
+    read_csv_as_dataframe,
+    get_companies_house_company_name_from_number,
+    get_request,
+    extract_company_registration_number_from_text,
+    reconcile_company_names,
+)
+from .constants import (
+    ENTITY_TEMPLATE,
+    NER_BASE_MODEL,
+    COMPANIES_HOUSE_PREFIXES,
+    OPENCORPORATES_RECONCILE_URL,
+    HEADERS,
+)
+from .custom import ValueOverride
 
 
 class NamedEntityExtract:
@@ -35,6 +49,8 @@ class NamedEntityExtract:
         ner_model=None,
     ):
         """Read all passed in data files"""
+        self.companies_house_apikey = companies_house_apikey
+        self.opencorporates_apikey = opencorporates_apikey
         self.logger = logger
         _entities = read_csv_as_dataframe(entities)
         _relationships = read_csv_as_dataframe(relationships)
@@ -63,7 +79,7 @@ class NamedEntityExtract:
 
     def execute(self):
         """Execute"""
-        self.sanitise_relationships()
+        self.extract_entities_from_relationships()
         self.save()
 
         self.logger.info("*" * 100)
@@ -80,8 +96,8 @@ class NamedEntityExtract:
     def relationships(self):
         return self._all_relationships
 
-    def sanitise_relationships(self):
-        """Sanitise the relationships"""
+    def extract_entities_from_relationships(self):
+        """Extract entities from the relationships"""
 
         for (index, relationship) in self.relationships.iterrows():
             relationship_type = relationship["relationship_type"]
@@ -202,6 +218,7 @@ class NamedEntityExtract:
         self.logger.debug("{}: {} ({})".format(_text, _type, _target))
 
         target = "UNKNOWN"
+        company_registration = "N/A"
         target_entity_type = None
         text = self.eval_list_as_strings(_text)
 
@@ -209,24 +226,89 @@ class NamedEntityExtract:
         for line in text:
             if ":" in line:
                 splits = line.split(":")
-                key = splits[0]
-                value = splits[-1]
+                key = splits[0].strip()
+                value = splits[-1].strip()
                 if "name" in key.lower():
-                    _data["name"] = "Received something from {}".format(
-                        value
-                    )  # for ner recognition
+
+                    custom_value = ValueOverride(
+                        "swap_values.csv", value.strip(), self.logger
+                    )
+                    if custom_value.converted:
+                        self.logger.debug(
+                            "Found override: {}".format(custom_value.value)
+                        )
+                        value = custom_value.value
+
+                    _data["name"] = value
                 elif "amount" in key.lower() or "value" in key.lower():
                     _data["amount"] = value
+
+                elif "status" in key.lower():
+                    _data["status"] = value
+
+                elif "address" in key.lower():
+                    _data["address"] = value
+
             if "registered" in line.lower():
                 _data["date"] = line
 
-        result = self.nlp(_data.get("name", _text))
-        entities = [(X.text, X.label_) for X in result.ents]
-        for entity in entities:
-            if entity[1] in ["PERSON", "ORG", "NORP"]:
-                target = entity[0].title()
-                target_entity_type = self.get_target_type(entity[1])
-                break
+        # before we do NER extraction, see if we can find a company number
+        if "status" in _data and "individual" in _data["status"].lower():
+            pass
+
+        elif (
+            "status" in _data
+            and not "trade union" in _data["status"].lower()
+            and not "association" in _data["status"].lower()
+            and not "trust" in _data["status"].lower()
+            and not "other" in _data["status"].lower()
+        ):
+            company_name = None
+
+            # find the company number from the text
+            company_registration_number = (
+                extract_company_registration_number_from_text(_data["status"], self.logger)
+            )
+            if company_registration_number:
+                # query companies house for company
+                company_name = get_companies_house_company_name_from_number(
+                    self.companies_house_apikey,
+                    company_registration_number,
+                    self.logger,
+                )
+
+            if not company_name:
+                # either the company_registration_number is invalid or
+                # it is outside the companies house jurisdiction
+                data = reconcile_company_names(_data["name"], self.logger)
+                results = data[_data["name"]]["result"]
+                if len(results):
+                    top_match = results[0]
+                    if top_match["score"] > 10:
+                        company_name = top_match["name"]
+                        company_registration_number = top_match["id"].split("/")[-1]
+
+            if company_name:
+                target_entity_type = "company"
+                target = company_name
+                company_registration = company_registration_number
+                self.companies_found += 1
+                self.logger.info(
+                    "Company Found: {} ({})".format(company_name, company_registration)
+                )
+            else:
+                self.logger.warning(
+                    "Company NOT Found: {}".format(relationship["text"])
+                )
+
+        if target == "UNKNOWN":
+            result = self.nlp(_data.get("name", _text))
+            entities = [(X.text, X.label_) for X in result.ents]
+            for entity in entities:
+                if entity[1] in ["PERSON", "ORG", "NORP"]:
+                    target = entity[0].title()
+                    target_entity_type = self.get_target_type(entity[1])
+                    break
 
         relationship["target"] = target
         relationship["date"] = self.extract_date_from_text(_data.get("date", _text))
@@ -237,7 +319,12 @@ class NamedEntityExtract:
         self.log_relationship(index, relationship)
 
         if target != "UNKNOWN":
-            self.add_entity(entity_type=target_entity_type, name=target, aliases=target)
+            self.add_entity(
+                entity_type=target_entity_type,
+                name=target,
+                company_registration=company_registration,
+                aliases=target,
+            )
 
     ##########################################################################################
     # Genral Methods

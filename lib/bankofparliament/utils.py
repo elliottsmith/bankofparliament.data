@@ -4,6 +4,7 @@ Module for utils
 # -*- coding: utf-8 -*-
 
 # sys libs
+import re
 import time
 import json
 import logging
@@ -14,7 +15,7 @@ import requests
 import tabula
 
 # local libs
-from .constants import REQUEST_WAIT_TIME
+from .constants import REQUEST_WAIT_TIME, COMPANIES_HOUSE_QUERY_TEMPLATE, HEADERS, COMPANIES_HOUSE_PREFIXES, OPENCORPORATES_RECONCILE_URL
 
 
 def get_logger(name, debug=False):
@@ -59,6 +60,59 @@ def get_request(url, logger, user=None, headers=None):
 
     return None
 
+
+def get_companies_house_company_name_from_number(
+    companies_house_apikey, entity_number, logger
+):
+    """Query companies house for company name"""
+    url = COMPANIES_HOUSE_QUERY_TEMPLATE.format("company", entity_number)
+    logger.debug("Companies House Query: {}".format(url))
+    request = get_request(
+        url=url, logger=logger, user=companies_house_apikey, headers=HEADERS
+    )
+    if request:
+        data = request.json()
+        return data["company_name"]
+    return None
+
+def extract_company_registration_number_from_text(text, logger):
+    """Regex for companies house number"""
+    text = (
+        re.split("registration |registration number ", text)[-1]
+        .strip()
+        .replace(" ", "")
+    )
+
+    companies_house_pattern = "([{}|0-9]+)".format(
+        "|".join(COMPANIES_HOUSE_PREFIXES)
+    )
+    match = re.search(companies_house_pattern, text)
+    if match:
+        company_number = match.groups()[0].zfill(8)
+        logger.debug("Found companies house number: {}".format(company_number))
+        return company_number
+    return None
+
+def reconcile_company_names(names, logger):
+    """"""
+    if isinstance(names, str):
+        names = [names]
+
+    query_data = {}
+    for name in names:
+        query_data[name] = {"query": name}
+
+    url = "{}?queries={}&order=score".format(
+        OPENCORPORATES_RECONCILE_URL, json.dumps(query_data)
+    )
+    request = get_request(url=url, logger=logger, user=None, headers=HEADERS)
+    if request:
+        return request.json()
+
+    spoof = {}
+    for name in names:
+        spoof[name] = {"result": []}
+    return spoof
 
 def read_json_file(path):
     """Read json input file"""

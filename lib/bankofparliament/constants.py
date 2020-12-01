@@ -16,6 +16,10 @@ THEYWORKFORYOU_LINK_URL = "https://www.theyworkforyou.com/mp/25916/{}/{}#registe
 
 SPADS_URL = "https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/854554/Annual_Report_on_Special_Advisers.pdf"
 
+OPENCORPORATES_QUERY_TEMPLATE = "https://api.opencorporates.com/v0.4/companies/{}"
+OPENCORPORATES_RECONCILE_URL = "https://opencorporates.com/reconcile"
+
+
 COMPANIES_HOUSE_QUERY_TEMPLATE = "https://api.companieshouse.gov.uk/{}/{}"
 COMPANIES_HOUSE_SEARCH_TEMPLATE = (
     "https://api.companieshouse.gov.uk/search/{}?q={}&items_per_page={}"
