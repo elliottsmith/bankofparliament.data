@@ -20,7 +20,8 @@ from .constants import ENTITY_TEMPLATE, NER_BASE_MODEL
 class NamedEntityExtract:
     """Class to extract entities from raw data"""
 
-    LIMIT = -1
+    START = 0
+    END = -1
 
     def __init__(
         self,
@@ -35,17 +36,24 @@ class NamedEntityExtract:
     ):
         """Read all passed in data files"""
         self.logger = logger
-        self._entities = read_csv_as_dataframe(entities)
-        self._relationships = read_csv_as_dataframe(relationships)
-        self._custom_entities = read_csv_as_dataframe(custom_entities)
-        self._custom_relationships = read_csv_as_dataframe(custom_relationships)
+        _entities = read_csv_as_dataframe(entities)
+        _relationships = read_csv_as_dataframe(relationships)
+        _custom_entities = read_csv_as_dataframe(custom_entities)
+        _custom_relationships = read_csv_as_dataframe(custom_relationships)
 
-        self._all_entities = pandas.concat(
-            [self._entities, self._custom_entities], ignore_index=True
-        )
+        entity_data_frames = [_entities]
+        if len(_custom_entities):
+            entity_data_frames.append(_custom_entities)
+
+        self._all_entities = pandas.concat(entity_data_frames, ignore_index=True)
+
+        relationships_data_frames = [_relationships]
+        if len(_custom_relationships):
+            relationships_data_frames.append(_custom_relationships)
+
         self._all_relationships = pandas.concat(
-            [self._relationships, self._custom_relationships], ignore_index=True
-        )[: self.LIMIT]
+            relationships_data_frames, ignore_index=True
+        )[self.START : self.END]
 
         model = ner_model if ner_model else NER_BASE_MODEL
         self.logger.info("Loading NER model: {}".format(model))
