@@ -15,7 +15,13 @@ import requests
 import tabula
 
 # local libs
-from .constants import REQUEST_WAIT_TIME, COMPANIES_HOUSE_QUERY_TEMPLATE, HEADERS, COMPANIES_HOUSE_PREFIXES, OPENCORPORATES_RECONCILE_URL
+from .constants import (
+    REQUEST_WAIT_TIME,
+    COMPANIES_HOUSE_QUERY_TEMPLATE,
+    HEADERS,
+    COMPANIES_HOUSE_PREFIXES,
+    OPENCORPORATES_RECONCILE_URL,
+)
 
 
 def get_logger(name, debug=False):
@@ -75,6 +81,7 @@ def get_companies_house_company_name_from_number(
         return data["company_name"]
     return None
 
+
 def extract_company_registration_number_from_text(text, logger):
     """Regex for companies house number"""
     text = (
@@ -83,15 +90,14 @@ def extract_company_registration_number_from_text(text, logger):
         .replace(" ", "")
     )
 
-    companies_house_pattern = "([{}|0-9]+)".format(
-        "|".join(COMPANIES_HOUSE_PREFIXES)
-    )
+    companies_house_pattern = "([{}|0-9]+)".format("|".join(COMPANIES_HOUSE_PREFIXES))
     match = re.search(companies_house_pattern, text)
     if match:
         company_number = match.groups()[0].zfill(8)
         logger.debug("Found companies house number: {}".format(company_number))
         return company_number
     return None
+
 
 def reconcile_company_names(names, logger):
     """"""
@@ -113,6 +119,7 @@ def reconcile_company_names(names, logger):
     for name in names:
         spoof[name] = {"result": []}
     return spoof
+
 
 def read_json_file(path):
     """Read json input file"""

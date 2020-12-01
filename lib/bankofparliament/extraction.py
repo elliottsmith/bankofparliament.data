@@ -266,8 +266,8 @@ class NamedEntityExtract:
             company_name = None
 
             # find the company number from the text
-            company_registration_number = (
-                extract_company_registration_number_from_text(_data["status"], self.logger)
+            company_registration_number = extract_company_registration_number_from_text(
+                _data["status"], self.logger
             )
             if company_registration_number:
                 # query companies house for company
