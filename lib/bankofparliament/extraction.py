@@ -240,7 +240,7 @@ class NamedEntityExtract:
         data = dict.fromkeys(ENTITY_TEMPLATE)
         for (key, value) in kwargs.items():
             if key in data:
-                data[key] = value
+                data[key] = value if value else "N/A"
             else:
                 self.logger.debug("Key not found in template: {}".format(key))
 
