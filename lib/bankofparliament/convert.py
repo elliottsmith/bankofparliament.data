@@ -145,7 +145,7 @@ class Convert:
                     delimeter = "?????"
                     for line_break in div.findAll("br"):
                         line_break.replaceWith(delimeter)
-                    text = [re.sub("\r|\n", " ", div.get_text()).split(delimeter)]
+                    text = re.sub("\r|\n", " ", div.get_text()).split(delimeter)
 
                     self.add_relationship(
                         relationship_type=last_category,
