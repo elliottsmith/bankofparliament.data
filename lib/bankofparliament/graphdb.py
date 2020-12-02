@@ -37,8 +37,8 @@ class GraphDB:
         """Execute"""
         self.delete_all_nodes_and_relationships()
 
-        entities = read_csv_as_dataframe(self.entities, null_replace="N/A")
-        relationships = read_csv_as_dataframe(self.relationships, null_replace="N/A")
+        entities = read_csv_as_dataframe(self.entities)
+        relationships = read_csv_as_dataframe(self.relationships)
 
         for (_index, row) in relationships[: self.LIMIT].iterrows():
 
@@ -50,13 +50,11 @@ class GraphDB:
             source_match = entities.loc[source_filter]
             if len(source_match):
                 source = source_match.to_dict(orient="records")[0]
-                del source["Unnamed: 0"]
 
             target_filter = entities["name"] == _target
             target_match = entities.loc[target_filter]
             if len(target_match):
                 target = target_match.to_dict(orient="records")[0]
-                del target["Unnamed: 0"]
 
             if source and target:
                 source_node = self.create_node(source)
@@ -65,7 +63,6 @@ class GraphDB:
                 relationship = row.to_dict()
                 del relationship["source"]
                 del relationship["target"]
-                del relationship["Unnamed: 0"]
                 del relationship["text"]
 
                 self.create_relationship(source_node, target_node, relationship)
