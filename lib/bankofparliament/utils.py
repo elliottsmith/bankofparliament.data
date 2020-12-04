@@ -35,13 +35,14 @@ def get_logger(name, debug=False):
     )
     return logging.getLogger(name)
 
+
 def colorize(text, color):
     """Returns the specified text formatted with the specified color."""
     color = color.lower()
     if color in COLOR_CODES:
         return color_command(color) + text + color_command("reset")
-    else:
-        return text
+    return text
+
 
 def color_command(color):
     """Returns the term-compatible command associated with the specified color (or 'reset')."""
@@ -51,8 +52,8 @@ def color_command(color):
     elif color in COLOR_CODES:
         code_modifier, code = COLOR_CODES[color]
         return "\033[%d;%dm" % (code_modifier, code)
-    else:
-        return ""
+    return ""
+
 
 def get_request(url, logger, user=None, headers=None):
     """General purpose url requests"""
