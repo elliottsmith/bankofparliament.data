@@ -10,35 +10,32 @@ import os
 import pandas
 
 
-class ValueOverride:
+class SwapValue:
     """Class to map one value to another"""
 
-    CUSTOM_DATA = os.path.join(os.path.dirname(__file__), "../../data/custom")
+    SWAP_VALUES_FILE = os.path.join(
+        os.path.dirname(__file__), "../../data/custom/swap_values.csv"
+    )
 
-    def __init__(self, dataset_name, value_to_replace, logger):
+    def __init__(self, logger):
         self.logger = logger
-        self.dataset_name = dataset_name
-        self.value_to_replace = value_to_replace
-        self._value = value_to_replace
+        if os.path.exists(self.SWAP_VALUES_FILE):
+            self.dataframe = self._get_data()
+        else:
+            self.dataframe = []
 
-        self.dataset_path = os.path.join(self.CUSTOM_DATA, self.dataset_name)
-        if os.path.exists(self.dataset_path):
-            dataframe = self._get_data()
-            filt = dataframe["from"] == value_to_replace
-            match = dataframe.loc[filt, "to"]
+    def swap(self, value):
+        """Swap the value and return"""
+        if len(self.dataframe):
+            filt = self.dataframe["from"].str.lower() == value.lower()
+            match = self.dataframe.loc[filt, "to"]
             if len(match):
-                self._value = match.values[0]
-                self.logger.info("Overriden:{}".format(self._value))
-
-    @property
-    def value(self):
-        return self._value
-
-    @property
-    def converted(self):
-        return self._value != self.value_to_replace
+                _value = match.values[0]
+                self.logger.info("Overriden:{}".format(_value))
+                return _value
+        return value
 
     def _get_data(self):
         """Read csv input file"""
-        with open(self.dataset_path, "r") as file:
+        with open(self.SWAP_VALUES_FILE, "r") as file:
             return pandas.read_csv(file)

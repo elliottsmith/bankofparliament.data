@@ -23,7 +23,7 @@ from .constants import (
     ENTITY_TEMPLATE,
     RELATIONSHIP_TEMPLATE,
 )
-from .custom import ValueOverride
+from .custom import SwapValue
 from .utils import read_json_file, read_pdf_table
 
 
@@ -37,6 +37,7 @@ class Convert:
 
         self._members_data = read_json_file(members_path)
         self._spads_data = read_pdf_table(spads_path)
+        self.swap_value = SwapValue(self.logger)
 
         self._entities = []
         self._people = []
@@ -306,14 +307,7 @@ class Convert:
         """Resolve a laying minister name to an entity"""
         # there are some names here, that don't correspond exactly to laying
         # ministers names, let's check our custom values first
-        custom_value = ValueOverride(
-            "map_values.csv", laying_minister_name, self.logger
-        )
-        if custom_value.converted:
-            self.logger.debug(
-                "Found laying minister (override): {}".format(custom_value.value)
-            )
-            laying_minister_name = custom_value.value
+        laying_minister_name = self.swap_value.swap(laying_minister_name)
 
         def _loop_members():
             """Members generator"""
