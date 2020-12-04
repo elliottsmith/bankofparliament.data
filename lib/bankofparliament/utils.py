@@ -30,7 +30,7 @@ def get_logger(name, debug=False):
     loglevel = logging.DEBUG if debug else logging.INFO
     logging.basicConfig(
         level=loglevel,
-        format="%(asctime)s %(name)s %(levelname)s:%(message)s",
+        format="%(name)s %(levelname)s:%(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
     return logging.getLogger(name)
