@@ -55,14 +55,16 @@ def color_command(color):
     return ""
 
 
-def get_request(url, logger, user=None, headers=None):
+def get_request(url, logger, user=None, headers=None, params=None):
     """General purpose url requests"""
     if not headers:
         headers = {}
+    if not params:
+        params = {}
     if user:
-        request = requests.get(url, auth=(user, ""), headers=headers)
+        request = requests.get(url, auth=(user, ""), headers=headers, params=params)
     else:
-        request = requests.get(url, headers=headers)
+        request = requests.get(url, headers=headers, params=params)
 
     # successfull request
     if request.status_code == 200:
@@ -119,26 +121,15 @@ def extract_company_registration_number_from_text(text, logger):
     return None
 
 
-def reconcile_company_names(names, logger):
-    """"""
-    if isinstance(names, str):
-        names = [names]
-
-    query_data = {}
-    for name in names:
-        query_data[name] = {"query": name}
-
-    url = "{}?queries={}&order=score".format(
-        OPENCORPORATES_RECONCILE_URL, json.dumps(query_data)
+def reconcile_company_name(names, logger):
+    """Reconcile a company name to an opencorporates record"""
+    params = {"query": names}
+    request = get_request(
+        OPENCORPORATES_RECONCILE_URL, logger, user=None, headers=HEADERS, params=params
     )
-    request = get_request(url=url, logger=logger, user=None, headers=HEADERS)
     if request:
         return request.json()
-
-    spoof = {}
-    for name in names:
-        spoof[name] = {"result": []}
-    return spoof
+    return {"result": []}
 
 
 def read_json_file(path):
