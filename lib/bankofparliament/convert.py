@@ -40,7 +40,6 @@ class Convert:
         self.swap_value = SwapValue(self.logger)
 
         self._entities = []
-        self._people = []
         self._relationships = []
 
     def execute(self):
@@ -97,11 +96,11 @@ class Convert:
     def add_parties(self):
         """Add all parties to entities"""
         for member in self.members:
-            if member["Party"]["#text"] not in [
-                entity["name"] for entity in self.entities
-            ]:
+            party = self.cleanup_party_affliation(member["Party"]["#text"])
+            aliases = list(set([party, member["Party"]["#text"]]))
+            if party not in [entity["name"] for entity in self.entities]:
                 self.add_entity(
-                    entity_type=ENTITY_TYPES[3], name=member["Party"]["#text"]
+                    entity_type=ENTITY_TYPES[3], name=party, aliases=aliases
                 )
 
     def convert_commons_members_interests(self):
@@ -118,7 +117,7 @@ class Convert:
             self.add_relationship(
                 relationship_type=RELATIONSHIP_TYPES[1],
                 source=member["DisplayAs"],
-                target=member["Party"]["#text"],
+                target=self.cleanup_party_affliation(member["Party"]["#text"]),
                 text="{} membership".format(member["Party"]["#text"]),
                 link=DATA_PARLIAMENT_LINK_URL.format(member["@Member_Id"], "contact"),
             )
@@ -189,7 +188,7 @@ class Convert:
             self.add_relationship(
                 relationship_type=RELATIONSHIP_TYPES[1],
                 source=member["DisplayAs"],
-                target=member["Party"]["#text"],
+                target=self.cleanup_party_affliation(member["Party"]["#text"]),
                 text="{} membership".format(member["Party"]["#text"]),
                 link=DATA_PARLIAMENT_LINK_URL.format(member["@Member_Id"], "contact"),
             )
@@ -330,15 +329,15 @@ class Convert:
                 self.logger.debug("Found laying minister: {}".format(member))
                 return member
 
-            elif name and laying_minister_name in name:
+            if name and laying_minister_name in name:
                 self.logger.debug("Found laying minister: {}".format(member))
                 return member
 
-            elif hansard_name and laying_minister_name in hansard_name:
+            if hansard_name and laying_minister_name in hansard_name:
                 self.logger.debug("Found laying minister: {}".format(member))
                 return member
 
-            elif laying_name and laying_minister_name in laying_name:
+            if laying_name and laying_minister_name in laying_name:
                 self.logger.debug("Found laying minister: {}".format(member))
                 return member
 
@@ -434,6 +433,31 @@ class Convert:
             aliases=";".join(aliases),
             date_of_birth=date_of_birth,
         )
+
+    def cleanup_party_affliation(self, party):
+        """Cleanup party affliation"""
+        non_affiliated = [
+            "Non-affiliated",
+            "Bishops",
+            "Speaker",
+            "Lord Speaker",
+            "Crossbench",
+            "Independent",
+        ]
+
+        if "labour" in party.lower():
+            party = "Labour"
+        elif "conservative" in party.lower():
+            party = "Conservative"
+        elif "ulster unionist" in party.lower():
+            party = "Ulster Unionist"
+        elif "social democrat" in party.lower():
+            party = "Social Democrat"
+
+        if party not in non_affiliated and not party.lower().endswith("party"):
+            party += " Party"
+
+        return party
 
     def save(self, output_dir=None):
         """Dump the entities and relationships to csv"""
