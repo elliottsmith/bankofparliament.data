@@ -100,7 +100,7 @@ class Convert:
             aliases = list(set([party, member["Party"]["#text"]]))
             if party not in [entity["name"] for entity in self.entities]:
                 self.add_entity(
-                    entity_type=ENTITY_TYPES[3], name=party, aliases=aliases
+                    entity_type=ENTITY_TYPES[3], name=party, aliases=";".join(aliases)
                 )
 
     def convert_commons_members_interests(self):
