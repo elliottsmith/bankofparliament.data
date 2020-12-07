@@ -28,6 +28,7 @@ from .text import (
     eval_string_as_list,
 )
 
+from .relationships.base import get_relationship
 
 class NamedEntityExtract:
     """Class to extract entities from raw data"""
@@ -102,28 +103,8 @@ class NamedEntityExtract:
         for (index, relationship) in self.relationships.iterrows():
             relationship_type = relationship["relationship_type"]
 
-            if relationship_type == "significant_control_of":
-                text = eval_string_as_list(relationship["text"])[0]
-                text = clean_up_significant_control(text)
-                text = self.swap_value.swap(text)
-                self._process_organisation(index, relationship, text)
-
-            elif relationship_type == "director_of":
-                # TODO more clean up of entry
-                text = eval_string_as_list(relationship["text"])[0]
-                text = clean_up_directorship(text)
-                text = self.swap_value.swap(text)
-                self._process_organisation(index, relationship, text)
-
-            elif relationship_type == "related_to":
-                text = eval_string_as_list(relationship["text"])[0]
-                text = self.swap_value.swap(text)
-                self._process_person(index, relationship, text)
-
-            elif relationship_type == "owner_of":
-                text = eval_string_as_list(relationship["text"])[0]
-                text = self.swap_value.swap(text)
-                self._process_property(index, relationship, text)
+            relationship_object = get_relationship(index, relationship, self.entities)
+            self.logger.debug(relationship_object)
 
     def _process_organisations(self, index, relationship, organisations):
         """Process organisations"""
