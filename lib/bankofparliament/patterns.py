@@ -100,4 +100,6 @@ POSITIONS = [
     "Member",
     "Chair",
     "CEO",
+    "director and sole shareholder",
+    "Director and shareholder",
 ]

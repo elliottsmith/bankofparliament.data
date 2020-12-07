@@ -9,7 +9,7 @@ import ast
 
 # local libs
 from .patterns import IN_PARENTHESIS, POSITIONS
-
+from .constants import COMPANIES_HOUSE_PREFIXES
 
 def eval_string_as_list(string_list):
     """Eval the string to list"""
@@ -74,6 +74,65 @@ def clean_up_directorship(text):
     return text.strip()
 
 
+def clean_up_shareholder(text):
+    """"""
+    text = strip_category_text(text)
+    text = strip_registered_text(text)
+
+    # Remove ay positions from text, chairman, director etc
+    pattern = "{}".format(",? |".join(sorted(POSITIONS, key=len, reverse=True)))
+    text = re.sub(pattern, "", text)
+
+    parenthesis_match = find_text_within_parenthesis_excluding_other_parenthesis(text)
+    if parenthesis_match:
+        for match in parenthesis_match:
+            if not has_consecutive_capital_letters_within_parenthesis(match):
+                text = text.replace(match, "")
+
+    splitters = [
+        "trading as ",
+        "investee companies",
+        ";",
+        ":",
+        ", a",
+        ", marketing consultancy",
+        ", financial services company",
+        ", psychology assessment",
+        ", tour operator",
+        ", shares co-owned",
+        ". UK property company",
+        ", Sporting Video Company",
+        ", management of",
+        "family business",
+        "in the EdTech space",
+        "SIPP",
+        "per cent ownership",
+        r"% ownership",
+    ]
+    for splitter in splitters:
+        if splitter in text:
+            text = text.split(splitter)[0]
+
+    starters = ["and ", ", ", "of ", "in "]
+    for starter in starters:
+        if text.startswith(starter):
+            text = text[len(starter) :]
+
+    enders = ["."]
+    for ender in enders:
+        if text.endswith(ender):
+            text = text[: len(ender)]
+
+    from_until_pattern = "(Until [a-zA-Z0-9 ]+,)|(From [a-zA-Z0-9 ]+,)"
+    match = re.search(from_until_pattern, text)
+    if match:
+        grps = match.group()
+        text = text.replace(grps, "")
+
+    text = text.replace("  ", " ")
+    return text.strip()
+
+
 def strip_category_text(text):
     """
     Remove occurances of:
@@ -82,6 +141,21 @@ def strip_category_text(text):
          '(see category 4(a))'
     """
     patterns = [r"\(see category [0-9]+\)", r"\(see category [0-9]+\([a-z]\)\)"]
+    for pattern in patterns:
+        match = re.search(pattern, text)
+        if match:
+            grps = match.group()
+            text = text.replace(grps, "")
+    return text
+
+
+def strip_registered_text(text):
+    """
+    Remove occurances of:
+    Examples:
+         'Millgap Ltd; consulting, advisory and investment (Registered 05 June 2015)'
+    """
+    patterns = [r"(\(Registered.*\))", r"(\(Updated.*\))"]
     for pattern in patterns:
         match = re.search(pattern, text)
         if match:
@@ -113,3 +187,21 @@ def find_text_within_parenthesis_excluding_other_parenthesis(text):
     pattern = r"(\([^(^)]+\))"
     match = re.findall(pattern, text)
     return match
+
+def extract_company_registration_number_from_text(text, logger):
+    """
+    Regex for companies house number
+    """
+    text = (
+        re.split("registration |registration number ", text)[-1]
+        .strip()
+        .replace(" ", "")
+    )
+
+    companies_house_pattern = "([{}|0-9]+)".format("|".join(COMPANIES_HOUSE_PREFIXES))
+    match = re.search(companies_house_pattern, text)
+    if match:
+        company_number = match.groups()[0].zfill(8)
+        logger.debug("Found companies house number: {}".format(company_number))
+        return company_number
+    return None

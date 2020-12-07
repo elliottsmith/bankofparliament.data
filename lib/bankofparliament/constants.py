@@ -24,7 +24,7 @@ COMPANIES_HOUSE_QUERY_TEMPLATE = "https://api.companieshouse.gov.uk/{}/{}"
 COMPANIES_HOUSE_SEARCH_TEMPLATE = (
     "https://api.companieshouse.gov.uk/search/{}?q={}&items_per_page={}"
 )
-COMPANIES_HOUSE_QUERY_LIMIT = 10
+COMPANIES_HOUSE_QUERY_LIMIT = 3
 COMPANIES_HOUSE_PREFIXES = [
     "AC",
     "ZC",
@@ -126,6 +126,18 @@ DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "data")
 
 # Named entityy recognition
 NER_BASE_MODEL = "en_core_web_md"
+
+MEMBERS_CLUBS = [
+    "carlton club",
+    "bucks club",
+    "national liberal",
+    "reform club",
+    "pratts club",
+    "keepers of the quaich",
+    "lords and commons cigar club",
+    "10 trinity square",
+    "goodwood country club"
+]
 
 # Neo4j
 NEO4J_URL = "bolt://{}:{}"
