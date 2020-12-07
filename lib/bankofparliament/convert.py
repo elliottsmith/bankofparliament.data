@@ -73,7 +73,7 @@ class Convert:
 
     def add_entity(self, **kwargs):
         """Add entity data"""
-        data = dict.fromkeys(ENTITY_TEMPLATE)
+        data = dict.fromkeys(ENTITY_TEMPLATE, "N/A")
         for (key, value) in kwargs.items():
             if key in data:
                 data[key] = value if value else "N/A"
