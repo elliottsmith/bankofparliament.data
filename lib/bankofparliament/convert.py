@@ -145,18 +145,22 @@ class Convert:
                     delimeter = "?????"
                     for line_break in div.findAll("br"):
                         line_break.replaceWith(delimeter)
-                    text = re.sub("\r|\n", " ", div.get_text()).split(delimeter)
+                    _texts = re.sub("\r|\n", " ", div.get_text()).split(delimeter)
 
-                    self.add_relationship(
-                        relationship_type=last_category,
-                        source=member["DisplayAs"],
-                        target="UNKNOWN",
-                        text=text,
-                        link=THEYWORKFORYOU_LINK_URL.format(
-                            member["DisplayAs"].lower().replace(" ", "_"),
-                            member["MemberFrom"].lower().replace(" ", "_"),
-                        ),
-                    )
+                    MINIMUM_LENGTH = 3
+                    texts = [text for text in _texts if len(text) > MINIMUM_LENGTH]
+
+                    if texts:
+                        self.add_relationship(
+                            relationship_type=last_category,
+                            source=member["DisplayAs"],
+                            target="UNKNOWN",
+                            text=texts,
+                            link=THEYWORKFORYOU_LINK_URL.format(
+                                member["DisplayAs"].lower().replace(" ", "_"),
+                                member["MemberFrom"].lower().replace(" ", "_"),
+                            ),
+                        )
 
                     if last_category == "related_to":
                         # add a second relationship, from target > source - employment
@@ -164,7 +168,7 @@ class Convert:
                             relationship_type="employed_by",
                             source="UNKNOWN",
                             target=member["DisplayAs"],
-                            text=text,
+                            text=texts,
                             link=THEYWORKFORYOU_LINK_URL.format(
                                 member["DisplayAs"].lower().replace(" ", "_"),
                                 member["MemberFrom"].lower().replace(" ", "_"),
