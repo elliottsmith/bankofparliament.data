@@ -125,7 +125,7 @@ RELATIONSHIP_TYPES = {1: "member_of", 2: "employed_by"}
 DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "data")
 
 # Named entityy recognition
-NER_BASE_MODEL = "en_core_web_md"
+NER_BASE_MODEL = "en_core_web_sm"
 
 # Neo4j
 NEO4J_URL = "bolt://{}:{}"
