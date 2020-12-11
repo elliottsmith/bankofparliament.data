@@ -4,10 +4,11 @@ Module for utils
 # -*- coding: utf-8 -*-
 
 # sys libs
-import re
 import time
 import json
 import logging
+import urllib.parse
+import urllib.request
 
 # third party libs
 import pandas
@@ -16,10 +17,11 @@ import tabula
 
 # local libs
 from .constants import (
+    HEADERS,
     REQUEST_WAIT_TIME,
     COMPANIES_HOUSE_QUERY_TEMPLATE,
-    HEADERS,
-    COMPANIES_HOUSE_PREFIXES,
+    COMPANIES_HOUSE_QUERY_LIMIT,
+    COMPANIES_HOUSE_SEARCH_TEMPLATE,
     OPENCORPORATES_RECONCILE_URL,
     COLOR_CODES,
 )
@@ -30,7 +32,7 @@ def get_logger(name, debug=False):
     loglevel = logging.DEBUG if debug else logging.INFO
     logging.basicConfig(
         level=loglevel,
-        format="%(name)s %(levelname)s:%(message)s",
+        format="%(name)s %(levelname)s: %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
     return logging.getLogger(name)
@@ -49,7 +51,7 @@ def color_command(color):
     color = color.lower()
     if color == "reset":
         return "\033[0m"
-    elif color in COLOR_CODES:
+    if color in COLOR_CODES:
         code_modifier, code = COLOR_CODES[color]
         return "\033[%d;%dm" % (code_modifier, code)
     return ""
@@ -89,9 +91,91 @@ def get_request(url, logger, user=None, headers=None, params=None):
     return None
 
 
-def get_companies_house_company_name_from_number(
-    companies_house_apikey, entity_number, logger
+def find_organisation_by_name(name, companies_house_apikey, logger):
+    """Find a registered organisation by name"""
+    # try reconciling it first - doesn't use up opencorporates api calls
+    opencorporates_reconcile = reconcile_opencorporates_entity_by_name(name, logger)
+    if opencorporates_reconcile:
+        results = opencorporates_reconcile["result"]
+        if len(results):
+            top_match = results[0]
+            if top_match["score"] > 10:
+                organisation_name = top_match["name"].upper()
+                organisation_registration = top_match["id"].split("/")[-1]
+                return (organisation_name, organisation_registration)
+
+    # try locally in companies house first
+    companies_house_search = search_companies_house(
+        name, companies_house_apikey, logger, query_type="companies"
+    )
+    if companies_house_search:
+        return companies_house_search
+
+    # # uses up api calls
+    # opencorporates_search = search_opencorporates_company_name_from_name(*args, **kwargs)
+    # if opencorporates_search:
+    #     return opencorporates_search
+
+    return (None, None)
+
+
+def reconcile_opencorporates_entity_by_name(name, logger):
+    """Reconcile a company name to an opencorporates record"""
+    params = {"query": name}
+    request = get_request(
+        OPENCORPORATES_RECONCILE_URL, logger, user=None, headers=HEADERS, params=params
+    )
+    if request:
+        data = request.json()
+        if "result" in data:
+            return data
+    return {"result": []}
+
+
+def search_companies_house(
+    query,
+    companies_house_apikey,
+    logger,
+    query_type="",
+    limit=COMPANIES_HOUSE_QUERY_LIMIT,
 ):
+    """Search companies with text"""
+    query = query.lower().strip()
+    url = COMPANIES_HOUSE_SEARCH_TEMPLATE.format(
+        query_type, urllib.parse.quote(query), str(limit)
+    )
+    request = get_request(
+        url=url,
+        logger=logger,
+        user=companies_house_apikey,
+        headers=HEADERS,
+    )
+
+    if not request:
+        return (None, None)
+
+    data = request.json()
+    for i in data["items"]:
+        title = i["title"].lower().strip()
+        snippet = i["snippet"].lower().strip() if "snippet" in i else None
+
+        if (
+            title in query
+            or title.replace("ltd", "limited") in query.replace("ltd", "limited")
+            or title.replace(".", "") in query.replace(".", "")
+            and len(snippet) > 2
+        ):
+            result = (i["title"].upper(), i["links"]["self"])
+            return result
+
+        if snippet and snippet in query and len(snippet) > 2:
+            result = (i["title"].upper(), i["links"]["self"])
+            return result
+
+    return (None, None)
+
+
+def find_organisation_by_number(companies_house_apikey, entity_number, logger):
     """Query companies house for company name"""
     url = COMPANIES_HOUSE_QUERY_TEMPLATE.format("company", entity_number)
     logger.debug("Companies House Query: {}".format(url))
@@ -102,34 +186,6 @@ def get_companies_house_company_name_from_number(
         data = request.json()
         return data["company_name"]
     return None
-
-
-def extract_company_registration_number_from_text(text, logger):
-    """Regex for companies house number"""
-    text = (
-        re.split("registration |registration number ", text)[-1]
-        .strip()
-        .replace(" ", "")
-    )
-
-    companies_house_pattern = "([{}|0-9]+)".format("|".join(COMPANIES_HOUSE_PREFIXES))
-    match = re.search(companies_house_pattern, text)
-    if match:
-        company_number = match.groups()[0].zfill(8)
-        logger.debug("Found companies house number: {}".format(company_number))
-        return company_number
-    return None
-
-
-def reconcile_company_name(names, logger):
-    """Reconcile a company name to an opencorporates record"""
-    params = {"query": names}
-    request = get_request(
-        OPENCORPORATES_RECONCILE_URL, logger, user=None, headers=HEADERS, params=params
-    )
-    if request:
-        return request.json()
-    return {"result": []}
 
 
 def read_json_file(path):

@@ -150,4 +150,5 @@ COLOR_CODES = {
     "cyan": (1, 36),
     "light gray": (0, 37),
     "white": (1, 37),
+    "blink": (1, 5),
 }
