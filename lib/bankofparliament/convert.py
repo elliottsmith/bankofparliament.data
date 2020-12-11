@@ -30,6 +30,8 @@ from .utils import read_json_file, read_pdf_table
 class Convert:
     """Converts serialised json and pdf data to entity and relationship csv data"""
 
+    MINIMUM_SOUP_LENGTH = 3
+
     def __init__(self, members_path, spads_path, output_dir, logger):
         """Initialise the converter instance"""
         self.output_dir = output_dir
@@ -84,7 +86,7 @@ class Convert:
 
     def add_relationship(self, **kwargs):
         """Add relationship data"""
-        data = dict.fromkeys(RELATIONSHIP_TEMPLATE)
+        data = dict.fromkeys(RELATIONSHIP_TEMPLATE, "N/A")
         for (key, value) in kwargs.items():
             if key in data:
                 data[key] = value if value else "N/A"
@@ -147,8 +149,9 @@ class Convert:
                         line_break.replaceWith(delimeter)
                     _texts = re.sub("\r|\n", " ", div.get_text()).split(delimeter)
 
-                    MINIMUM_LENGTH = 3
-                    texts = [text for text in _texts if len(text) > MINIMUM_LENGTH]
+                    texts = [
+                        text for text in _texts if len(text) > self.MINIMUM_SOUP_LENGTH
+                    ]
 
                     if texts:
                         self.add_relationship(
@@ -345,10 +348,9 @@ class Convert:
                 self.logger.debug("Found laying minister: {}".format(member))
                 return member
 
-        else:
-            self.logger.warning(
-                "Could not find laying minister: {}".format(laying_minister_name)
-            )
+        self.logger.warning(
+            "Could not find laying minister: {}".format(laying_minister_name)
+        )
         return None
 
     def convert_donations(self):
