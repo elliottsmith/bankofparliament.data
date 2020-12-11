@@ -3,18 +3,15 @@ Module for shareholder relationship
 """
 # -*- coding: utf-8 -*-
 
-# sys libs
-import re
-
 # local libs
 from .base import TextRelationship
 from ..text import (
     strip_category_text,
     strip_registered_text,
-    find_text_within_parenthesis_excluding_other_parenthesis,
-    has_consecutive_capital_letters_within_parenthesis,
+    strip_positions_text,
+    strip_from_dates_text,
+    strip_parenthesis_text,
 )
-from ..patterns import POSITIONS
 from ..utils import find_organisation_by_name
 
 
@@ -44,58 +41,39 @@ class Shareholder(TextRelationship):
     ]
     STARTERS = ["and ", ", ", "of ", "in "]
     ENDERS = ["."]
+    NER_TYPES = ["ORG"]
+    ALIAS_ENTITY_TYPES = [
+        "company",
+        "association",
+        "government_body",
+        "charity",
+        "government",
+    ]
 
     def cleanup(self):
         """Clean the text prior to solving"""
         text = self.text
         text = strip_category_text(text)
         text = strip_registered_text(text)
+        text = strip_positions_text(text)
+        text = strip_from_dates_text(text)
+        text = strip_parenthesis_text(text)
 
-        # Remove any positions from text, chairman, director etc
-        pattern = "{}".format(",? |".join(sorted(POSITIONS, key=len, reverse=True)))
-        text = re.sub(pattern, "", text)
-
-        parenthesis_match = find_text_within_parenthesis_excluding_other_parenthesis(
-            text
-        )
-        if parenthesis_match:
-            for match in parenthesis_match:
-                if not has_consecutive_capital_letters_within_parenthesis(match):
-                    text = text.replace(match, "")
-
-        for splitter in self.SPLITTERS:
-            if splitter in text:
-                text = text.split(splitter)[0]
-
-        from_until_pattern = "(Until [a-zA-Z0-9 ]+,)|(From [a-zA-Z0-9 ]+,)"
-        match = re.search(from_until_pattern, text)
-        if match:
-            grps = match.group()
-            text = text.replace(grps, "")
-
-        for starter in self.STARTERS:
-            if text.startswith(starter):
-                text = text[len(starter) :]
-        text = text.strip()
-
-        for ender in self.ENDERS:
-            if text.endswith(ender):
-                text = text[: -len(ender)]
-
-        text = text.replace("  ", " ")
-        text = text.strip()
+        text = self.split(text)
+        text = self.strip_startwswith(text)
+        text = self.strip_endswith(text)
+        text = self.run_replace(text)
         self.text = text
 
     def solve(self):
         """Find entity in text"""
-        self.date = self.extract_date_from_text(self.text)
-        self.amount = self.extract_amount_from_text(self.text)
+        self.date = self.extract_date_from_text(self.relationship["text"])
+        self.amount = self.extract_amount_from_text(self.relationship["text"])
 
         (organisation_name, organisation_registration) = find_organisation_by_name(
             self.text, self.companies_house_apikey, self.logger
         )
 
-        self.target = organisation_name if organisation_name else "UNKNOWN"
         if organisation_name:
             entity = self.make_entity_dict(
                 entity_type=self.TARGET_ENTITY_TYPE,
@@ -105,9 +83,17 @@ class Shareholder(TextRelationship):
             )
             self.extracted_entities.append(entity)
 
-        else:
-            alias = self.check_aliases(entity_types=["company"])
+        if not organisation_name:
+            alias = self.check_aliases(entity_types=self.ALIAS_ENTITY_TYPES)
             if alias:
-                self.target = alias
+                entity = self.make_entity_dict(
+                    entity_type="company",
+                    name=alias,
+                    aliases=";".join([alias]),
+                )
+                organisation_name = alias
+                self.extracted_entities.append(entity)
 
-        self.update_relationship()
+        if not organisation_name and self.prompt:
+            entities = self.query_nlp_entities()
+            self.extracted_custom_entities.extend(entities)
