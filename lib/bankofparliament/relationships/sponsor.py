@@ -6,6 +6,7 @@ Module for sponsor relationship
 # local libs
 from .base import TextRelationship
 from ..utils import find_organisation_by_name
+from ..constants import ENTITY_TYPES
 
 
 class Sponsorship(TextRelationship):
@@ -13,13 +14,7 @@ class Sponsorship(TextRelationship):
 
     EXCLUDE = ["house", "parliament", "co-chair", "house of lords"]
     NER_TYPES = ["ORG"]
-    ALIAS_ENTITY_TYPES = [
-        "company",
-        "association",
-        "government_body",
-        "charity",
-        "government",
-    ]
+    ALIAS_ENTITY_TYPES = ENTITY_TYPES
 
     def solve(self):
         """Find entity in text"""

@@ -5,26 +5,36 @@ Constants
 # sys libs
 import os
 
+# Named entityy recognition
+NER_BASE_MODEL = "en_core_web_sm"
+
+# Neo4j
+NEO4J_URL = "bolt://{}:{}"
+
 # Download / query constants
+REQUEST_WAIT_TIME = 300
+HEADERS = {"Accept": "application/json", "Content-Type": "application/json"}
+
+# uk government
 DATA_PARLIAMENT_QUERY_URL = (
     "http://data.parliament.uk/membersdataplatform/services/mnis/members/query"
 )
 DATA_PARLIAMENT_LINK_URL = "https://members.parliament.uk/member/{}/{}"
+SPADS_URL = "https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/854554/Annual_Report_on_Special_Advisers.pdf"
 
+# theyworkforyou
 THEYWORKFORYOU_QUERY_URL = "https://www.theyworkforyou.com/api"
 THEYWORKFORYOU_LINK_URL = "https://www.theyworkforyou.com/mp/25916/{}/{}#register"
 
-SPADS_URL = "https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/854554/Annual_Report_on_Special_Advisers.pdf"
-
-OPENCORPORATES_QUERY_TEMPLATE = "https://api.opencorporates.com/v0.4/companies/{}"
+# opencorporates
 OPENCORPORATES_RECONCILE_URL = "https://opencorporates.com/reconcile"
 
-
-COMPANIES_HOUSE_QUERY_TEMPLATE = "https://api.companieshouse.gov.uk/{}/{}"
-COMPANIES_HOUSE_SEARCH_TEMPLATE = (
+# companies house
+COMPANIES_HOUSE_QUERY_LIMIT = 10
+COMPANIES_HOUSE_QUERY_URL = "https://api.companieshouse.gov.uk/{}/{}"
+COMPANIES_HOUSE_SEARCH_URL = (
     "https://api.companieshouse.gov.uk/search/{}?q={}&items_per_page={}"
 )
-COMPANIES_HOUSE_QUERY_LIMIT = 10
 COMPANIES_HOUSE_PREFIXES = [
     "AC",
     "ZC",
@@ -61,9 +71,6 @@ COMPANIES_HOUSE_PREFIXES = [
     "NR",
     "NO",
 ]
-
-REQUEST_WAIT_TIME = 300
-HEADERS = {"Accept": "application/json", "Content-Type": "application/json"}
 
 # Entity / relationships data structures
 ENTITY_TEMPLATE = [
@@ -114,21 +121,33 @@ LORDS_CATEGORIES = {
     "Category 10": "miscellaneous",  # Miscellaneous
 }
 
-ENTITY_TYPES = {
-    1: "politician",
-    2: "advisor",
-    3: "political_party",
-    4: "government_body",
-}
-RELATIONSHIP_TYPES = {1: "member_of", 2: "employed_by"}
-
-DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "data")
-
-# Named entityy recognition
-NER_BASE_MODEL = "en_core_web_sm"
-
-# Neo4j
-NEO4J_URL = "bolt://{}:{}"
+RELATIONSHIP_TYPES = list(
+    set(list(COMMONS_CATEGORIES.values()) + list(LORDS_CATEGORIES.values()))
+)
+HUMAN_ENTITIES = [
+    "person",
+    "advisor",
+    "politician",
+]
+POLLITICAL_ENTITIES = [
+    "foreign_government",
+    "government_body",
+    "political_party",
+    "pollster",
+    "think_lobby",
+]
+OTHER_ENTITIES = [
+    "company",
+    "association",
+    "charity",
+    "union",
+    "education",
+    "media",
+    "miscellaneous",
+    "sport",
+]
+NON_HUMAN_ENTITIES = POLLITICAL_ENTITIES + OTHER_ENTITIES
+ENTITY_TYPES = HUMAN_ENTITIES + POLLITICAL_ENTITIES + OTHER_ENTITIES
 
 COLOR_CODES = {
     "bold": (1, 1),

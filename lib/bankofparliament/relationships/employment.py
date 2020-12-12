@@ -16,29 +16,13 @@ from ..text import (
 )
 from ..utils import find_organisation_by_name, colorize
 from ..patterns import RECURRING_INDICATORS, SINGLE_INDICATORS
+from ..constants import ENTITY_TYPES
 
 
 class Employment(TextRelationship):
 
     TARGET_ENTITY_TYPE = "company"
-    ALIAS_ENTITY_TYPES = [
-        "company",
-        "association",
-        "government_body",
-        "charity",
-        "government",
-        "union",
-        "education",
-        "media",
-        "person",
-        "miscellaneous",
-        "offshore",
-        "political",
-        "polling",
-        # "profession",
-        "sport",
-        "think_lobby",
-    ]
+    ALIAS_ENTITY_TYPES = ENTITY_TYPES
 
     SPLITTERS = ["speaker", "engagement", "speaking"]
     STARTERS = ["and ", ",", "of ", "in ", "group"]

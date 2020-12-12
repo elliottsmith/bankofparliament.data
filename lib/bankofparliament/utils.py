@@ -19,9 +19,9 @@ import tabula
 from .constants import (
     HEADERS,
     REQUEST_WAIT_TIME,
-    COMPANIES_HOUSE_QUERY_TEMPLATE,
+    COMPANIES_HOUSE_QUERY_URL,
     COMPANIES_HOUSE_QUERY_LIMIT,
-    COMPANIES_HOUSE_SEARCH_TEMPLATE,
+    COMPANIES_HOUSE_SEARCH_URL,
     OPENCORPORATES_RECONCILE_URL,
     COLOR_CODES,
 )
@@ -144,7 +144,7 @@ def search_companies_house(
 ):
     """Search companies with text"""
     query = query.lower().strip()
-    url = COMPANIES_HOUSE_SEARCH_TEMPLATE.format(
+    url = COMPANIES_HOUSE_SEARCH_URL.format(
         query_type, urllib.parse.quote(query), str(limit)
     )
     request = get_request(
@@ -180,7 +180,7 @@ def search_companies_house(
 
 def find_organisation_by_number(companies_house_apikey, entity_number, logger):
     """Query companies house for company name"""
-    url = COMPANIES_HOUSE_QUERY_TEMPLATE.format("company", entity_number)
+    url = COMPANIES_HOUSE_QUERY_URL.format("company", entity_number)
     logger.debug("Companies House Query: {}".format(url))
     request = get_request(
         url=url, logger=logger, user=companies_house_apikey, headers=HEADERS

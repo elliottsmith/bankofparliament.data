@@ -5,13 +5,14 @@ Module for relation relationship
 
 # local libs
 from .base import TextRelationship
+from ..constants import HUMAN_ENTITIES
 
 
 class Relation(TextRelationship):
     """Family relation relationship solver"""
 
     NER_TYPES = ["PERSON"]
-    ALIAS_ENTITY_TYPES = ["person"]
+    ALIAS_ENTITY_TYPES = HUMAN_ENTITIES
 
     def solve(self):
         """Find entity in text"""

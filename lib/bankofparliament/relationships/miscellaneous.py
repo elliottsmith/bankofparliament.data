@@ -13,6 +13,7 @@ from ..text import (
     strip_parenthesis_text,
 )
 from ..utils import find_organisation_by_name
+from ..constants import ENTITY_TYPES
 
 
 class Miscellaneous(TextRelationship):
@@ -23,16 +24,7 @@ class Miscellaneous(TextRelationship):
     ENDERS = ["."]
     REPLACE = [("  ", " "), (" & ", " and "), ("unpaid", "")]
     NER_TYPES = ["ORG", "PERSON"]
-    ALIAS_ENTITY_TYPES = [
-        "company",
-        "political_party",
-        "association",
-        "government_body",
-        "person",
-        "charity",
-        "government",
-        "profession",
-    ]
+    ALIAS_ENTITY_TYPES = ENTITY_TYPES
 
     def cleanup(self):
         """Clean the text prior to solving"""

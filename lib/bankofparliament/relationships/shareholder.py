@@ -13,6 +13,7 @@ from ..text import (
     strip_parenthesis_text,
 )
 from ..utils import find_organisation_by_name
+from ..constants import OTHER_ENTITIES, POLLITICAL_ENTITIES
 
 
 class Shareholder(TextRelationship):
@@ -42,13 +43,7 @@ class Shareholder(TextRelationship):
     STARTERS = ["and ", ", ", "of ", "in "]
     ENDERS = ["."]
     NER_TYPES = ["ORG"]
-    ALIAS_ENTITY_TYPES = [
-        "company",
-        "association",
-        "government_body",
-        "charity",
-        "government",
-    ]
+    ALIAS_ENTITY_TYPES = OTHER_ENTITIES + POLLITICAL_ENTITIES
 
     def cleanup(self):
         """Clean the text prior to solving"""

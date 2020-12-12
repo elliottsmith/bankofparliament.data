@@ -13,8 +13,6 @@ from bs4 import BeautifulSoup
 
 # local libs
 from .constants import (
-    ENTITY_TYPES,
-    RELATIONSHIP_TYPES,
     DATA_PARLIAMENT_LINK_URL,
     THEYWORKFORYOU_LINK_URL,
     COMMONS_CATEGORIES,
@@ -102,14 +100,14 @@ class Convert:
             aliases = list(set([party, member["Party"]["#text"]]))
             if party not in [entity["name"] for entity in self.entities]:
                 self.add_entity(
-                    entity_type=ENTITY_TYPES[3], name=party, aliases=";".join(aliases)
+                    entity_type="political_party", name=party, aliases=";".join(aliases)
                 )
 
     def convert_commons_members_interests(self):
         """Convert the register of interests to dict items ready for csv export"""
 
         # add the house of commons as an entity
-        self.add_entity(entity_type=ENTITY_TYPES[4], name="House of Commons")
+        self.add_entity(entity_type="government_body", name="House of Commons")
 
         for member in self.members_data["commons"]:
             self.logger.info(member["DisplayAs"])
@@ -117,7 +115,7 @@ class Convert:
 
             # member to party relationship
             self.add_relationship(
-                relationship_type=RELATIONSHIP_TYPES[1],
+                relationship_type="member_of",
                 source=member["DisplayAs"],
                 target=self.cleanup_party_affliation(member["Party"]["#text"]),
                 text=["{} membership".format(member["Party"]["#text"])],
@@ -126,7 +124,7 @@ class Convert:
 
             # house of commons membership
             self.add_relationship(
-                relationship_type=RELATIONSHIP_TYPES[1],
+                relationship_type="member_of",
                 source=member["DisplayAs"],
                 target="House of Commons",
                 text=["Member of the House of Commons"],
@@ -185,7 +183,7 @@ class Convert:
         """Convert the register of interests to dict items ready for csv export"""
 
         # add the house of lords as an entity
-        self.add_entity(entity_type=ENTITY_TYPES[4], name="House of Lords")
+        self.add_entity(entity_type="government_body", name="House of Lords")
 
         for member in self.members_data["lords"]:
             self.logger.info(member["DisplayAs"])
@@ -193,7 +191,7 @@ class Convert:
 
             # member to party relationship
             self.add_relationship(
-                relationship_type=RELATIONSHIP_TYPES[1],
+                relationship_type="member_of",
                 source=member["DisplayAs"],
                 target=self.cleanup_party_affliation(member["Party"]["#text"]),
                 text=["{} membership".format(member["Party"]["#text"])],
@@ -202,7 +200,7 @@ class Convert:
 
             # house of lords membership
             self.add_relationship(
-                relationship_type=RELATIONSHIP_TYPES[1],
+                relationship_type="member_of",
                 source=member["DisplayAs"],
                 target="House of Lords",
                 text=["Member of the House of Lords"],
@@ -272,16 +270,18 @@ class Convert:
 
                 if name and last_appointer and salary:
                     self.logger.info(name)
-                    self.add_entity(
-                        entity_type=ENTITY_TYPES[2], name=name, aliases=name
-                    )
+                    self.add_entity(entity_type="advisor", name=name, aliases=name)
 
                     resolved_employer = self.get_spad_employer(last_appointer)
                     self.add_relationship(
-                        relationship_type=RELATIONSHIP_TYPES[2],
+                        relationship_type="employed_by",
                         source=name,
                         target=resolved_employer,
-                        text=["I am employed by {} on a salary of {}".format(resolved_employer, str(salary.split("-")[0]))],
+                        text=[
+                            "I am employed by {} on a salary of {}".format(
+                                resolved_employer, str(salary.split("-")[0])
+                            )
+                        ],
                         link=SPADS_URL,
                     )
 
@@ -430,7 +430,7 @@ class Convert:
         aliases = [i.strip().replace("  ", " ") for i in aliases if i]
 
         self.add_entity(
-            entity_type=ENTITY_TYPES[1],
+            entity_type="politician",
             name=member["DisplayAs"],
             company_registration=company_registration,
             address=address_line,

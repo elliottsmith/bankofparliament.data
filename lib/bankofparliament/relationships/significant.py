@@ -10,13 +10,14 @@ import re
 from .base import TextRelationship
 from ..utils import find_organisation_by_name
 from ..patterns import IN_PARENTHESIS
+from ..constants import OTHER_ENTITIES
 
 
 class SignificationControl(TextRelationship):
     """Signification control relationship solver"""
 
     NER_TYPES = ["ORG"]
-    ALIAS_ENTITY_TYPES = ["company"]
+    ALIAS_ENTITY_TYPES = OTHER_ENTITIES
 
     def cleanup(self):
         """Clean the text prior to solving"""

@@ -8,28 +8,13 @@ import re
 # local libs
 from .base import CompoundRelationship
 from ..utils import find_organisation_by_name
+from ..constants import ENTITY_TYPES
 
 
 class Visit(CompoundRelationship):
     """Visit relationship solver"""
 
-    ALIAS_ENTITY_TYPES = [
-        "company",
-        "association",
-        "government_body",
-        "charity",
-        "government",
-        "union",
-        "education",
-        "media",
-        "person",
-        "miscellaneous",
-        "offshore",
-        "political",
-        "politician",
-        "sport",
-        "think_lobby",
-    ]
+    ALIAS_ENTITY_TYPES = ENTITY_TYPES
 
     def cleanup(self):
         """Clean the text prior to solving"""

@@ -10,28 +10,13 @@ import re
 from .base import CompoundRelationship
 from ..text import extract_company_registration_number_from_text
 from ..utils import find_organisation_by_number, find_organisation_by_name
+from ..constants import ENTITY_TYPES
 
 
 class Donation(CompoundRelationship):
     """Donation relationship solver"""
 
-    ALIAS_ENTITY_TYPES = [
-        "company",
-        "association",
-        "government_body",
-        "charity",
-        "government",
-        "union",
-        "education",
-        "media",
-        "person",
-        "miscellaneous",
-        "offshore",
-        "political",
-        "politician",
-        "sport",
-        "think_lobby",
-    ]
+    ALIAS_ENTITY_TYPES = ENTITY_TYPES
 
     def cleanup(self):
         """Clean the text prior to solving"""
