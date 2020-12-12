@@ -329,7 +329,7 @@ class NamedEntityExtract:
                 )
             )
         else:
-            text = debug_text if debug_text else str(relationship["text"])
+            text = str(debug_text) if debug_text else str(relationship["text"])
             self.logger.warning(
                 "[{:05d}] [{}] {} {}".format(
                     index,

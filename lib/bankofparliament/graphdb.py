@@ -51,7 +51,7 @@ class GraphDB:
             if len(source_match):
                 source = source_match.to_dict(orient="records")[0]
 
-            target_filter = entities["name"] == _target
+            target_filter = entities["name"].str.lower() == _target.lower()
             target_match = entities.loc[target_filter]
             if len(target_match):
                 target = target_match.to_dict(orient="records")[0]
