@@ -131,10 +131,13 @@ class BaseRelationship:
         """Extract monetary amount from text"""
         result = self.nlp(text)
         entities = [(X.text, X.label_) for X in result.ents]
+        amounts = []
         for entity in entities:
             if entity[1] in ["MONEY"]:
                 pounds = entity[0].split(".")[0]
-                return re.sub("[^0-9]", "", pounds)
+                amounts.append(re.sub("[^0-9]", "", pounds))
+        if amounts:
+            return max(amounts)
         return 0
 
     def make_entity_dict(self, **kwargs):
