@@ -120,7 +120,7 @@ class Convert:
                 relationship_type=RELATIONSHIP_TYPES[1],
                 source=member["DisplayAs"],
                 target=self.cleanup_party_affliation(member["Party"]["#text"]),
-                text="{} membership".format(member["Party"]["#text"]),
+                text=["{} membership".format(member["Party"]["#text"])],
                 link=DATA_PARLIAMENT_LINK_URL.format(member["@Member_Id"], "contact"),
             )
 
@@ -129,7 +129,7 @@ class Convert:
                 relationship_type=RELATIONSHIP_TYPES[1],
                 source=member["DisplayAs"],
                 target="House of Commons",
-                text="Member of the House of Commons",
+                text=["Member of the House of Commons"],
                 link=DATA_PARLIAMENT_LINK_URL.format(member["@Member_Id"], "contact"),
             )
 
@@ -171,7 +171,7 @@ class Convert:
                             relationship_type="employed_by",
                             source="UNKNOWN",
                             target=member["DisplayAs"],
-                            text=texts,
+                            text=["Am employed by {}".format(member["DisplayAs"])],
                             link=THEYWORKFORYOU_LINK_URL.format(
                                 member["DisplayAs"].lower().replace(" ", "_"),
                                 member["MemberFrom"].lower().replace(" ", "_"),
@@ -196,7 +196,7 @@ class Convert:
                 relationship_type=RELATIONSHIP_TYPES[1],
                 source=member["DisplayAs"],
                 target=self.cleanup_party_affliation(member["Party"]["#text"]),
-                text="{} membership".format(member["Party"]["#text"]),
+                text=["{} membership".format(member["Party"]["#text"])],
                 link=DATA_PARLIAMENT_LINK_URL.format(member["@Member_Id"], "contact"),
             )
 
@@ -205,7 +205,7 @@ class Convert:
                 relationship_type=RELATIONSHIP_TYPES[1],
                 source=member["DisplayAs"],
                 target="House of Lords",
-                text="Member of the House of Lords",
+                text=["Member of the House of Lords"],
                 link=DATA_PARLIAMENT_LINK_URL.format(member["@Member_Id"], "contact"),
             )
 
