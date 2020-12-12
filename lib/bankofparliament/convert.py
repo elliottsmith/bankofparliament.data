@@ -275,11 +275,13 @@ class Convert:
                     self.add_entity(
                         entity_type=ENTITY_TYPES[2], name=name, aliases=name
                     )
+
+                    resolved_employer = self.get_spad_employer(last_appointer)
                     self.add_relationship(
                         relationship_type=RELATIONSHIP_TYPES[2],
                         source=name,
-                        target=self.get_spad_employer(last_appointer),
-                        text=[str(salary), last_appointer],
+                        target=resolved_employer,
+                        text=["I am employed by {} on a salary of {}".format(resolved_employer, str(salary.split("-")[0]))],
                         link=SPADS_URL,
                     )
 
