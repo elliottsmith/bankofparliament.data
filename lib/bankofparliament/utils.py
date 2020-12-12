@@ -29,6 +29,7 @@ from .constants import (
 # global requests session
 session = requests.Session()
 
+
 def get_logger(name, debug=False):
     """General purpose logger"""
     loglevel = logging.DEBUG if debug else logging.INFO
@@ -57,6 +58,7 @@ def color_command(color):
         code_modifier, code = COLOR_CODES[color]
         return "\033[%d;%dm" % (code_modifier, code)
     return ""
+
 
 def get_request(url, logger, user=None, headers=None, params=None):
     """General purpose url requests"""

@@ -30,13 +30,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--custom_entities", help="Custom entities file", action="store", default=None
     )
-    parser.add_argument(
-        "--custom_relationships",
-        help="Custom relationships file",
-        action="store",
-        default=None,
-    )
-    parser.add_argument("--ner_model", help="NER model", action="store", default=None)
+    parser.add_argument("--prompt", help="Prompt input", action="store_true", default=False)
 
     args = parser.parse_args()
     if not args.entities and args.relationships:
@@ -44,11 +38,11 @@ if __name__ == "__main__":
 
     extract = NamedEntityExtract(
         entities=args.entities,
-        relationships=args.relationships,
         custom_entities=args.custom_entities,
-        custom_relationships=args.custom_relationships,
+        relationships=args.relationships,
         companies_house_apikey=COMPANIES_HOUSE_APIKEY,
         opencorporates_apikey=OPENCORPORATES_APIKEY,
+        prompt=args.prompt,
         logger=get_logger("extract", args.debug),
     )
     extract.execute()
