@@ -26,6 +26,8 @@ from .constants import (
     COLOR_CODES,
 )
 
+# global requests session
+session = requests.Session()
 
 def get_logger(name, debug=False):
     """General purpose logger"""
@@ -56,7 +58,6 @@ def color_command(color):
         return "\033[%d;%dm" % (code_modifier, code)
     return ""
 
-
 def get_request(url, logger, user=None, headers=None, params=None):
     """General purpose url requests"""
     if not headers:
@@ -64,9 +65,9 @@ def get_request(url, logger, user=None, headers=None, params=None):
     if not params:
         params = {}
     if user:
-        request = requests.get(url, auth=(user, ""), headers=headers, params=params)
+        request = session.get(url, auth=(user, ""), headers=headers, params=params)
     else:
-        request = requests.get(url, headers=headers, params=params)
+        request = session.get(url, headers=headers, params=params)
 
     # successfull request
     if request.status_code == 200:
