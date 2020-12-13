@@ -14,6 +14,7 @@ import urllib.request
 import pandas
 import requests
 import tabula
+from bs4 import BeautifulSoup
 
 # local libs
 from .constants import (
@@ -23,6 +24,7 @@ from .constants import (
     COMPANIES_HOUSE_QUERY_LIMIT,
     COMPANIES_HOUSE_SEARCH_URL,
     OPENCORPORATES_RECONCILE_URL,
+    OPENCORPORATES_RECONCILE_FLYOUT_URL,
     COLOR_CODES,
 )
 
@@ -134,6 +136,19 @@ def reconcile_opencorporates_entity_by_name(name, logger):
             return data
     return {"result": []}
 
+def reconcile_opencorporates_entity_by_id(_id, logger):
+    """Reconcile a company name to an opencorporates record"""
+    params = {"id": _id}
+    request = get_request(
+        OPENCORPORATES_RECONCILE_FLYOUT_URL, logger, user=None, params=params
+    )
+    if request:
+        html = request.json()["html"]
+        soup = BeautifulSoup(html, features="lxml")
+        title = soup.find(id="oc-flyout-title")
+        if title:
+            return title.text
+    return None
 
 def search_companies_house(
     query,

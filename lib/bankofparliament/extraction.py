@@ -17,6 +17,7 @@ from .utils import (
     read_csv_as_dataframe,
     colorize,
     find_organisation_by_number,
+    reconcile_opencorporates_entity_by_id,
 )
 from .constants import NER_BASE_MODEL, ENTITY_TEMPLATE, RELATIONSHIP_TEMPLATE
 from .relationships.base import get_relationship_solver
@@ -298,11 +299,15 @@ class NamedEntityExtract:
                     registered_number,
                     entity_type,
                 ) = get_registration_number_from_link(registered_link)
-                entity_name = find_organisation_by_number(
-                    self.companies_house_apikey,
-                    registered_number,
-                    self.logger,
-                )
+                if "service.gov.uk" in registered_link:
+                    entity_name = find_organisation_by_number(
+                        self.companies_house_apikey,
+                        registered_number,
+                        self.logger,
+                    )
+                elif "opencorporates" in registered_link:
+                    entity_name = reconcile_opencorporates_entity_by_id(registered_link.split("opencorporates.com")[-1], self.logger)
+
             else:
                 entity_name = input("NEW ENTITY: ")
                 entity_type = input("NEW ENTITY TYPE: ")
