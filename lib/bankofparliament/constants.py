@@ -133,6 +133,7 @@ POLLITICAL_ENTITIES = [
     "foreign_government",
     "government_body",
     "political_party",
+    "political",
     "pollster",
     "think_lobby",
 ]
