@@ -81,6 +81,7 @@ class NamedEntityExtract:
     def execute(self):
         """Execute"""
         self.backup_csv_files()
+        self.save_custom()
         self.extract_entities_from_relationships()
         self.save()
         self.log_output()
