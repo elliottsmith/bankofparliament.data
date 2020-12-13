@@ -41,14 +41,12 @@ class Employment(TextRelationship):
         text = self.text
         text = strip_category_text(text)
         text = strip_registered_text(text)
-        # text = strip_positions_text(text)
         text = strip_from_dates_text(text)
         text = strip_parenthesis_text(text)
 
-        text = self.split(text, index=-1)
-        text = self.run_replace(text)
         text = self.strip_startwswith(text)
         text = self.strip_endswith(text)
+        text = self.run_replace(text)
         self.text = text
 
     def solve(self):
@@ -85,8 +83,12 @@ class Employment(TextRelationship):
         if not organisation_name:
             alias = self.check_aliases(entity_types=self.ALIAS_ENTITY_TYPES)
             if alias:
+                filt = (self.entities["name"].str.lower() == alias.lower())
+                match = self.entities.loc[filt]
+                alias_type = match.iloc[0]["entity_type"]
+
                 entity = self.make_entity_dict(
-                    entity_type="company",
+                    entity_type=alias_type,
                     name=alias,
                     aliases=";".join([alias]),
                 )
