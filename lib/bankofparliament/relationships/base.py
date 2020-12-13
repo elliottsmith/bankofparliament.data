@@ -210,7 +210,7 @@ class TextRelationship(BaseRelationship):
         """Evaluate as string"""
         self.text = eval_string_as_list(self.relationship["text"])[0]
 
-    def check_aliases(self, entity_types, text=None):
+    def check_aliases(self, entity_types, preffered_entity_type=None, text=None):
         """Check entity aliases for occurances of query string"""
         if not text:
             text = self.relationship["text"]
@@ -218,6 +218,7 @@ class TextRelationship(BaseRelationship):
         filt = dataframe["entity_type"].isin(entity_types)
         dataframe = dataframe[filt]
 
+        _aliases = []
         for name, aliases, etype in zip(
             dataframe["name"], dataframe["aliases"], dataframe["entity_type"]
         ):
@@ -228,7 +229,20 @@ class TextRelationship(BaseRelationship):
                         self.logger.debug(
                             "Alias Found: {}".format(colorize(name, "magenta"))
                         )
-                        return name.upper()
+                        if preffered_entity_type:
+                            _aliases.append((etype, name.upper()))
+                        else:
+                            return name.upper()
+
+        if preffered_entity_type and _aliases:
+            best_match = None
+            for (_alias_type, _alias_name) in _aliases:
+                if _alias_type == preffered_entity_type:
+                    best_match = _alias_name
+            if best_match:
+                return best_match
+            return _aliases[0][1]
+
         return None
 
     def query_nlp_entities(self):

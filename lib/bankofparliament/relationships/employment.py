@@ -81,7 +81,7 @@ class Employment(TextRelationship):
             self.extracted_entities.append(entity)
 
         if not organisation_name:
-            alias = self.check_aliases(entity_types=self.ALIAS_ENTITY_TYPES)
+            alias = self.check_aliases(entity_types=self.ALIAS_ENTITY_TYPES, preffered_entity_type="company")
             if alias:
                 filt = (self.entities["name"].str.lower() == alias.lower())
                 match = self.entities.loc[filt]
