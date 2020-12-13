@@ -6,6 +6,7 @@ Module for extracting entities from relationship text
 # sys libs
 import os
 import time
+import shutil
 
 # third party
 import pandas
@@ -78,6 +79,7 @@ class NamedEntityExtract:
 
     def execute(self):
         """Execute"""
+        self.backup_csv_files()
         self.extract_entities_from_relationships()
         self.save()
         self.log_output()
@@ -351,12 +353,28 @@ class NamedEntityExtract:
             )
         )
 
+    def backup_csv_files(self):
+        """"""
+        extracted_path = self.output_dir
+        backup_path = os.path.join(extracted_path, "backup")
+
+        if not os.path.exists(extracted_path):
+            self.logger.debug("Making directoy: {}".format(extracted_path))
+            os.makedirs(extracted_path)
+
+        if not os.path.exists(backup_path):
+            self.logger.debug("Making directoy: {}".format(backup_path))
+            os.makedirs(backup_path)
+
+        # backup existing csv files
+        for _file in os.listdir(extracted_path):
+            _filepath = os.path.join(extracted_path, _file)
+            if _filepath.endswith(".csv"):
+                shutil.move(_filepath, os.path.join(backup_path, _file))
+
     def save(self):
         """Dump the rows to csv"""
-        if not os.path.exists(self.output_dir):
-            self.logger.debug("Making directoy: {}".format(self.output_dir))
-            os.makedirs(self.output_dir)
-
+        # save out dataframes
         self._extracted_relationships.to_csv(
             self.RELATIONSHIPS_ENTITY_CSV_TEMPLATE.format(self.output_dir),
             index_label="id",
@@ -364,17 +382,13 @@ class NamedEntityExtract:
         self._extracted_entities.to_csv(
             self.ENTITY_CSV_TEMPLATE.format(self.output_dir), index_label="id"
         )
-        self._extracted_custom_entities.to_csv(
-            self.CUSTOM_ENTITY_CSV_TEMPLATE.format(self.output_dir), index_label="id"
-        )
+
+        self.save_custom()
         self.logger.debug("Saved: {}".format(self.output_dir))
 
     def save_custom(self):
         """Dump the rows to csv"""
-        if not os.path.exists(self.output_dir):
-            self.logger.debug("Making directoy: {}".format(self.output_dir))
-            os.makedirs(self.output_dir)
-
+        # save out dataframes
         self._extracted_custom_entities.to_csv(
             self.CUSTOM_ENTITY_CSV_TEMPLATE.format(self.output_dir), index_label="id"
         )
