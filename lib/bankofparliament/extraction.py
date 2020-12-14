@@ -142,12 +142,22 @@ class NamedEntityExtract:
             if solver:
                 self.processed_relationships += 1
                 solver.solve()
-                if not len(solver.extracted_entities) and not self.prompt:
+                if (
+                    not len(
+                        solver.extracted_entities + solver.extracted_custom_entities
+                    )
+                    and not self.prompt
+                ):
                     self.log_relationship(index, relationship, debug_text=solver.text)
                     continue
                 self.resolved_relationships += 1
 
-                if not len(solver.extracted_entities) and self.prompt:
+                if (
+                    not len(
+                        solver.extracted_entities + solver.extracted_custom_entities
+                    )
+                    and self.prompt
+                ):
                     manual_entity = self.prompt_manual_input(relationship)
                     if manual_entity:
                         solver.extracted_custom_entities.append(manual_entity)
