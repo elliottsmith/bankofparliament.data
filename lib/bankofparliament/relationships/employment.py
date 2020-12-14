@@ -124,6 +124,32 @@ class Employment(TextRelationship):
                         self.extracted_entities.append(entity)
                         break
 
+        if not organisation_name:
+            filt = self.entities["entity_type"] == "profession"
+            professions = self.entities.loc[filt]
+
+            for (_index, row) in professions.iterrows():
+                if row["name"].lower() in self.text.lower():
+                    entity = self.make_entity_dict(
+                        entity_type="profession",
+                        name=row["name"],
+                        aliases=";".join([row["name"]]),
+                    )
+                    organisation_name = row["name"]
+                    self.extracted_entities.append(entity)
+                    break
+
+                for alias in row["aliases"].split(";"):
+                    if alias.lower() in self.text.lower():
+                        entity = self.make_entity_dict(
+                            entity_type="profession",
+                            name=row["name"],
+                            aliases=";".join([row["name"]]),
+                        )
+                        organisation_name = row["name"]
+                        self.extracted_entities.append(entity)
+                        break
+
         if not organisation_name and self.prompt:
             entities = self.query_nlp_entities()
             self.extracted_custom_entities.extend(entities)
