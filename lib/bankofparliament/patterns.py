@@ -228,6 +228,10 @@ RECURRING_INDICATORS = [
     "Consultant on political and policy risk to Venn & Partners LLP",
     "Senior Adviser giving strategic advice to Brennan and Partners Ltd",
     "Columnist",
+    "Payments received:",
+    "Head of Strategy for",
+    "received for consultancy",
+    "Payments for legal advice",
 ]
 
 SINGLE_INDICATORS = [
@@ -255,4 +259,7 @@ SINGLE_INDICATORS = [
     " v ",
     "appearances",
     "was paid to a family member",
+    "received a redundancy payment",
+    "receive an annual allowance of",
+    "received additional sum of",
 ]
