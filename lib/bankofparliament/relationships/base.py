@@ -17,7 +17,13 @@ class BaseRelationship:
 
     NER_TYPES = ["ORG"]
     EXCLUDE_NER_MATCHES = ["trustee"]
-    ACCEPTED_SINGLE_MATCHES = ["union", "pollster", "media"]
+    ACCEPTED_SINGLE_MATCHES = [
+        "union",
+        "pollster",
+        "media",
+        "charity",
+        "government_body",
+    ]
 
     def __init__(
         self,
