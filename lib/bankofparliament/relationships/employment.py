@@ -86,7 +86,7 @@ class Employment(TextRelationship):
                 prefered_entity_types=["company", "pollster"],
             )
             if alias:
-                filt = (self.entities["name"].str.lower() == alias.lower())
+                filt = self.entities["name"].str.lower() == alias.lower()
                 match = self.entities.loc[filt]
                 alias_type = match.iloc[0]["entity_type"]
 
@@ -101,12 +101,14 @@ class Employment(TextRelationship):
         # no organisation in text
         # no alias found
         if not organisation_name and self.amount:
+
+            # search for single payment
             if self.single_payment_regex.search(self.relationship["text"].lower()):
 
                 sources_relationships = self.parent.get_sibling_relationships_by_type(
                     self.relationship["source"], self.relationship["relationship_type"]
                 )
-                # if len(sources_relationships):
+
                 for (_index, rel) in sources_relationships.iterrows():
                     if rel["target"] != "UNKNOWN" and rel["amount"] == "recurring":
                         self.logger.debug(
@@ -116,10 +118,14 @@ class Employment(TextRelationship):
                             )
                         )
 
-                        # TODO - entity type
+                        filt = (
+                            self.entities["name"].str.lower() == rel["target"].lower()
+                        )
+                        match = self.entities.loc[filt]
+                        entity_type = match.iloc[0]["entity_type"]
 
                         entity = self.make_entity_dict(
-                            entity_type="company",
+                            entity_type=entity_type,
                             name=rel["target"],
                             aliases=";".join([rel["target"]]),
                         )
