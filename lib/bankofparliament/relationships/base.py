@@ -210,7 +210,7 @@ class TextRelationship(BaseRelationship):
         """Evaluate as string"""
         self.text = eval_string_as_list(self.relationship["text"])[0]
 
-    def check_aliases(self, entity_types, preffered_entity_type=None, text=None):
+    def check_aliases(self, entity_types, prefered_entity_types=[], text=None):
         """Check entity aliases for occurances of query string"""
         if not text:
             text = self.relationship["text"]
@@ -229,15 +229,15 @@ class TextRelationship(BaseRelationship):
                         self.logger.debug(
                             "Alias Found: {}".format(colorize(name, "magenta"))
                         )
-                        if preffered_entity_type:
+                        if prefered_entity_types:
                             _aliases.append((etype, name.upper()))
                         else:
                             return name.upper()
 
-        if preffered_entity_type and _aliases:
+        if prefered_entity_types and _aliases:
             best_match = None
             for (_alias_type, _alias_name) in _aliases:
-                if _alias_type == preffered_entity_type:
+                if _alias_type in prefered_entity_types:
                     best_match = _alias_name
             if best_match:
                 return best_match
