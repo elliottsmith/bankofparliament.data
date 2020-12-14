@@ -279,6 +279,16 @@ class NamedEntityExtract:
             return True
         return False
 
+    def entity_type_from_name(self, name):
+        """"""
+        filt = self.entities["name"].str.lower() == name.lower()
+        entity = self.entities.loc[filt]
+
+        if len(entity):
+            self.logger.debug("Entity exists: {}".format(name))
+            return entity.iloc[0]["entity_type"]
+        return None
+
     def prompt_manual_input(self, relationship):
         """Enter overrides for missing entities"""
         self.logger.info(
@@ -328,11 +338,15 @@ class NamedEntityExtract:
         """Log the relationship with extracted info"""
         if relationship["target"] != "UNKNOWN":
             self.logger.info(
-                "[{:05d}] [{}] {} [{}] {}".format(
+                "[{:05d}] [{}] {} [{} ({})] {}".format(
                     index,
                     colorize(str(relationship["source"]), "cyan"),
                     relationship["relationship_type"],
                     colorize(str(relationship["target"]), "yellow"),
+                    colorize(
+                        str(self.entity_type_from_name(relationship["target"])),
+                        "yellow",
+                    ),
                     colorize(str(relationship["text"]), "cyan"),
                 )
             )
