@@ -327,7 +327,9 @@ class NamedEntityExtract:
                         self.logger,
                     )
                 elif "opencorporates" in registered_link:
-                    entity_name = reconcile_opencorporates_entity_by_id(registered_link.split("opencorporates.com")[-1], self.logger)
+                    entity_name = reconcile_opencorporates_entity_by_id(
+                        registered_link.split("opencorporates.com")[-1], self.logger
+                    )
 
             else:
                 entity_name = input("NEW ENTITY: ")

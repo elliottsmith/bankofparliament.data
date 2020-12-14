@@ -136,6 +136,7 @@ def reconcile_opencorporates_entity_by_name(name, logger):
             return data
     return {"result": []}
 
+
 def reconcile_opencorporates_entity_by_id(_id, logger):
     """Reconcile a company name to an opencorporates record"""
     params = {"id": _id}
@@ -149,6 +150,7 @@ def reconcile_opencorporates_entity_by_id(_id, logger):
         if title:
             return title.text
     return None
+
 
 def search_companies_house(
     query,
