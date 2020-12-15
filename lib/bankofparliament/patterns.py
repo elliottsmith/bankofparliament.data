@@ -214,7 +214,7 @@ RECURRING_INDICATORS = [
     "political consultant (ad hoc) for the Confederation",
     "Lay Associate Member of the Medical Practitioners Tribunal Service",
     "Any additional payments are listed below",
-    "Locum Consultant Breast Cancer Surgeon",
+    "Locum Consultant",
     "work as an NHS doctor",
     "Consultancy fees received",
     "Chair of Optimised Waste Logistics Group",
@@ -232,6 +232,11 @@ RECURRING_INDICATORS = [
     "Head of Strategy for",
     "received for consultancy",
     "Payments for legal advice",
+    "payments received as",
+    "Payments for work as",
+    "weekly column for",
+    "Until further notice, I will receive",
+    "for work as an external adviser",
 ]
 
 SINGLE_INDICATORS = [
@@ -262,4 +267,7 @@ SINGLE_INDICATORS = [
     "received a redundancy payment",
     "receive an annual allowance of",
     "received additional sum of",
+    "Until further notice I receive",
+    "Until further notice, I receive",
+    "received final payment",
 ]
