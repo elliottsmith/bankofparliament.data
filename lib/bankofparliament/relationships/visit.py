@@ -6,7 +6,7 @@ Module for visit relationship
 import re
 
 # local libs
-from .base import CompoundRelationship
+from .base_relationships import CompoundRelationship
 from ..utils import find_organisation_by_name
 from ..constants import ENTITY_TYPES
 
@@ -60,7 +60,3 @@ class Visit(CompoundRelationship):
                     )
                     organisation_name = alias
                     self.extracted_entities.append(entity)
-
-            if not organisation_name and self.prompt:
-                entities = self.query_nlp_entities()
-                self.extracted_custom_entities.extend(entities)

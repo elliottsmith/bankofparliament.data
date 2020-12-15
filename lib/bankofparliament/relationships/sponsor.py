@@ -4,7 +4,7 @@ Module for sponsor relationship
 # -*- coding: utf-8 -*-
 
 # local libs
-from .base import TextRelationship
+from .base_relationships import TextRelationship
 from ..utils import find_organisation_by_name
 from ..constants import ENTITY_TYPES
 
@@ -87,7 +87,3 @@ class Sponsorship(TextRelationship):
                 )
                 entity_name = alias
                 self.extracted_entities.append(entity)
-
-        if not entity_name and self.prompt:
-            entities = self.query_nlp_entities()
-            self.extracted_custom_entities.extend(entities)

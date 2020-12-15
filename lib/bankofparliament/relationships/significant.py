@@ -7,7 +7,7 @@ Module for significant relationship
 import re
 
 # local libs
-from .base import TextRelationship
+from .base_relationships import TextRelationship
 from ..utils import find_organisation_by_name
 from ..patterns import IN_PARENTHESIS
 from ..constants import OTHER_ENTITIES
@@ -65,7 +65,3 @@ class SignificationControl(TextRelationship):
                 )
                 organisation_name = alias
                 self.extracted_entities.append(entity)
-
-        if not organisation_name:
-            entities = self.query_nlp_entities()
-            self.extracted_custom_entities.extend(entities)

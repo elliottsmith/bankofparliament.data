@@ -7,7 +7,7 @@ Module for donation relationship
 import re
 
 # local libs
-from .base import CompoundRelationship
+from .base_relationships import CompoundRelationship
 from ..text import extract_company_registration_number_from_text
 from ..utils import find_organisation_by_number, find_organisation_by_name
 from ..constants import ENTITY_TYPES
@@ -77,10 +77,6 @@ class Donation(CompoundRelationship):
                         organisation_name = alias
                         self.extracted_entities.append(entity)
 
-                if not organisation_name and self.prompt:
-                    entities = self.query_nlp_entities()
-                    self.extracted_custom_entities.extend(entities)
-
             else:
                 # trade union etc
                 alias = self.check_aliases(
@@ -94,7 +90,3 @@ class Donation(CompoundRelationship):
                     )
                     organisation_name = alias
                     self.extracted_entities.append(entity)
-
-                elif self.prompt:
-                    entities = self.query_nlp_entities()
-                    self.extracted_custom_entities.extend(entities)

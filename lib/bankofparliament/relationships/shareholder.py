@@ -4,7 +4,7 @@ Module for shareholder relationship
 # -*- coding: utf-8 -*-
 
 # local libs
-from .base import TextRelationship
+from .base_relationships import TextRelationship
 from ..text import (
     strip_category_text,
     strip_registered_text,
@@ -88,7 +88,3 @@ class Shareholder(TextRelationship):
                 )
                 organisation_name = alias
                 self.extracted_entities.append(entity)
-
-        if not organisation_name and self.prompt:
-            entities = self.query_nlp_entities()
-            self.extracted_custom_entities.extend(entities)

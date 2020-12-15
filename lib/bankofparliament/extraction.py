@@ -78,14 +78,6 @@ class NamedEntityExtract:
         self.processed_relationships = 0
         self.resolved_relationships = 0
 
-    def execute(self):
-        """Execute"""
-        self.backup_csv_files()
-        self.save_custom()
-        self.extract_entities_from_relationships()
-        self.save()
-        self.log_output()
-
     @property
     def entities(self):
         return self._entities
@@ -94,26 +86,13 @@ class NamedEntityExtract:
     def relationships(self):
         return self._relationships
 
-    def get_missing_source_entity(self, relationship):
-        """Find the missing source entity for members relatives"""
-        target = relationship["target"]  # this is the member
-        target_relations = self.get_sibling_relationships_by_type(target, "related_to")
-
-        for (_index, row) in target_relations.iterrows():
-            return row["target"]
-        return None
-
-    def get_sibling_relationships_by_type(self, source, relationship_type):
-        """Check if entity name already exists"""
-        filt = (
-            self._extracted_relationships["source"].str.lower() == source.lower()
-        ) & (
-            self._extracted_relationships["relationship_type"].str.lower()
-            == relationship_type.lower()
-        )
-        relationships = self._extracted_relationships.loc[filt]
-        relationships = relationships.reindex(index=relationships.index[::-1])
-        return relationships
+    def execute(self):
+        """Execute"""
+        self.backup_csv_files()
+        self.save_custom()
+        self.extract_entities_from_relationships()
+        self.save()
+        self.log_output()
 
     def extract_entities_from_relationships(self):
         """Extract entities from the relationships"""
@@ -142,27 +121,24 @@ class NamedEntityExtract:
             if solver:
                 self.processed_relationships += 1
                 solver.solve()
-                if (
-                    not len(
-                        solver.extracted_entities + solver.extracted_custom_entities
-                    )
-                    and not self.prompt
-                ):
-                    self.log_relationship(index, relationship, debug_text=solver.text)
-                    continue
+
+                # check to see if we have extracted entities, if we don't
+                # have any, prompt for override if specified
+                if not len(solver.extracted_entities + solver.extracted_custom_entities):
+                    if self.prompt:
+                        manual_entity = self.prompt_manual_input(relationship)
+                        if manual_entity:
+                            solver.extracted_custom_entities.append(manual_entity)
+                        else:
+                            self.log_relationship(index, relationship, debug_text=solver.text)
+                            continue
+                    else:
+                        self.log_relationship(index, relationship, debug_text=solver.text)
+                        continue
+
                 self.resolved_relationships += 1
-
-                if (
-                    not len(
-                        solver.extracted_entities + solver.extracted_custom_entities
-                    )
-                    and self.prompt
-                ):
-                    manual_entity = self.prompt_manual_input(relationship)
-                    if manual_entity:
-                        solver.extracted_custom_entities.append(manual_entity)
-
-                for entity in solver.extracted_entities:
+                # add all the entities found and a relationship
+                for entity in solver.extracted_entities + solver.extracted_custom_entities:
                     self.add_entity(entity)
                     relationship = self.make_relationship_dict(
                         relationship_type=relationship["relationship_type"],
@@ -176,21 +152,31 @@ class NamedEntityExtract:
                     self.add_relationship(relationship)
                     self.log_relationship(index, relationship)
 
+                # also save out custom entities separately
                 for entity in solver.extracted_custom_entities:
-                    self.add_entity(entity)
                     self.add_custom_entity(entity)
-                    relationship = self.make_relationship_dict(
-                        relationship_type=relationship["relationship_type"],
-                        source=relationship["source"],
-                        target=entity["name"],
-                        date=solver.date,
-                        amount=solver.amount,
-                        text=relationship["text"],
-                        link=relationship["link"],
-                    )
-                    self.add_relationship(relationship)
-                    self.log_relationship(index, relationship)
                     self.save_custom()
+
+    def get_missing_source_entity(self, relationship):
+        """Find the missing source entity for members relatives"""
+        target = relationship["target"]  # this is the member
+        target_relations = self.get_sibling_relationships_by_type(target, "related_to")
+
+        for (_index, row) in target_relations.iterrows():
+            return row["target"]
+        return None
+
+    def get_sibling_relationships_by_type(self, source, relationship_type):
+        """Check if entity name already exists"""
+        filt = (
+            self._extracted_relationships["source"].str.lower() == source.lower()
+        ) & (
+            self._extracted_relationships["relationship_type"].str.lower()
+            == relationship_type.lower()
+        )
+        relationships = self._extracted_relationships.loc[filt]
+        relationships = relationships.reindex(index=relationships.index[::-1])
+        return relationships
 
     def make_entity_dict(self, **kwargs):
         """Add entity data"""
