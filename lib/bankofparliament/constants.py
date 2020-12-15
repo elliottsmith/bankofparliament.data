@@ -2,8 +2,6 @@
 Constants
 """
 # -*- coding: utf-8 -*-
-# sys libs
-import os
 
 # Named entityy recognition
 NER_BASE_MODEL = "en_core_web_sm"

@@ -7,8 +7,6 @@ Module for relationships
 import re
 
 # local libs
-from ..text import eval_string_as_list
-from ..utils import colorize, find_organisation_by_name
 from ..constants import ENTITY_TEMPLATE
 
 
