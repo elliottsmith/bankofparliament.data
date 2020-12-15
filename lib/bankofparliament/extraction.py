@@ -124,21 +124,29 @@ class NamedEntityExtract:
 
                 # check to see if we have extracted entities, if we don't
                 # have any, prompt for override if specified
-                if not len(solver.extracted_entities + solver.extracted_custom_entities):
+                if not len(
+                    solver.extracted_entities + solver.extracted_custom_entities
+                ):
                     if self.prompt:
                         manual_entity = self.prompt_manual_input(relationship)
                         if manual_entity:
                             solver.extracted_custom_entities.append(manual_entity)
                         else:
-                            self.log_relationship(index, relationship, debug_text=solver.text)
+                            self.log_relationship(
+                                index, relationship, debug_text=solver.text
+                            )
                             continue
                     else:
-                        self.log_relationship(index, relationship, debug_text=solver.text)
+                        self.log_relationship(
+                            index, relationship, debug_text=solver.text
+                        )
                         continue
 
                 self.resolved_relationships += 1
                 # add all the entities found and a relationship
-                for entity in solver.extracted_entities + solver.extracted_custom_entities:
+                for entity in (
+                    solver.extracted_entities + solver.extracted_custom_entities
+                ):
                     self.add_entity(entity)
                     relationship = self.make_relationship_dict(
                         relationship_type=relationship["relationship_type"],

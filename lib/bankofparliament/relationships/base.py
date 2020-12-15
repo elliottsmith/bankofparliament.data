@@ -155,6 +155,7 @@ class BaseRelationship:
                 self.logger.debug("Key not found in template: {}".format(key))
         return data
 
+
 def get_relationship_solver(*args, **kwargs):
     """Utility function to get correct relationship solver object"""
 

@@ -8,6 +8,7 @@ from .base import BaseRelationship
 from ..utils import colorize
 from ..text import eval_string_as_list
 
+
 class TextRelationship(BaseRelationship):
     """Text relationship class - single line of text"""
 
