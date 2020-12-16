@@ -15,6 +15,7 @@ import pandas
 import requests
 import tabula
 from bs4 import BeautifulSoup
+import zeep
 
 # local libs
 from .constants import (
@@ -25,6 +26,7 @@ from .constants import (
     COMPANIES_HOUSE_SEARCH_URL,
     OPENCORPORATES_RECONCILE_URL,
     OPENCORPORATES_RECONCILE_FLYOUT_URL,
+    CHARITY_COMMISSION_WSDL,
     COLOR_CODES,
 )
 
@@ -205,6 +207,61 @@ def find_organisation_by_number(companies_house_apikey, entity_number, logger):
     if request:
         data = request.json()
         return data["company_name"]
+    return None
+
+
+def get_zeep_client(wsdl, api_key_name, api_key_value):
+    """Get an SOAP zeep client"""
+
+    class CharitiesAuthPlugin(zeep.Plugin):
+
+        """Add an APIKey to each request."""
+
+        def __init__(self, api_key_name, api_key_value):
+            """Initialise api_key_name and api_key_value."""
+            self.api_key_name = api_key_name
+            self.api_key_value = api_key_value
+
+        def egress(self, envelope, http_headers, operation, binding_options):
+            """Auto add to the envelope (or replace) Charity api_key.
+            :param envelope: The envelope as XML node
+            :param http_headers: Dict with the HTTP headers
+            :param operation: The associated Operation instance
+            :param binding_options: Binding specific options for the operation
+            """
+            for element in operation.input.body.type.elements:
+                if (
+                    element[0] == self.api_key_name
+                    and element[1].name == self.api_key_name
+                ):
+                    key_type = element[1]
+                    key_type.render(envelope[0][0], self.api_key_value)
+            return envelope, http_headers
+
+    settings = zeep.Settings(strict=False, xml_huge_tree=True, raw_response=False)
+    plugins = [CharitiesAuthPlugin(api_key_name, api_key_value)]
+    return zeep.Client(wsdl=wsdl, settings=settings, plugins=plugins)
+
+
+def find_charity_by_number(charities_apikey, registered_number, logger):
+    """Find charity by number"""
+    logger.debug("Query charities commission: {}".format(registered_number))
+    client = get_zeep_client(CHARITY_COMMISSION_WSDL, "APIKey", charities_apikey)
+    charity = client.service.GetCharityByRegisteredCharityNumber(
+        registeredCharityNumber=str(registered_number)
+    )
+    if charity:
+        return charity["CharityName"]
+    return None
+
+
+def find_charity_by_name(charities_apikey, name, logger):
+    """Find charity by name"""
+    logger.debug("Query charities commission: {}".format(name))
+    client = get_zeep_client(CHARITY_COMMISSION_WSDL, "APIKey", charities_apikey)
+    charity = client.service.GetCharityByName(strSearch=str(name))
+    if charity:
+        return charity["CharityName"]
     return None
 
 

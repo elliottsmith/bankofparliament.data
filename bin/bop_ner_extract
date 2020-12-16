@@ -11,7 +11,7 @@ import argparse
 # local libs
 from bankofparliament.extraction import NamedEntityExtract
 from bankofparliament.utils import get_logger
-from apikeys import COMPANIES_HOUSE_APIKEY, OPENCORPORATES_APIKEY
+from apikeys import COMPANIES_HOUSE_APIKEY, OPENCORPORATES_APIKEY, CHARITIES_COMMISION_APIKEY
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -44,6 +44,7 @@ if __name__ == "__main__":
         relationships=args.relationships,
         companies_house_apikey=COMPANIES_HOUSE_APIKEY,
         opencorporates_apikey=OPENCORPORATES_APIKEY,
+        charities_apikey=CHARITIES_COMMISION_APIKEY,
         prompt=args.prompt,
         logger=get_logger("extract", args.debug),
     )

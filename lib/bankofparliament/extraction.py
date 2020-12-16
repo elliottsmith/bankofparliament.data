@@ -17,6 +17,7 @@ from .utils import (
     read_csv_as_dataframe,
     colorize,
     find_organisation_by_number,
+    find_charity_by_number,
     reconcile_opencorporates_entity_by_id,
 )
 from .constants import NER_BASE_MODEL, ENTITY_TEMPLATE, RELATIONSHIP_TEMPLATE
@@ -41,6 +42,7 @@ class NamedEntityExtract:
         relationships,
         companies_house_apikey,
         opencorporates_apikey,
+        charities_apikey,
         prompt,
         logger,
     ):
@@ -48,6 +50,8 @@ class NamedEntityExtract:
         self._time_start = time.time()
         self.companies_house_apikey = companies_house_apikey
         self.opencorporates_apikey = opencorporates_apikey
+        self.charities_apikey = charities_apikey
+
         self.prompt = prompt
         self.logger = logger
         self.output_dir = os.path.join(os.path.dirname(entities), "extracted")
@@ -325,6 +329,10 @@ class NamedEntityExtract:
                         registered_link.split("opencorporates.com")[-1], self.logger
                     )
 
+                elif "charitycommission" in registered_link:
+                    entity_name = find_charity_by_number(
+                        self.charities_apikey, registered_number, self.logger
+                    )
             else:
                 entity_name = input("NEW ENTITY: ")
                 entity_type = input("NEW ENTITY TYPE: ")
