@@ -213,7 +213,7 @@ class NamedEntityExtract:
     def add_entity(self, entity):
         """Add entity data"""
         entity_name = entity["name"]
-        if not self.entity_name_exists(entity_name):
+        if not self.get_entity_name_exists(entity_name):
             new_entity = pandas.DataFrame([entity])
             self._entities = pandas.concat(
                 [self._entities, new_entity], ignore_index=True
@@ -236,7 +236,7 @@ class NamedEntityExtract:
     def add_custom_entity(self, entity):
         """Add to custom entities"""
         entity_name = entity["name"]
-        if not self.custom_entity_name_exists(entity_name):
+        if not self.get_custom_get_entity_name_exists(entity_name):
             new_entity = pandas.DataFrame([entity])
             self._extracted_custom_entities = pandas.concat(
                 [self._extracted_custom_entities, new_entity], ignore_index=True
@@ -269,7 +269,7 @@ class NamedEntityExtract:
             [self._extracted_relationships, relationship], ignore_index=True
         )
 
-    def entity_name_exists(self, name):
+    def get_entity_name_exists(self, name):
         """Check if entity name already exists"""
         filt = self.entities["name"].str.lower() == name.lower()
         entity = self.entities.loc[filt]
@@ -278,7 +278,7 @@ class NamedEntityExtract:
             return True
         return False
 
-    def custom_entity_name_exists(self, name):
+    def get_custom_get_entity_name_exists(self, name):
         """Check if custom entity name already exists"""
         filt = self._extracted_custom_entities["name"].str.lower() == name.lower()
         entity = self._extracted_custom_entities.loc[filt]
@@ -287,8 +287,8 @@ class NamedEntityExtract:
             return True
         return False
 
-    def entity_type_from_name(self, name):
-        """"""
+    def get_entity_type_from_name(self, name):
+        """Get the entity type from the name"""
         filt = self.entities["name"].str.lower() == name.lower()
         entity = self.entities.loc[filt]
 
@@ -302,7 +302,7 @@ class NamedEntityExtract:
         self.logger.info(
             "[{}] {}: {}".format(
                 relationship["relationship_type"],
-                colorize("UNKNOWN", "light red"),
+                colorize("PROMPT", "light red"),
                 colorize(relationship["text"], "light gray"),
             )
         )
@@ -333,11 +333,15 @@ class NamedEntityExtract:
                     entity_name = find_charity_by_number(
                         self.charities_apikey, registered_number, self.logger
                     )
+
+                entity_type = input("NEW ENTITY TYPE: ")
+
             else:
                 entity_name = input("NEW ENTITY: ")
                 entity_type = input("NEW ENTITY TYPE: ")
-                if not entity_name and not entity_type:
-                    return None
+
+            if not entity_name and not entity_type:
+                return None
 
             entity = self.make_entity_dict(
                 entity_type=entity_type,
@@ -358,7 +362,7 @@ class NamedEntityExtract:
                     relationship["relationship_type"],
                     colorize(str(relationship["target"]), "yellow"),
                     colorize(
-                        str(self.entity_type_from_name(relationship["target"])),
+                        str(self.get_entity_type_from_name(relationship["target"])),
                         "yellow",
                     ),
                     colorize(str(relationship["text"]), "cyan"),
@@ -372,6 +376,12 @@ class NamedEntityExtract:
                     colorize(str(relationship["source"]), "cyan"),
                     colorize(relationship["relationship_type"], "blink"),
                     colorize(text, "light red"),
+                )
+            )
+            self.logger.warning(
+                "[{:05d}] {}".format(
+                    index,
+                    colorize(relationship["text"], "light red"),
                 )
             )
 
@@ -388,7 +398,7 @@ class NamedEntityExtract:
         )
 
     def backup_csv_files(self):
-        """"""
+        """Backup existing csv files"""
         extracted_path = self.output_dir
         backup_path = os.path.join(extracted_path, "backup")
 
