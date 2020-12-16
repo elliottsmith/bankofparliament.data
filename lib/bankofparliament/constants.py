@@ -4,7 +4,7 @@ Constants
 # -*- coding: utf-8 -*-
 
 # Named entityy recognition
-NER_BASE_MODEL = "en_core_web_sm"
+NER_BASE_MODEL = "en_core_web_md"
 
 # Neo4j
 NEO4J_URL = "bolt://{}:{}"
