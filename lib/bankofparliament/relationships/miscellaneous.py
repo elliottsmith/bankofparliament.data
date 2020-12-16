@@ -4,7 +4,7 @@ Module for misc relationship
 # -*- coding: utf-8 -*-
 
 # local libs
-from .base_relationships import TextRelationship
+from .relationships import TextRelationship
 from ..text import (
     strip_category_text,
     strip_registered_text,
@@ -12,7 +12,6 @@ from ..text import (
     strip_from_dates_text,
     strip_parenthesis_text,
 )
-from ..utils import find_organisation_by_name
 from ..constants import ENTITY_TYPES
 
 
@@ -46,52 +45,17 @@ class Miscellaneous(TextRelationship):
         self.date = self.extract_date_from_text(self.relationship["text"])
         self.amount = self.extract_amount_from_text(self.relationship["text"])
 
-        (organisation_name, organisation_registration) = find_organisation_by_name(
-            self.text, self.companies_house_apikey, self.logger
-        )
-
-        if organisation_name:
-            entity = self.make_entity_dict(
-                entity_type="company",
-                name=organisation_name,
-                company_registration=organisation_registration,
-                aliases=";".join(list(set([self.text, organisation_name]))),
-            )
+        entity = self.find_alias_from_text(text=self.relationship["text"])
+        if entity:
             self.extracted_entities.append(entity)
+            return
 
-        if not organisation_name:
-            alias = self.check_aliases(entity_types=self.ALIAS_ENTITY_TYPES)
-            if alias:
-                entity = self.make_entity_dict(
-                    entity_type="company",
-                    name=alias,
-                    aliases=";".join([alias]),
-                )
-                organisation_name = alias
-                self.extracted_entities.append(entity)
+        entity = self.find_organisation_from_text(text=self.text)
+        if entity:
+            self.extracted_entities.append(entity)
+            return
 
-        if not organisation_name:
-            filt = self.entities["entity_type"] == "profession"
-            professions = self.entities.loc[filt]
-
-            for (_index, row) in professions.iterrows():
-                if row["name"].lower() in self.text.lower():
-                    entity = self.make_entity_dict(
-                        entity_type="profession",
-                        name=row["name"],
-                        aliases=";".join([row["name"]]),
-                    )
-                    organisation_name = row["name"]
-                    self.extracted_entities.append(entity)
-                    break
-
-                for alias in row["aliases"].split(";"):
-                    if alias.lower() in self.text.lower():
-                        entity = self.make_entity_dict(
-                            entity_type="profession",
-                            name=row["name"],
-                            aliases=";".join([row["name"]]),
-                        )
-                        organisation_name = row["name"]
-                        self.extracted_entities.append(entity)
-                        break
+        entity = self.find_profession_from_text(text=self.relationship["text"])
+        if entity:
+            self.extracted_entities.append(entity)
+            return

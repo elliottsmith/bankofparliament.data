@@ -7,7 +7,7 @@ Module for property ownership relationship
 import math
 
 # local libs
-from .base_relationships import TextRelationship
+from .relationships import TextRelationship
 from ..text import get_property_multiplier
 
 

@@ -4,7 +4,7 @@ Module for membership relationship
 # -*- coding: utf-8 -*-
 
 # local libs
-from .base_relationships import TextRelationship
+from .relationships import TextRelationship
 
 
 class Membership(TextRelationship):

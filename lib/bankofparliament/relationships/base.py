@@ -8,19 +8,33 @@ import re
 
 # local libs
 from ..constants import ENTITY_TEMPLATE
+from ..utils import colorize, find_organisation_by_name, find_organisation_by_number
+from ..patterns import RECURRING_INDICATORS, SINGLE_INDICATORS
+from ..text import extract_company_registration_number_from_text
 
 
 class BaseRelationship:
     """Base relationship class"""
 
-    NER_TYPES = ["ORG"]
+    ALIAS_ENTITY_TYPES = []
+    PREFERRED_ALIAS_ENTITY_TYPES = []
+
+    NER_TYPES = []
     EXCLUDE_NER_MATCHES = ["trustee"]
     ACCEPTED_SINGLE_MATCHES = [
         "union",
         "pollster",
         "media",
         "government_body",
+        "property",
     ]
+
+    recurring_payment_regex = re.compile(
+        r"({}).+".format("|".join(RECURRING_INDICATORS).lower())
+    )
+    single_payment_regex = re.compile(
+        r"({}).+".format("|".join(SINGLE_INDICATORS).lower())
+    )
 
     def __init__(
         self,
@@ -35,7 +49,7 @@ class BaseRelationship:
         parent,
     ):
         """
-        Relationship - pandas DataFrame
+        Relationship base class
         """
         self.index = index
         self.relationship = relationship
@@ -153,6 +167,189 @@ class BaseRelationship:
                 self.logger.debug("Key not found in template: {}".format(key))
         return data
 
+    def find_single_payment_from_text(self, text):
+        """Find a single payment within text"""
+        if self.amount:
+            # search for single payment
+            if self.single_payment_regex.search(text.lower()):
+
+                sources_relationships = self.parent.get_sibling_relationships_by_type(
+                    self.relationship["source"], self.relationship["relationship_type"]
+                )
+
+                for (_index, rel) in sources_relationships.iterrows():
+                    if rel["target"] != "UNKNOWN" and rel["amount"] == "recurring":
+                        self.logger.debug(
+                            "{}: {}".format(
+                                colorize("Recurring payment used", "light blue"),
+                                rel["target"],
+                            )
+                        )
+
+                        filt = (
+                            self.entities["name"].str.lower() == rel["target"].lower()
+                        )
+                        match = self.entities.loc[filt]
+                        entity_type = match.iloc[0]["entity_type"]
+
+                        entity = self.make_entity_dict(
+                            entity_type=entity_type,
+                            name=rel["target"],
+                            aliases=";".join([rel["target"]]),
+                        )
+                        self.logger.debug(
+                            "Single Payment Found: {}".format(
+                                colorize(rel["target"], "magenta")
+                            )
+                        )
+                        return entity
+        return None
+
+    def find_profession_from_text(self, text):
+        """Find a profession within text"""
+        filt = self.entities["entity_type"] == "profession"
+        professions = self.entities.loc[filt]
+
+        for (_index, row) in professions.iterrows():
+            if row["name"].lower() in text.lower():
+                entity = self.make_entity_dict(
+                    entity_type="profession",
+                    name=row["name"],
+                    aliases=";".join([row["name"]]),
+                )
+                self.logger.debug(
+                    "Profession Found: {}".format(colorize(row["name"], "magenta"))
+                )
+                return entity
+
+            for alias in row["aliases"].split(";"):
+                if alias.lower() in text.lower():
+                    entity = self.make_entity_dict(
+                        entity_type="profession",
+                        name=row["name"],
+                        aliases=";".join([row["name"]]),
+                    )
+                    self.logger.debug(
+                        "Profession Found: {}".format(colorize(row["name"], "magenta"))
+                    )
+                    return entity
+        return None
+
+    def find_ner_type_from_text(self, text, target_entity_type):
+        """Find NER types within text"""
+        result = self.nlp(text)
+        entities = [(X.text, X.label_) for X in result.ents]
+
+        for entity in entities:
+            if entity[1] in self.NER_TYPES:
+                entity_name = entity[0]
+
+                if len(entity_name.split()) > 1:
+                    entity = self.make_entity_dict(
+                        entity_type=target_entity_type,
+                        name=entity_name,
+                        aliases=";".join([entity_name]),
+                    )
+                    self.logger.debug(
+                        "Entity Found: {}".format(colorize(entity_name, "magenta"))
+                    )
+                    return entity
+        return None
+
+    def find_organisation_from_text(self, text):
+        """Find organistation from text"""
+        (organisation_name, organisation_registration) = find_organisation_by_name(
+            text, self.companies_house_apikey, self.logger
+        )
+
+        if organisation_name:
+            entity = self.make_entity_dict(
+                entity_type="company",
+                name=organisation_name,
+                company_registration=organisation_registration,
+                aliases=";".join(list(set([text, organisation_name]))),
+            )
+            self.logger.debug(
+                "Company Found: {}".format(colorize(organisation_name, "magenta"))
+            )
+            return entity
+        return None
+
+    def find_organisation_from_number_in_text(self, text):
+        """Find organisation from number within text"""
+        organisation_registration = extract_company_registration_number_from_text(
+            text, self.logger
+        )
+        if organisation_registration:
+            organisation_name = find_organisation_by_number(
+                self.companies_house_apikey,
+                organisation_registration,
+                self.logger,
+            )
+            if organisation_name:
+                entity = self.make_entity_dict(
+                    entity_type="company",
+                    name=organisation_name,
+                    company_registration=organisation_registration,
+                    aliases=";".join(list(set([text, organisation_name]))),
+                )
+                self.logger.debug(
+                    "Company Found: {}".format(colorize(organisation_name, "magenta"))
+                )
+                return entity
+        return None
+
+    def find_alias_from_text(self, text):
+        """Find alias from text"""
+        alias = self._check_aliases(
+            entity_types=self.ALIAS_ENTITY_TYPES,
+            prefered_entity_types=self.PREFERRED_ALIAS_ENTITY_TYPES,
+            text=text,
+        )
+        if alias:
+            filt = self.entities["name"].str.lower() == alias.lower()
+            match = self.entities.loc[filt]
+            alias_type = match.iloc[0]["entity_type"]
+
+            entity = self.make_entity_dict(
+                entity_type=alias_type,
+                name=alias,
+                aliases=";".join([alias]),
+            )
+            self.logger.debug("Alias Found: {}".format(colorize(alias, "magenta")))
+            return entity
+        return None
+
+    def _check_aliases(self, entity_types, prefered_entity_types, text):
+        """Check entity aliases for occurances of query string"""
+        dataframe = self.entities
+        filt = dataframe["entity_type"].isin(entity_types)
+        dataframe = dataframe[filt]
+
+        _aliases = []
+        for name, aliases, etype in zip(
+            dataframe["name"], dataframe["aliases"], dataframe["entity_type"]
+        ):
+            for alias in aliases.split(";"):
+                if len(alias.split()) > 1 or etype in self.ACCEPTED_SINGLE_MATCHES:
+                    clean_alias = "{}".format(alias.strip().lower())
+                    if clean_alias in text.lower():
+                        if prefered_entity_types:
+                            _aliases.append((etype, name.upper()))
+                        else:
+                            return name.upper()
+
+        if prefered_entity_types and _aliases:
+            best_match = None
+            for (_alias_type, _alias_name) in _aliases:
+                if _alias_type in prefered_entity_types:
+                    best_match = _alias_name
+            if best_match:
+                return best_match
+            return _aliases[0][1]
+
+        return None
+
 
 def get_relationship_solver(*args, **kwargs):
     """Utility function to get correct relationship solver object"""
@@ -161,62 +358,62 @@ def get_relationship_solver(*args, **kwargs):
     if not relationship_type:
         return None
 
-    elif relationship_type == "member_of":
+    if relationship_type == "member_of":
         from .membership import Membership
 
         return Membership(*args, **kwargs)
 
-    elif relationship_type == "related_to":
+    if relationship_type == "related_to":
         from .relation import Relation
 
         return Relation(*args, **kwargs)
 
-    elif relationship_type == "owner_of":
+    if relationship_type == "owner_of":
         from .property import PropertyOwner
 
         return PropertyOwner(*args, **kwargs)
 
-    elif relationship_type == "significant_control_of":
+    if relationship_type == "significant_control_of":
         from .significant import SignificationControl
 
         return SignificationControl(*args, **kwargs)
 
-    elif relationship_type == "director_of":
+    if relationship_type == "director_of":
         from .director import Directorship
 
         return Directorship(*args, **kwargs)
 
-    elif relationship_type == "shareholder_of":
+    if relationship_type == "shareholder_of":
         from .shareholder import Shareholder
 
         return Shareholder(*args, **kwargs)
 
-    elif relationship_type == "miscellaneous":
+    if relationship_type == "miscellaneous":
         from .miscellaneous import Miscellaneous
 
         return Miscellaneous(*args, **kwargs)
 
-    elif relationship_type == "sponsored_by":
+    if relationship_type == "sponsored_by":
         from .sponsor import Sponsorship
 
         return Sponsorship(*args, **kwargs)
 
-    elif relationship_type == "donations_from":
+    if relationship_type == "donations_from":
         from .donation import Donation
 
         return Donation(*args, **kwargs)
 
-    elif relationship_type == "gifts_from":
+    if relationship_type == "gifts_from":
         from .gift import Gift
 
         return Gift(*args, **kwargs)
 
-    elif relationship_type == "visited":
+    if relationship_type == "visited":
         from .visit import Visit
 
         return Visit(*args, **kwargs)
 
-    elif relationship_type == "employed_by":
+    if relationship_type == "employed_by":
         from .employment import Employment
 
         return Employment(*args, **kwargs)

@@ -7,8 +7,7 @@ Module for significant relationship
 import re
 
 # local libs
-from .base_relationships import TextRelationship
-from ..utils import find_organisation_by_name
+from .relationships import TextRelationship
 from ..patterns import IN_PARENTHESIS
 from ..constants import OTHER_ENTITIES
 
@@ -42,26 +41,12 @@ class SignificationControl(TextRelationship):
         self.date = self.extract_date_from_text(self.relationship["text"])
         self.amount = self.extract_amount_from_text(self.relationship["text"])
 
-        (organisation_name, organisation_registration) = find_organisation_by_name(
-            self.text, self.companies_house_apikey, self.logger
-        )
-
-        if organisation_name:
-            entity = self.make_entity_dict(
-                entity_type="company",
-                name=organisation_name,
-                company_registration=organisation_registration,
-                aliases=";".join(list(set([self.text, organisation_name]))),
-            )
+        entity = self.find_alias_from_text(text=self.relationship["text"])
+        if entity:
             self.extracted_entities.append(entity)
+            return
 
-        if not organisation_name:
-            alias = self.check_aliases(entity_types=self.ALIAS_ENTITY_TYPES)
-            if alias:
-                entity = self.make_entity_dict(
-                    entity_type="company",
-                    name=alias,
-                    aliases=";".join([alias]),
-                )
-                organisation_name = alias
-                self.extracted_entities.append(entity)
+        entity = self.find_organisation_from_text(text=self.text)
+        if entity:
+            self.extracted_entities.append(entity)
+            return
