@@ -167,6 +167,7 @@ POSITIONS = [
     "Senior Partner",
     "Pro Vice Chancellor",
     "Columnist",
+    "Advisory Group",
 ]
 
 RECURRING_INDICATORS = [
@@ -237,6 +238,11 @@ RECURRING_INDICATORS = [
     "weekly column for",
     "Until further notice, I will receive",
     "for work as an external adviser",
+    "Consultancy fees received",
+    "final payments for which",
+    "external advisor to JCB",
+    "for services as a director",
+    "Until further notice",
 ]
 
 SINGLE_INDICATORS = [
@@ -270,4 +276,14 @@ SINGLE_INDICATORS = [
     "Until further notice I receive",
     "Until further notice, I receive",
     "received final payment",
+    "to meet tax liability",
+    "I drew",
+    "until further notice I expect",
+    "Until further notice, I will receive",
+    "for a survey",
+    "I shall receive fees",
+    "received final payment of",
+    "for a survey completed",
+    "for consultancy work",
+    "royalties of",
 ]
