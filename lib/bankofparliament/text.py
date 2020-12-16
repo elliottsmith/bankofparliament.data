@@ -143,7 +143,7 @@ def strip_category_text(text):
     """
     patterns = [r"\(see category [0-9]+\)", r"\(see category [0-9]+\([a-z]\)\)"]
     for pattern in patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
+        match = re.search(pattern, text, flags=re.IGNORECASE)
         if match:
             grps = match.groups()
             for grp in grps:
@@ -159,7 +159,7 @@ def strip_registered_text(text):
     """
     patterns = [r"(\(Registered.*\))", r"(\(Updated.*\))"]
     for pattern in patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
+        match = re.search(pattern, text, flags=re.IGNORECASE)
         if match:
             grps = match.groups()
             for grp in grps:
@@ -171,14 +171,14 @@ def strip_positions_text(text):
     """Remove a job title from text"""
     # Remove ay positions from text, chairman, director etc
     pattern = "{}".format(",? |".join(sorted(POSITIONS, key=len, reverse=True)))
-    text = re.sub(pattern, "", text, re.IGNORECASE)
+    text = re.sub(pattern, "", text, flags=re.IGNORECASE)
     return text
 
 
 def strip_from_dates_text(text):
     """Remove dates from text"""
     from_until_pattern = "(until [a-zA-Z0-9 ]+,)|(from [a-zA-Z0-9 ]+,)"
-    match = re.search(from_until_pattern, text, re.IGNORECASE)
+    match = re.search(from_until_pattern, text, flags=re.IGNORECASE)
     if match:
         grps = match.groups()
         for grp in grps:
