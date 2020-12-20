@@ -117,7 +117,7 @@ class Convert:
 
         # monarchy
         self.add_entity(
-            entity_type="monarchy", name="The Crown", aliases=["The Monarchy"]
+            entity_type="state_power", name="The Crown", aliases=["The Monarchy"]
         )
 
         # separation of powers
