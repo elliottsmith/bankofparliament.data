@@ -108,6 +108,7 @@ class NamedEntityExtract:
     def extract_entities_from_relationships(self):
         """Extract entities from the relationships"""
         for (index, relationship) in self.relationships.iterrows():
+            self.processed_relationships += 1
 
             if relationship.get("resolved", "N/A") != "N/A":
                 self.relationship_passthrough(
@@ -136,7 +137,6 @@ class NamedEntityExtract:
             # solve for entites, add any new ones found
             # for every entity, create a relationship from source
             if solver:
-                self.processed_relationships += 1
                 solver.solve()
 
                 # check to see if we have extracted entities, if we don't
@@ -195,8 +195,6 @@ class NamedEntityExtract:
         self, index, relationship, debug_text=None, resolved=False
     ):
         """Passthrough for already solved relationships"""
-        self.processed_relationships += 1
-        self.resolved_relationships += 1
 
         relationship = make_relationship_dict(
             relationship_type=relationship["relationship_type"],
@@ -419,10 +417,12 @@ class NamedEntityExtract:
         """Final log output"""
         taken = time.time() - self._time_start
         self.logger.info(
-            "{}/{} ({}%) relationships solved (Time taken: {})".format(
+            "{}/{} ({:.2f}%) relationships solved (Time taken: {})".format(
                 self.resolved_relationships,
                 self.processed_relationships,
-                int((self.resolved_relationships / self.processed_relationships) * 100),
+                float(
+                    (self.resolved_relationships / self.processed_relationships) * 100
+                ),
                 time.strftime("%Hh%Mm%Ss", time.gmtime(taken)),
             )
         )
