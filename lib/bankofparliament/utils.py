@@ -14,6 +14,7 @@ import urllib.request
 import pandas
 import requests
 import tabula
+import scraperwiki
 from bs4 import BeautifulSoup
 import zeep
 
@@ -21,6 +22,7 @@ import zeep
 from .constants import (
     HEADERS,
     REQUEST_WAIT_TIME,
+    TRADE_UNIONS_URL,
     COMPANIES_HOUSE_QUERY_URL,
     COMPANIES_HOUSE_QUERY_LIMIT,
     COMPANIES_HOUSE_SEARCH_URL,
@@ -184,6 +186,27 @@ def reconcile_findthatcharity_entity_by_name(name, logger, limit=5, end_point="a
     return {"result": []}
 
 
+def get_government_organisations(logger):
+    """Get government organisations from findthatcharity"""
+    return reconcile_findthatcharity_entity_by_name(
+        name="*", logger=logger, limit=989, end_point="government-organisation"
+    )
+
+
+def get_local_authorities(logger):
+    """Get local authorities from findthatcharity"""
+    return reconcile_findthatcharity_entity_by_name(
+        name="*", logger=logger, limit=472, end_point="local-authority"
+    )
+
+
+def get_universities(logger):
+    """Get universities from findthatcharity"""
+    return reconcile_findthatcharity_entity_by_name(
+        name="*", logger=logger, limit=172, end_point="university"
+    )
+
+
 def search_companies_house(
     query,
     companies_house_apikey,
@@ -294,6 +317,19 @@ def find_charity_by_name(charities_apikey, name, logger):
     if charity:
         return charity["CharityName"]
     return None
+
+
+def get_list_of_trade_unions():
+    """Get a list of trade unions"""
+    html = scraperwiki.scrape(TRADE_UNIONS_URL)
+    soup = BeautifulSoup(html, features="lxml")
+    trade_unions = []
+    tables = soup.find_all("table")
+    for section in range(4):
+        links = tables[section].find_all("a", class_="govuk-link", rel="external")
+        for union in links:
+            trade_unions.append(union.text)
+    return trade_unions
 
 
 def read_json_file(path):

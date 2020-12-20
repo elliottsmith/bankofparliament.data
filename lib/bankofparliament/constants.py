@@ -33,6 +33,7 @@ OPENCORPORATES_RECONCILE_FLYOUT_URL = "https://opencorporates.com/reconcile/flyo
 
 # findthatcharity
 FINDTHATCHARITY_RECONCILE_URL = "https://findthatcharity.uk/reconcile/{}"
+
 # companies house
 COMPANIES_HOUSE_QUERY_LIMIT = 10
 COMPANIES_HOUSE_QUERY_URL = "https://api.companieshouse.gov.uk/{}/{}"
@@ -76,6 +77,10 @@ COMPANIES_HOUSE_PREFIXES = [
     "NO",
 ]
 
+# trade unions
+TRADE_UNIONS_URL = "https://www.gov.uk/government/publications/public-list-of-active-trade-unions-official-list-and-schedule/trade-unions-the-current-list-and-schedule"
+
+
 # Entity / relationships data structures
 ENTITY_TEMPLATE = [
     "entity_type",
@@ -98,7 +103,6 @@ RELATIONSHIP_TEMPLATE = [
     "text",
     "link",
     "resolved",
-    "original",
 ]
 
 COMMONS_CATEGORIES = {
@@ -136,8 +140,9 @@ HUMAN_ENTITIES = [
     "politician",
 ]
 POLLITICAL_ENTITIES = [
+    "local_authority",
     "foreign_government",
-    "government_body",
+    "government_organisation",
     "political_party",
     "political",
     "pollster",
@@ -148,9 +153,9 @@ OTHER_ENTITIES = [
     "association",
     "charity",
     "union",
-    "education",
+    "university",
     "media",
-    "miscellaneous",
+    "misc",
     "sport",
     "property",
 ]

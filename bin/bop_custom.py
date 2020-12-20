@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+"""
+Script to initial custom data
+"""
+# -*- coding: utf-8 -*-
+
+# sys libs
+import sys
+import argparse
+
+# local libs
+from bankofparliament.custom import GenerateCustom
+from bankofparliament.utils import get_logger
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--debug",
+        help="Debug prints",
+        action="store_true",
+        default=False,
+    )
+
+    parser.add_argument(
+        "--output", help="Output file", action="store", default=None
+    )
+
+    args = parser.parse_args()
+
+    custom = GenerateCustom(
+        output_path=args.output,
+        logger=get_logger("custom", args.debug),
+    )
+    custom.execute()
+    custom.save()
