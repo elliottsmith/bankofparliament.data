@@ -231,6 +231,24 @@ class NamedEntityExtract:
 
     def make_entity_dict(self, **kwargs):
         """Add entity data"""
+        if not "aliases" in kwargs:
+            kwargs["aliases"] = [kwargs["name"]]
+
+        # convert from list to semi-colon separated string
+        # and add further aliases, replacing ampersand with 'and'
+        # and vice versa
+        _aliases = []
+        for _alias in kwargs["aliases"]:
+            if " and " in _alias:
+                _aliases.append(_alias.replace(" and ", " & "))
+            elif " & " in _alias:
+                _aliases.append(_alias.replace(" & ", " and "))
+            else:
+                _aliases.append(_alias)
+
+        alias_string = ";".join(list(set(_aliases)))
+        kwargs["aliases"] = alias_string
+
         data = dict.fromkeys(ENTITY_TEMPLATE, "N/A")
         for (key, value) in kwargs.items():
             if key in data:
@@ -386,7 +404,7 @@ class NamedEntityExtract:
                 entity_type=entity_type,
                 name=entity_name,
                 company_registration=registered_number,
-                aliases=";".join(list(set([isolated_entity, entity_name]))),
+                aliases=list(set([isolated_entity, entity_name])),
             )
             return entity
         return None
