@@ -29,7 +29,7 @@ class BaseRelationship:
         "union",
         "pollster",
         "media",
-        "government_body",
+        "government_organisation",
         "property",
     ]
 
