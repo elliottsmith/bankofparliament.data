@@ -354,6 +354,11 @@ def get_relationship_solver(*args, **kwargs):
     if not relationship_type:
         return None
 
+    if relationship_type == "constitutional_head_of":
+        from .constitutional import Constitutional
+
+        return Constitutional(*args, **kwargs)
+
     if relationship_type == "member_of":
         from .membership import Membership
 

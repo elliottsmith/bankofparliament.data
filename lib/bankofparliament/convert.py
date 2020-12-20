@@ -101,6 +101,7 @@ class Convert:
                 source="The Crown",
                 relationship_type="constitutional_head_of",
                 target=power,
+                text=["Constitutional head of {}".format(power)]
             )
 
         self.add_entity(
