@@ -373,8 +373,10 @@ def make_entity_dict(**kwargs):
         elif " & " in _alias:
             _aliases.append(_alias.replace(" & ", " and "))
 
-    alias_string = ";".join(list(set(_aliases)))
+    alias_string = ";".join(list(set(_aliases))).lower()
     kwargs["aliases"] = alias_string
+
+    kwargs["name"] = kwargs["name"].upper()
 
     data = dict.fromkeys(ENTITY_TEMPLATE, "N/A")
     for (key, value) in kwargs.items():

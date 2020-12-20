@@ -125,7 +125,7 @@ class Convert:
         for member in self.members:
             party = self.cleanup_party_affliation(member["Party"]["#text"])
             aliases = list(set([party, member["Party"]["#text"]]))
-            if party not in [entity["name"] for entity in self.entities]:
+            if party.upper() not in [entity["name"] for entity in self.entities]:
                 self.add_entity(
                     entity_type="political_party", name=party, aliases=aliases
                 )
