@@ -304,4 +304,3 @@ SINGLE_INDICATORS = [
     "royalties of",
     "expected for a survey",
 ]
-]
