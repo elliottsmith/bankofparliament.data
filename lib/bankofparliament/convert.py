@@ -20,7 +20,12 @@ from .constants import (
     SPADS_URL,
 )
 from .custom import SwapValue
-from .utils import read_json_file, read_pdf_table, make_entity_dict, make_relationship_dict
+from .utils import (
+    read_json_file,
+    read_pdf_table,
+    make_entity_dict,
+    make_relationship_dict,
+)
 
 
 class Convert:
@@ -101,7 +106,7 @@ class Convert:
                 source="The Crown",
                 relationship_type="constitutional_head_of",
                 target=power,
-                text=["Constitutional head of {}".format(power)]
+                text=["Constitutional head of {}".format(power)],
             )
 
         self.add_entity(
@@ -376,7 +381,6 @@ class Convert:
             "Could not find laying minister: {}".format(laying_minister_name)
         )
         return None
-
 
     def add_government_relationship(self, member):
         """If the member has a government post, add a relationship"""

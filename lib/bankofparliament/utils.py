@@ -30,7 +30,7 @@ from .constants import (
     FINDTHATCHARITY_RECONCILE_URL,
     COLOR_CODES,
     ENTITY_TEMPLATE,
-    RELATIONSHIP_TEMPLATE
+    RELATIONSHIP_TEMPLATE,
 )
 
 # global requests session
@@ -182,6 +182,8 @@ def reconcile_findthatcharity_entity_by_name(name, logger, limit=5, end_point="a
         if "q0" in data:
             return data["q0"]
     return {"result": []}
+
+
 def search_companies_house(
     query,
     companies_house_apikey,
@@ -317,6 +319,7 @@ def read_csv_as_dataframe(path, null_replace="N/A", index_col="id"):
         return dataframe.where(pandas.notnull(dataframe), null_replace)
     return []
 
+
 def make_entity_dict(**kwargs):
     """Make entity data"""
     if not "aliases" in kwargs:
@@ -343,6 +346,7 @@ def make_entity_dict(**kwargs):
             data[key] = value if value else "N/A"
 
     return data
+
 
 def make_relationship_dict(**kwargs):
     """Make relationship data"""

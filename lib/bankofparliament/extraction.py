@@ -210,6 +210,7 @@ class NamedEntityExtract:
         )
         self.add_relationship(relationship)
         self.log_relationship(index, relationship, debug_text, resolved)
+
     def get_missing_source_entity(self, relationship):
         """Find the missing source entity for members relatives"""
         target = relationship["target"]  # this is the member
