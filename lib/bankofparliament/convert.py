@@ -44,6 +44,7 @@ class Convert:
 
     def execute(self):
         """Execute"""
+        self.add_constitutional_monarchy()
         self.add_parties()
         self.convert_commons_members_interests()
         self.convert_lords_members_interests()
@@ -111,6 +112,40 @@ class Convert:
 
         self._relationships.append(data)
 
+    def add_constitutional_monarchy(self):
+        """Add a basic skeleton of the UK's constitutional monarchy"""
+
+        # monarchy
+        self.add_entity(
+            entity_type="monarchy", name="The Crown", aliases=["The Monarchy"]
+        )
+
+        # separation of powers
+        state_powers = [
+            "Judicary",
+            "Church of England",
+            "British Armed Forces",
+            "Her Majesty's Government",
+        ]
+        for power in state_powers:
+            self.add_entity(entity_type="state_power", name=power)
+            self.add_relationship(
+                source="The Crown",
+                relationship_type="constitutional_head_of",
+                target=power,
+            )
+
+        self.add_entity(
+            entity_type="house_of_parliament",
+            name="House of Commons",
+            aliases=["The Commons"],
+        )
+        self.add_entity(
+            entity_type="house_of_parliament",
+            name="House of Lords",
+            aliases=["The Lords"],
+        )
+
     def add_parties(self):
         """Add all parties to entities"""
         for member in self.members:
@@ -123,9 +158,6 @@ class Convert:
 
     def convert_commons_members_interests(self):
         """Convert the register of interests to dict items ready for csv export"""
-
-        # add the house of commons as an entity
-        self.add_entity(entity_type="government_body", name="House of Commons")
 
         for member in self.members_data["commons"]:
             self.logger.info(member["DisplayAs"])
@@ -148,6 +180,9 @@ class Convert:
                 text=["Member of the House of Commons"],
                 link=DATA_PARLIAMENT_LINK_URL.format(member["@Member_Id"], "contact"),
             )
+
+            # government relationship
+            self.add_government_relationship(member)
 
             # financial interests relationships
             soup = BeautifulSoup(member["Interests"], features="lxml")
@@ -200,9 +235,6 @@ class Convert:
     def convert_lords_members_interests(self):
         """Convert the register of interests to dict items ready for csv export"""
 
-        # add the house of lords as an entity
-        self.add_entity(entity_type="government_body", name="House of Lords")
-
         for member in self.members_data["lords"]:
             self.logger.info(member["DisplayAs"])
             self.add_member_entity(member)
@@ -224,6 +256,9 @@ class Convert:
                 text=["Member of the House of Lords"],
                 link=DATA_PARLIAMENT_LINK_URL.format(member["@Member_Id"], "contact"),
             )
+
+            # government relationship
+            self.add_government_relationship(member)
 
             # financial interests relationships
             if member["Interests"]:
@@ -372,6 +407,27 @@ class Convert:
             "Could not find laying minister: {}".format(laying_minister_name)
         )
         return None
+
+
+    def add_government_relationship(self, member):
+        """If the member has a government post, add a relationship"""
+        # government relationship
+        if member.get("GovernmentPosts", None) or []:
+            posts = member["GovernmentPosts"]["GovernmentPost"]
+            if isinstance(posts, dict):
+                posts = [posts]
+
+            for post in posts:
+                if not post["EndDate"]:
+                    self.add_relationship(
+                        source=member["DisplayAs"],
+                        relationship_type="member_of",
+                        target="Her Majesty's Government",
+                        text=["Member of Her Majesty's Government"],
+                        link=DATA_PARLIAMENT_LINK_URL.format(
+                            member["@Member_Id"], "contact"
+                        ),
+                    )
 
     def convert_donations(self):
         """Convert other political donations"""
