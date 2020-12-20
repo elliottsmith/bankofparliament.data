@@ -168,6 +168,20 @@ POSITIONS = [
     "Pro Vice Chancellor",
     "Columnist",
     "Advisory Group",
+    "Trust Protector",
+    "Visitor",
+    "Supporter",
+    "Shareholder",
+    "Member of Council",
+    "Member of Court (Trustee)",
+    "Episcopal",
+    "Elector",
+    "Dual President",
+    "Board of Trustees",
+    "Vice-President",
+    "Church Leader",
+    "Chair of Council",
+    "Development Committee Member",
 ]
 
 RECURRING_INDICATORS = [
@@ -243,6 +257,8 @@ RECURRING_INDICATORS = [
     "external advisor to JCB",
     "for services as a director",
     "Until further notice",
+    "Co-founder",
+    "Co-owner and Chairman of Advisory Board",
 ]
 
 SINGLE_INDICATORS = [
@@ -286,4 +302,6 @@ SINGLE_INDICATORS = [
     "for a survey completed",
     "for consultancy work",
     "royalties of",
+    "expected for a survey",
+]
 ]
