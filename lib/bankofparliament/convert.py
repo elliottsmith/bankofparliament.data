@@ -73,6 +73,24 @@ class Convert:
 
     def add_entity(self, **kwargs):
         """Add entity data"""
+        if not "aliases" in kwargs:
+            kwargs["aliases"] = [kwargs["name"]]
+
+        # convert from list to semi-colon separated string
+        # and add further aliases, replacing ampersand with 'and'
+        # and vice versa
+        _aliases = []
+        for _alias in kwargs["aliases"]:
+            _aliases.append(_alias)
+
+            if " and " in _alias:
+                _aliases.append(_alias.replace(" and ", " & "))
+            elif " & " in _alias:
+                _aliases.append(_alias.replace(" & ", " and "))
+
+        alias_string = ";".join(list(set(_aliases)))
+        kwargs["aliases"] = alias_string
+
         data = dict.fromkeys(ENTITY_TEMPLATE, "N/A")
         for (key, value) in kwargs.items():
             if key in data:
@@ -100,7 +118,7 @@ class Convert:
             aliases = list(set([party, member["Party"]["#text"]]))
             if party not in [entity["name"] for entity in self.entities]:
                 self.add_entity(
-                    entity_type="political_party", name=party, aliases=";".join(aliases)
+                    entity_type="political_party", name=party, aliases=aliases
                 )
 
     def convert_commons_members_interests(self):
@@ -270,7 +288,7 @@ class Convert:
 
                 if name and last_appointer and salary:
                     self.logger.info(name)
-                    self.add_entity(entity_type="advisor", name=name, aliases=name)
+                    self.add_entity(entity_type="advisor", name=name, aliases=[name])
 
                     resolved_employer = self.get_spad_employer(last_appointer)
                     self.add_relationship(
@@ -438,7 +456,7 @@ class Convert:
             email=email,
             twitter=twitter,
             facebook=facebook,
-            aliases=";".join(aliases),
+            aliases=aliases,
             date_of_birth=date_of_birth,
         )
 
