@@ -9,6 +9,7 @@ import math
 # local libs
 from .relationships import TextRelationship
 from ..text import get_property_multiplier
+from ..utils import make_entity_dict
 
 
 class PropertyOwner(TextRelationship):
@@ -27,7 +28,7 @@ class PropertyOwner(TextRelationship):
             self.amount = self.amount * multiplier
 
         for _i in range(math.ceil(multiplier)):
-            entity = self.make_entity_dict(
+            entity = make_entity_dict(
                 entity_type="property",
                 name="Property",
             )

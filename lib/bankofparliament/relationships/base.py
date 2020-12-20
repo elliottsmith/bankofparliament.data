@@ -7,8 +7,12 @@ Module for relationships
 import re
 
 # local libs
-from ..constants import ENTITY_TEMPLATE
-from ..utils import colorize, find_organisation_by_name, find_organisation_by_number
+from ..utils import (
+    colorize,
+    make_entity_dict,
+    find_organisation_by_name,
+    find_organisation_by_number,
+)
 from ..patterns import RECURRING_INDICATORS, SINGLE_INDICATORS
 from ..text import extract_company_registration_number_from_text
 
@@ -157,16 +161,6 @@ class BaseRelationship:
             return max(amounts)
         return 0
 
-    def make_entity_dict(self, **kwargs):
-        """Add entity data"""
-        data = dict.fromkeys(ENTITY_TEMPLATE, "N/A")
-        for (key, value) in kwargs.items():
-            if key in data:
-                data[key] = value if value else "N/A"
-            else:
-                self.logger.debug("Key not found in template: {}".format(key))
-        return data
-
     def find_single_payment_from_text(self, text):
         """Find a single payment within text"""
         if self.amount:
@@ -192,10 +186,10 @@ class BaseRelationship:
                         match = self.entities.loc[filt]
                         entity_type = match.iloc[0]["entity_type"]
 
-                        entity = self.make_entity_dict(
+                        entity = make_entity_dict(
                             entity_type=entity_type,
                             name=rel["target"],
-                            aliases=";".join([rel["target"]]),
+                            aliases=[rel["target"]],
                         )
                         self.logger.debug(
                             "Single Payment Found: {}".format(
@@ -212,10 +206,10 @@ class BaseRelationship:
 
         for (_index, row) in professions.iterrows():
             if row["name"].lower() in text.lower():
-                entity = self.make_entity_dict(
+                entity = make_entity_dict(
                     entity_type="profession",
                     name=row["name"],
-                    aliases=";".join([row["name"]]),
+                    aliases=[row["name"]],
                 )
                 self.logger.debug(
                     "Profession Found: {}".format(colorize(row["name"], "magenta"))
@@ -224,10 +218,10 @@ class BaseRelationship:
 
             for alias in row["aliases"].split(";"):
                 if alias.lower() in text.lower():
-                    entity = self.make_entity_dict(
+                    entity = make_entity_dict(
                         entity_type="profession",
                         name=row["name"],
-                        aliases=";".join([row["name"]]),
+                        aliases=[row["name"]],
                     )
                     self.logger.debug(
                         "Profession Found: {}".format(colorize(row["name"], "magenta"))
@@ -245,10 +239,10 @@ class BaseRelationship:
                 entity_name = entity[0]
 
                 if len(entity_name.split()) > 1:
-                    entity = self.make_entity_dict(
+                    entity = make_entity_dict(
                         entity_type=target_entity_type,
                         name=entity_name,
-                        aliases=";".join([entity_name]),
+                        aliases=[entity_name],
                     )
                     self.logger.debug(
                         "Entity Found: {}".format(colorize(entity_name, "magenta"))
@@ -263,11 +257,11 @@ class BaseRelationship:
         )
 
         if organisation_name:
-            entity = self.make_entity_dict(
-                entity_type="company",
+            entity = make_entity_dict(
+                entity_type=entity_type,
                 name=organisation_name,
                 company_registration=organisation_registration,
-                aliases=";".join(list(set([text, organisation_name]))),
+                aliases=list(set([text, organisation_name])),
             )
             self.logger.debug(
                 "Company Found: {}".format(colorize(organisation_name, "magenta"))
@@ -287,11 +281,11 @@ class BaseRelationship:
                 self.logger,
             )
             if organisation_name:
-                entity = self.make_entity_dict(
+                entity = make_entity_dict(
                     entity_type="company",
                     name=organisation_name,
                     company_registration=organisation_registration,
-                    aliases=";".join(list(set([text, organisation_name]))),
+                    aliases=list(set([text, organisation_name])),
                 )
                 self.logger.debug(
                     "Company Found: {}".format(colorize(organisation_name, "magenta"))
@@ -311,10 +305,10 @@ class BaseRelationship:
             match = self.entities.loc[filt]
             alias_type = match.iloc[0]["entity_type"]
 
-            entity = self.make_entity_dict(
+            entity = make_entity_dict(
                 entity_type=alias_type,
                 name=alias,
-                aliases=";".join([alias]),
+                aliases=[alias],
             )
             self.logger.debug("Alias Found: {}".format(colorize(alias, "magenta")))
             return entity

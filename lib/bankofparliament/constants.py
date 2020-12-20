@@ -95,6 +95,8 @@ RELATIONSHIP_TEMPLATE = [
     "amount",
     "text",
     "link",
+    "resolved",
+    "original",
 ]
 
 COMMONS_CATEGORIES = {

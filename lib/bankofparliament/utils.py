@@ -28,6 +28,8 @@ from .constants import (
     OPENCORPORATES_RECONCILE_FLYOUT_URL,
     CHARITY_COMMISSION_WSDL,
     COLOR_CODES,
+    ENTITY_TEMPLATE,
+    RELATIONSHIP_TEMPLATE
 )
 
 # global requests session
@@ -287,3 +289,38 @@ def read_csv_as_dataframe(path, null_replace="N/A", index_col="id"):
         dataframe = pandas.read_csv(path, index_col=index_col)
         return dataframe.where(pandas.notnull(dataframe), null_replace)
     return []
+
+def make_entity_dict(**kwargs):
+    """Make entity data"""
+    if not "aliases" in kwargs:
+        kwargs["aliases"] = [kwargs["name"]]
+
+    # convert from list to semi-colon separated string
+    # and add further aliases, replacing ampersand with 'and'
+    # and vice versa
+    _aliases = []
+    for _alias in kwargs["aliases"]:
+        _aliases.append(_alias)
+
+        if " and " in _alias:
+            _aliases.append(_alias.replace(" and ", " & "))
+        elif " & " in _alias:
+            _aliases.append(_alias.replace(" & ", " and "))
+
+    alias_string = ";".join(list(set(_aliases)))
+    kwargs["aliases"] = alias_string
+
+    data = dict.fromkeys(ENTITY_TEMPLATE, "N/A")
+    for (key, value) in kwargs.items():
+        if key in data:
+            data[key] = value if value else "N/A"
+
+    return data
+
+def make_relationship_dict(**kwargs):
+    """Make relationship data"""
+    data = dict.fromkeys(RELATIONSHIP_TEMPLATE, "N/A")
+    for (key, value) in kwargs.items():
+        if key in data:
+            data[key] = value if value else "N/A"
+    return data

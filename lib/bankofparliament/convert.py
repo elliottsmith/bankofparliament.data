@@ -18,11 +18,9 @@ from .constants import (
     COMMONS_CATEGORIES,
     LORDS_CATEGORIES,
     SPADS_URL,
-    ENTITY_TEMPLATE,
-    RELATIONSHIP_TEMPLATE,
 )
 from .custom import SwapValue
-from .utils import read_json_file, read_pdf_table
+from .utils import read_json_file, read_pdf_table, make_entity_dict, make_relationship_dict
 
 
 class Convert:
@@ -74,42 +72,12 @@ class Convert:
 
     def add_entity(self, **kwargs):
         """Add entity data"""
-        if not "aliases" in kwargs:
-            kwargs["aliases"] = [kwargs["name"]]
-
-        # convert from list to semi-colon separated string
-        # and add further aliases, replacing ampersand with 'and'
-        # and vice versa
-        _aliases = []
-        for _alias in kwargs["aliases"]:
-            _aliases.append(_alias)
-
-            if " and " in _alias:
-                _aliases.append(_alias.replace(" and ", " & "))
-            elif " & " in _alias:
-                _aliases.append(_alias.replace(" & ", " and "))
-
-        alias_string = ";".join(list(set(_aliases)))
-        kwargs["aliases"] = alias_string
-
-        data = dict.fromkeys(ENTITY_TEMPLATE, "N/A")
-        for (key, value) in kwargs.items():
-            if key in data:
-                data[key] = value if value else "N/A"
-            else:
-                self.logger.debug("Key not found in template: {}".format(key))
-
+        data = make_entity_dict(**kwargs)
         self._entities.append(data)
 
     def add_relationship(self, **kwargs):
         """Add relationship data"""
-        data = dict.fromkeys(RELATIONSHIP_TEMPLATE, "N/A")
-        for (key, value) in kwargs.items():
-            if key in data:
-                data[key] = value if value else "N/A"
-            else:
-                self.logger.debug("Key not found in template: {}".format(key))
-
+        data = make_relationship_dict(**kwargs)
         self._relationships.append(data)
 
     def add_constitutional_monarchy(self):

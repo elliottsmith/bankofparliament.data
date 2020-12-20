@@ -16,6 +16,8 @@ import spacy
 from .utils import (
     read_csv_as_dataframe,
     colorize,
+    make_entity_dict,
+    make_relationship_dict,
     find_organisation_by_number,
     find_charity_by_number,
     reconcile_opencorporates_entity_by_id,
@@ -166,7 +168,7 @@ class NamedEntityExtract:
                     solver.extracted_entities + solver.extracted_custom_entities
                 ):
                     self.add_entity(entity)
-                    relationship = self.make_relationship_dict(
+                    relationship = make_relationship_dict(
                         relationship_type=relationship["relationship_type"],
                         source=relationship["source"],
                         target=entity["name"],
@@ -196,7 +198,7 @@ class NamedEntityExtract:
         self.processed_relationships += 1
         self.resolved_relationships += 1
 
-        relationship = self.make_relationship_dict(
+        relationship = make_relationship_dict(
             relationship_type=relationship["relationship_type"],
             source=relationship["source"],
             target=relationship["target"],
@@ -228,44 +230,6 @@ class NamedEntityExtract:
         relationships = self._extracted_relationships.loc[filt]
         relationships = relationships.reindex(index=relationships.index[::-1])
         return relationships
-
-    def make_entity_dict(self, **kwargs):
-        """Add entity data"""
-        if not "aliases" in kwargs:
-            kwargs["aliases"] = [kwargs["name"]]
-
-        # convert from list to semi-colon separated string
-        # and add further aliases, replacing ampersand with 'and'
-        # and vice versa
-        _aliases = []
-        for _alias in kwargs["aliases"]:
-            if " and " in _alias:
-                _aliases.append(_alias.replace(" and ", " & "))
-            elif " & " in _alias:
-                _aliases.append(_alias.replace(" & ", " and "))
-            else:
-                _aliases.append(_alias)
-
-        alias_string = ";".join(list(set(_aliases)))
-        kwargs["aliases"] = alias_string
-
-        data = dict.fromkeys(ENTITY_TEMPLATE, "N/A")
-        for (key, value) in kwargs.items():
-            if key in data:
-                data[key] = value if value else "N/A"
-            else:
-                self.logger.debug("Key not found in template: {}".format(key))
-        return data
-
-    def make_relationship_dict(self, **kwargs):
-        """Add relationship data"""
-        data = dict.fromkeys(RELATIONSHIP_TEMPLATE, "N/A")
-        for (key, value) in kwargs.items():
-            if key in data:
-                data[key] = value if value else "N/A"
-            else:
-                self.logger.debug("Key not found in template: {}".format(key))
-        return data
 
     def add_entity(self, entity):
         """Add entity data"""
@@ -400,7 +364,7 @@ class NamedEntityExtract:
             if not entity_name and not entity_type:
                 return None
 
-            entity = self.make_entity_dict(
+            entity = make_entity_dict(
                 entity_type=entity_type,
                 name=entity_name,
                 company_registration=registered_number,
