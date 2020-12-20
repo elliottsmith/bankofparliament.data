@@ -6,6 +6,7 @@ Module for relationships
 # local libs
 from .base import BaseRelationship
 from ..text import eval_string_as_list
+from ..constants import ENTITY_TYPES
 
 
 class TextRelationship(BaseRelationship):
@@ -119,6 +120,10 @@ class CompoundRelationship(BaseRelationship):
 
     def get_entity_type_from_status(self):
         """Find the entity from the status key"""
+
+        if not self.text["status"]:
+            return "misc"
+
         if (
             "individual" in self.text["status"].lower()
             or "private" in self.text["status"].lower()
@@ -141,7 +146,7 @@ class CompoundRelationship(BaseRelationship):
             "trust" in self.text["status"].lower()
             or "other" in self.text["status"].lower()
         ):
-            return "miscellaneous"
+            return "misc"
 
         if (
             "company" in self.text["status"].lower()
@@ -149,4 +154,75 @@ class CompoundRelationship(BaseRelationship):
         ):
             return "company"
 
-        return None
+        return "misc"
+
+    def solve(self):
+        """Find entity in text"""
+        self.date = self.extract_date_from_text(self.text["date"])
+        self.amount = self.extract_amount_from_text(self.text["amount"])
+
+        for entry in self._entries:
+
+            if self.entity_type == "company":
+
+                entity = self.find_alias_from_text(text=entry, alias_entity_types=["company"])
+                if entity:
+                    self.extracted_entities.append(entity)
+                    continue
+
+                entity = self.find_organisation_from_number_in_text(
+                    text=self.text["status"]
+                )
+                if entity:
+                    self.extracted_entities.append(entity)
+                    return
+
+                entity = self.find_company_from_text(text=entry)
+                if entity:
+                    self.extracted_entities.append(entity)
+                    return
+
+            elif self.entity_type == "person":
+                entity = self.find_alias_from_text(text=entry, alias_entity_types=["person", "politician", "advisor"])
+                if entity:
+                    self.extracted_entities.append(entity)
+                    continue
+
+            elif self.entity_type == "charity":
+                entity = self.find_alias_from_text(text=entry, alias_entity_types=["charity"])
+                if entity:
+                    self.extracted_entities.append(entity)
+                    continue
+
+                entity = self.find_charity_from_text(text=entry)
+                if entity:
+                    self.extracted_entities.append(entity)
+                    return
+
+            elif self.entity_type == "union":
+                entity = self.find_alias_from_text(text=entry, alias_entity_types=["union"])
+                if entity:
+                    self.extracted_entities.append(entity)
+                    continue
+
+            elif self.entity_type == "association":
+                entity = self.find_alias_from_text(text=entry, alias_entity_types=["association", "university", "political"])
+                if entity:
+                    self.extracted_entities.append(entity)
+                    continue
+
+                entity = self.find_organisation_from_text(text=entry)
+                if entity:
+                    self.extracted_entities.append(entity)
+                    return
+
+            elif self.entity_type == "misc":
+                entity = self.find_alias_from_text(text=entry, alias_entity_types=ENTITY_TYPES, prefered_entity_types=["university", "company", "association", "charity"])
+                if entity:
+                    self.extracted_entities.append(entity)
+                    continue
+
+                entity = self.find_organisation_from_text(text=entry)
+                if entity:
+                    self.extracted_entities.append(entity)
+                    return

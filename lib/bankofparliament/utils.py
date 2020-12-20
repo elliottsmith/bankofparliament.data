@@ -103,6 +103,38 @@ def get_request(url, logger, user=None, headers=None, params=None):
     return None
 
 
+def find_charity_by_name(name, companies_house_apikey, logger):
+    """Find a registered organisation by name"""
+    # try reconciling it first - doesn't use up api calls
+
+    findthatcharity_reconcile = reconcile_findthatcharity_entity_by_name(name, logger, end_point="registered-charity")
+    if findthatcharity_reconcile:
+        results = findthatcharity_reconcile["result"]
+        if len(results):
+            top_match = results[0]
+            if top_match["score"] > 1000:
+                organisation_name = top_match["name"].upper()
+                organisation_registration = top_match["id"].split("/")[-1]
+                entity_type = top_match["type"][0]["id"]
+                return (organisation_name, organisation_registration, entity_type)
+
+    return (None, None, None)
+
+def find_company_by_name(name, companies_house_apikey, logger):
+    """Find a registered organisation by name"""
+    # try reconciling it first - doesn't use up api calls
+    opencorporates_reconcile = reconcile_opencorporates_entity_by_name(name, logger)
+    if opencorporates_reconcile:
+        results = opencorporates_reconcile["result"]
+        if len(results):
+            top_match = results[0]
+            if top_match["score"] > 10:
+                organisation_name = top_match["name"].upper()
+                organisation_registration = top_match["id"].split("/")[-1]
+                return (organisation_name, organisation_registration, "company")
+
+    return (None, None, None)
+
 def find_organisation_by_name(name, companies_house_apikey, logger):
     """Find a registered organisation by name"""
     # try reconciling it first - doesn't use up api calls

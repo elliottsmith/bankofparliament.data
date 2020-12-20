@@ -12,6 +12,8 @@ from ..utils import (
     make_entity_dict,
     find_organisation_by_name,
     find_organisation_by_number,
+    find_charity_by_name,
+    find_company_by_name
 )
 from ..patterns import RECURRING_INDICATORS, SINGLE_INDICATORS
 from ..text import extract_company_registration_number_from_text
@@ -229,6 +231,36 @@ class BaseRelationship:
                     return entity
         return None
 
+    def find_property_from_text(self, text):
+        """Find a property within text"""
+        filt = self.entities["entity_type"] == "property"
+        properties = self.entities.loc[filt]
+
+        for (_index, row) in properties.iterrows():
+            if row["name"].lower() in text.lower():
+                entity = make_entity_dict(
+                    entity_type="property",
+                    name=row["name"],
+                    aliases=[row["name"]],
+                )
+                self.logger.debug(
+                    "Property Found: {}".format(colorize(row["name"], "magenta"))
+                )
+                return entity
+
+            for alias in row["aliases"].split(";"):
+                if alias.lower() in text.lower():
+                    entity = make_entity_dict(
+                        entity_type="property",
+                        name=row["name"],
+                        aliases=[row["name"]],
+                    )
+                    self.logger.debug(
+                        "Property Found: {}".format(colorize(row["name"], "magenta"))
+                    )
+                    return entity
+        return None
+
     def find_ner_type_from_text(self, text, target_entity_type):
         """Find NER types within text"""
         result = self.nlp(text)
@@ -271,6 +303,48 @@ class BaseRelationship:
             return entity
         return None
 
+    def find_company_from_text(self, text):
+        """Find organistation from text"""
+        (
+            organisation_name,
+            organisation_registration,
+            entity_type,
+        ) = find_company_by_name(text, self.companies_house_apikey, self.logger)
+
+        if organisation_name:
+            entity = make_entity_dict(
+                entity_type=entity_type,
+                name=organisation_name,
+                company_registration=organisation_registration,
+                aliases=list(set([text, organisation_name])),
+            )
+            self.logger.debug(
+                "Company Found: {}".format(colorize(organisation_name, "magenta"))
+            )
+            return entity
+        return None
+
+    def find_charity_from_text(self, text):
+        """Find organistation from text"""
+        (
+            organisation_name,
+            organisation_registration,
+            entity_type,
+        ) = find_charity_by_name(text, self.companies_house_apikey, self.logger)
+
+        if organisation_name:
+            entity = make_entity_dict(
+                entity_type=entity_type,
+                name=organisation_name,
+                company_registration=organisation_registration,
+                aliases=list(set([text, organisation_name])),
+            )
+            self.logger.debug(
+                "Company Found: {}".format(colorize(organisation_name, "magenta"))
+            )
+            return entity
+        return None
+
     def find_organisation_from_number_in_text(self, text):
         """Find organisation from number within text"""
         organisation_registration = extract_company_registration_number_from_text(
@@ -295,11 +369,14 @@ class BaseRelationship:
                 return entity
         return None
 
-    def find_alias_from_text(self, text):
+    def find_alias_from_text(self, text, alias_entity_types=None, prefered_entity_types=None):
         """Find alias from text"""
+        alias_entity_types = alias_entity_types if alias_entity_types else self.ALIAS_ENTITY_TYPES
+        prefered_entity_types = prefered_entity_types if prefered_entity_types else self.PREFERRED_ALIAS_ENTITY_TYPES
+
         alias = self._check_aliases(
-            entity_types=self.ALIAS_ENTITY_TYPES,
-            prefered_entity_types=self.PREFERRED_ALIAS_ENTITY_TYPES,
+            entity_types=alias_entity_types,
+            prefered_entity_types=prefered_entity_types,
             text=text,
         )
         if alias:
