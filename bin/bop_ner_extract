@@ -33,6 +33,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--prompt", help="Prompt input", action="store_true", default=False
     )
+    parser.add_argument(
+        "--update", help="Update input files", action="store_true", default=False
+    )
 
     args = parser.parse_args()
     if not args.entities and args.relationships:
@@ -46,6 +49,7 @@ if __name__ == "__main__":
         opencorporates_apikey=OPENCORPORATES_APIKEY,
         charities_apikey=CHARITIES_COMMISION_APIKEY,
         prompt=args.prompt,
+        update=args.update,
         logger=get_logger("extract", args.debug),
     )
     extract.execute()

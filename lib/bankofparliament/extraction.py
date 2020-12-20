@@ -44,6 +44,7 @@ class NamedEntityExtract:
         opencorporates_apikey,
         charities_apikey,
         prompt,
+        update,
         logger,
     ):
         """Read all passed in data files"""
@@ -54,7 +55,11 @@ class NamedEntityExtract:
 
         self.prompt = prompt
         self.logger = logger
-        self.output_dir = os.path.join(os.path.dirname(entities), "extracted")
+        self.output_dir = (
+            os.path.dirname(entities)
+            if update
+            else os.path.join(os.path.dirname(entities), "extracted")
+        )
 
         # read in data
         _entities = read_csv_as_dataframe(entities)
@@ -102,6 +107,12 @@ class NamedEntityExtract:
         """Extract entities from the relationships"""
         for (index, relationship) in self.relationships.iterrows():
 
+            if relationship.get("resolved", "N/A") != "N/A":
+                self.relationship_passthrough(
+                    index, relationship, debug_text=None, resolved=True
+                )
+                continue
+
             if relationship["source"] == "UNKNOWN":
                 resolved_source = self.get_missing_source_entity(relationship)
                 if resolved_source:
@@ -136,13 +147,16 @@ class NamedEntityExtract:
                         if manual_entity:
                             solver.extracted_custom_entities.append(manual_entity)
                         else:
-                            self.log_relationship(
-                                index, relationship, debug_text=solver.text
+                            self.relationship_passthrough(
+                                index,
+                                relationship,
+                                debug_text=solver.text,
+                                resolved=False,
                             )
                             continue
                     else:
-                        self.log_relationship(
-                            index, relationship, debug_text=solver.text
+                        self.relationship_passthrough(
+                            index, relationship, debug_text=solver.text, resolved=False
                         )
                         continue
 
@@ -160,6 +174,7 @@ class NamedEntityExtract:
                         amount=solver.amount,
                         text=relationship["text"],
                         link=relationship["link"],
+                        resolved=True,
                     )
                     self.add_relationship(relationship)
                     self.log_relationship(index, relationship)
@@ -169,6 +184,30 @@ class NamedEntityExtract:
                     self.add_custom_entity(entity)
                     self.save_custom()
 
+            else:
+                self.relationship_passthrough(
+                    index, relationship, debug_text=None, resolved=False
+                )
+
+    def relationship_passthrough(
+        self, index, relationship, debug_text=None, resolved=False
+    ):
+        """Passthrough for already solved relationships"""
+        self.processed_relationships += 1
+        self.resolved_relationships += 1
+
+        relationship = self.make_relationship_dict(
+            relationship_type=relationship["relationship_type"],
+            source=relationship["source"],
+            target=relationship["target"],
+            date=relationship["date"],
+            amount=relationship["amount"],
+            text=relationship["text"],
+            link=relationship["link"],
+            resolved=resolved,
+        )
+        self.add_relationship(relationship)
+        self.log_relationship(index, relationship, debug_text, resolved)
     def get_missing_source_entity(self, relationship):
         """Find the missing source entity for members relatives"""
         target = relationship["target"]  # this is the member
@@ -352,38 +391,46 @@ class NamedEntityExtract:
             return entity
         return None
 
-    def log_relationship(self, index, relationship, debug_text=None):
+    def log_relationship(self, index, relationship, debug_text=None, resolved=False):
         """Log the relationship with extracted info"""
-        if relationship["target"] != "UNKNOWN":
-            self.logger.info(
-                "[{:05d}] [{}] {} [{} ({})] {}".format(
-                    index,
-                    colorize(str(relationship["source"]), "cyan"),
-                    relationship["relationship_type"],
-                    colorize(str(relationship["target"]), "yellow"),
-                    colorize(
-                        str(self.get_entity_type_from_name(relationship["target"])),
-                        "yellow",
-                    ),
-                    colorize(str(relationship["text"]), "cyan"),
+        exclude_from_logging = ["member_of", "related_to", "owner_of"]
+        exclude_from_logging = []
+        if relationship["relationship_type"] not in exclude_from_logging:
+
+            if relationship["target"] != "UNKNOWN":
+                target_entity_type = self.get_entity_type_from_name(
+                    relationship["target"]
                 )
-            )
-        else:
-            text = str(debug_text) if debug_text else str(relationship["text"])
-            self.logger.warning(
-                "[{:05d}] [{}] {} {}".format(
-                    index,
-                    colorize(str(relationship["source"]), "cyan"),
-                    colorize(relationship["relationship_type"], "blink"),
-                    colorize(text, "light red"),
+
+                color_1 = "light cyan" if resolved else "cyan"
+                color_2 = "grey" if resolved else "yellow"
+
+                self.logger.info(
+                    "[{:05d}] [{}] {} [{} ({})] {}".format(
+                        index,
+                        colorize(str(relationship["source"]), color_1),
+                        relationship["relationship_type"],
+                        colorize(str(relationship["target"]), color_2),
+                        colorize(str(target_entity_type), color_2),
+                        colorize(str(relationship["text"]), color_1),
+                    )
                 )
-            )
-            self.logger.warning(
-                "[{:05d}] {}".format(
-                    index,
-                    colorize(relationship["text"], "light red"),
+            else:
+                text = str(debug_text) if debug_text else str(relationship["text"])
+                self.logger.warning(
+                    "[{:05d}] [{}] {} {}".format(
+                        index,
+                        colorize(str(relationship["source"]), "cyan"),
+                        colorize(relationship["relationship_type"], "blink"),
+                        colorize(text, "light red"),
+                    )
                 )
-            )
+                self.logger.warning(
+                    "[{:05d}] {}".format(
+                        index,
+                        colorize(relationship["text"], "light red"),
+                    )
+                )
 
     def log_output(self):
         """Final log output"""
