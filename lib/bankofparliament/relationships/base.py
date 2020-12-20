@@ -252,9 +252,11 @@ class BaseRelationship:
 
     def find_organisation_from_text(self, text):
         """Find organistation from text"""
-        (organisation_name, organisation_registration) = find_organisation_by_name(
-            text, self.companies_house_apikey, self.logger
-        )
+        (
+            organisation_name,
+            organisation_registration,
+            entity_type,
+        ) = find_organisation_by_name(text, self.companies_house_apikey, self.logger)
 
         if organisation_name:
             entity = make_entity_dict(

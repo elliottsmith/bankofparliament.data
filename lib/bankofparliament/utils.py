@@ -27,6 +27,7 @@ from .constants import (
     OPENCORPORATES_RECONCILE_URL,
     OPENCORPORATES_RECONCILE_FLYOUT_URL,
     CHARITY_COMMISSION_WSDL,
+    FINDTHATCHARITY_RECONCILE_URL,
     COLOR_CODES,
     ENTITY_TEMPLATE,
     RELATIONSHIP_TEMPLATE
@@ -102,7 +103,19 @@ def get_request(url, logger, user=None, headers=None, params=None):
 
 def find_organisation_by_name(name, companies_house_apikey, logger):
     """Find a registered organisation by name"""
-    # try reconciling it first - doesn't use up opencorporates api calls
+    # try reconciling it first - doesn't use up api calls
+
+    findthatcharity_reconcile = reconcile_findthatcharity_entity_by_name(name, logger)
+    if findthatcharity_reconcile:
+        results = findthatcharity_reconcile["result"]
+        if len(results):
+            top_match = results[0]
+            if top_match["score"] > 1000:
+                organisation_name = top_match["name"].upper()
+                organisation_registration = top_match["id"].split("/")[-1]
+                entity_type = top_match["type"][0]["id"]
+                return (organisation_name, organisation_registration, entity_type)
+
     opencorporates_reconcile = reconcile_opencorporates_entity_by_name(name, logger)
     if opencorporates_reconcile:
         results = opencorporates_reconcile["result"]
@@ -111,7 +124,7 @@ def find_organisation_by_name(name, companies_house_apikey, logger):
             if top_match["score"] > 10:
                 organisation_name = top_match["name"].upper()
                 organisation_registration = top_match["id"].split("/")[-1]
-                return (organisation_name, organisation_registration)
+                return (organisation_name, organisation_registration, "company")
 
     # try locally in companies house first
     companies_house_search = search_companies_house(
@@ -120,12 +133,7 @@ def find_organisation_by_name(name, companies_house_apikey, logger):
     if companies_house_search:
         return companies_house_search
 
-    # # uses up api calls
-    # opencorporates_search = search_opencorporates_company_name_from_name(*args, **kwargs)
-    # if opencorporates_search:
-    #     return opencorporates_search
-
-    return (None, None)
+    return (None, None, None)
 
 
 def reconcile_opencorporates_entity_by_name(name, logger):
@@ -156,6 +164,24 @@ def reconcile_opencorporates_entity_by_id(_id, logger):
     return None
 
 
+def reconcile_findthatcharity_entity_by_name(name, logger, limit=5, end_point="all"):
+    """Reconcile a company name to an findthatcharity record"""
+    query = {"q0": {"query": name, "limit": limit}}
+    _query = json.dumps(query)
+    params = {"queries": [_query]}
+
+    request = get_request(
+        FINDTHATCHARITY_RECONCILE_URL.format(end_point),
+        logger,
+        user=None,
+        headers=HEADERS,
+        params=params,
+    )
+    if request:
+        data = request.json()
+        if "q0" in data:
+            return data["q0"]
+    return {"result": []}
 def search_companies_house(
     query,
     companies_house_apikey,
@@ -176,7 +202,7 @@ def search_companies_house(
     )
 
     if not request:
-        return (None, None)
+        return (None, None, None)
 
     data = request.json()
     for i in data["items"]:
@@ -189,13 +215,14 @@ def search_companies_house(
             or title.replace(".", "") in query.replace(".", "")
             and len(snippet) > 2
         ):
-            result = (i["title"].upper(), i["links"]["self"])
+            result = (i["title"].upper(), i["links"]["self"], "company")
             return result
 
         if snippet and snippet in query and len(snippet) > 2:
-            result = (i["title"].upper(), i["links"]["self"])
+            result = (i["title"].upper(), i["links"]["self"], "company")
             return result
 
+    return (None, None, None)
     return (None, None)
 
 

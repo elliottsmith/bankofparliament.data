@@ -31,6 +31,8 @@ THEYWORKFORYOU_LINK_URL = "https://www.theyworkforyou.com/mp/25916/{}/{}#registe
 OPENCORPORATES_RECONCILE_URL = "https://opencorporates.com/reconcile"
 OPENCORPORATES_RECONCILE_FLYOUT_URL = "https://opencorporates.com/reconcile/flyout"
 
+# findthatcharity
+FINDTHATCHARITY_RECONCILE_URL = "https://findthatcharity.uk/reconcile/{}"
 # companies house
 COMPANIES_HOUSE_QUERY_LIMIT = 10
 COMPANIES_HOUSE_QUERY_URL = "https://api.companieshouse.gov.uk/{}/{}"
