@@ -70,6 +70,8 @@ class GenerateCustom:
         """Get all trade unions"""
         unions = get_list_of_trade_unions()
         for union in unions:
+            if not len(union.split(" ")) > 1:
+                union = "{} union".format(union)
             entity = make_entity_dict(name=union, entity_type="union")
             self.data.append(entity)
 
