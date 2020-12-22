@@ -155,6 +155,7 @@ OTHER_ENTITIES = [
     "misc",
     "sport",
     "education",
+    "health",
 ]
 
 NON_HUMAN_ENTITIES = POLLITICAL_ENTITIES + OTHER_ENTITIES
