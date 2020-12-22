@@ -16,7 +16,6 @@ import requests
 import tabula
 import scraperwiki
 from bs4 import BeautifulSoup
-import zeep
 
 # local libs
 from .constants import (
@@ -28,7 +27,6 @@ from .constants import (
     COMPANIES_HOUSE_SEARCH_URL,
     OPENCORPORATES_RECONCILE_URL,
     OPENCORPORATES_RECONCILE_FLYOUT_URL,
-    CHARITY_COMMISSION_WSDL,
     FINDTHATCHARITY_RECONCILE_URL,
     COLOR_CODES,
     ENTITY_TEMPLATE,
@@ -103,73 +101,8 @@ def get_request(url, logger, user=None, headers=None, params=None):
     return None
 
 
-def find_charity_by_name(name, companies_house_apikey, logger):
-    """Find a registered organisation by name"""
-    # try reconciling it first - doesn't use up api calls
-
-    findthatcharity_reconcile = reconcile_findthatcharity_entity_by_name(name, logger, end_point="registered-charity")
-    if findthatcharity_reconcile:
-        results = findthatcharity_reconcile["result"]
-        if len(results):
-            top_match = results[0]
-            if top_match["score"] > 1000:
-                organisation_name = top_match["name"].upper()
-                organisation_registration = top_match["id"].split("/")[-1]
-                entity_type = top_match["type"][0]["id"]
-                return (organisation_name, organisation_registration, entity_type)
-
-    return (None, None, None)
-
-def find_company_by_name(name, companies_house_apikey, logger):
-    """Find a registered organisation by name"""
-    # try reconciling it first - doesn't use up api calls
-    opencorporates_reconcile = reconcile_opencorporates_entity_by_name(name, logger)
-    if opencorporates_reconcile:
-        results = opencorporates_reconcile["result"]
-        if len(results):
-            top_match = results[0]
-            if top_match["score"] > 10:
-                organisation_name = top_match["name"].upper()
-                organisation_registration = top_match["id"].split("/")[-1]
-                return (organisation_name, organisation_registration, "company")
-
-    return (None, None, None)
-
-def find_organisation_by_name(name, companies_house_apikey, logger):
-    """Find a registered organisation by name"""
-    # try reconciling it first - doesn't use up api calls
-
-    findthatcharity_reconcile = reconcile_findthatcharity_entity_by_name(name, logger)
-    if findthatcharity_reconcile:
-        results = findthatcharity_reconcile["result"]
-        if len(results):
-            top_match = results[0]
-            if top_match["score"] > 1000:
-                organisation_name = top_match["name"].upper()
-                organisation_registration = top_match["id"].split("/")[-1]
-                entity_type = top_match["type"][0]["id"]
-                return (organisation_name, organisation_registration, entity_type)
-
-    opencorporates_reconcile = reconcile_opencorporates_entity_by_name(name, logger)
-    if opencorporates_reconcile:
-        results = opencorporates_reconcile["result"]
-        if len(results):
-            top_match = results[0]
-            if top_match["score"] > 10:
-                organisation_name = top_match["name"].upper()
-                organisation_registration = top_match["id"].split("/")[-1]
-                return (organisation_name, organisation_registration, "company")
-
-    # try locally in companies house first
-    companies_house_search = search_companies_house(
-        name, companies_house_apikey, logger, query_type="companies"
-    )
-    if companies_house_search:
-        return companies_house_search
-
-    return (None, None, None)
-
-
+############################################################################
+# reconcile functions
 def reconcile_opencorporates_entity_by_name(name, logger):
     """Reconcile a company name to an opencorporates record"""
     params = {"query": name}
@@ -184,7 +117,7 @@ def reconcile_opencorporates_entity_by_name(name, logger):
 
 
 def reconcile_opencorporates_entity_by_id(_id, logger):
-    """Reconcile a company name to an opencorporates record"""
+    """Reconcile a company id to an opencorporates record"""
     params = {"id": _id}
     request = get_request(
         OPENCORPORATES_RECONCILE_FLYOUT_URL, logger, user=None, params=params
@@ -198,8 +131,8 @@ def reconcile_opencorporates_entity_by_id(_id, logger):
     return None
 
 
-def reconcile_findthatcharity_entity_by_name(name, logger, limit=5, end_point="all"):
-    """Reconcile a company name to an findthatcharity record"""
+def reconcile_findthatcharity_entity_by_name(name, logger, end_point="all", limit=5):
+    """Reconcile a name to an findthatcharity record"""
     query = {"q0": {"query": name, "limit": limit}}
     _query = json.dumps(query)
     params = {"queries": [_query]}
@@ -216,6 +149,11 @@ def reconcile_findthatcharity_entity_by_name(name, logger, limit=5, end_point="a
         if "q0" in data:
             return data["q0"]
     return {"result": []}
+
+
+def reconcile_findthatcharity_entity_by_id(_id, logger):
+    """Reconcile a findthatcharity id to an findthatcharity record"""
+    raise NotImplementedError
 
 
 def get_government_organisations(logger):
@@ -239,6 +177,103 @@ def get_universities(logger):
     )
 
 
+############################################################################
+# finder functions
+def findthatcharity_by_name(name, logger, end_point="all"):
+    """Find a registered charity/university/local authority etc by name"""
+    logger.debug("findthatcharity_by_name: {} [{}]".format(name, end_point))
+
+    findthatcharity_reconcile = reconcile_findthatcharity_entity_by_name(
+        name, logger, end_point
+    )
+    if findthatcharity_reconcile:
+        results = findthatcharity_reconcile["result"]
+        if len(results):
+            top_match = results[0]
+            if top_match["score"] > 1000:
+                organisation_name = top_match["name"].upper()
+                organisation_registration = top_match["id"].split("/")[-1]
+                entity_type = top_match["type"][0]["id"]
+                return (organisation_name, organisation_registration, entity_type)
+
+            _id = top_match["id"]
+            _name = top_match["name"]
+            _name = _name.replace("({})".format(_id), "").strip()
+
+            if _name.lower() in name.lower() and len(name.split(" ")) > 1:
+                organisation_name = top_match["name"].upper()
+                organisation_registration = top_match["id"].split("/")[-1]
+                entity_type = top_match["type"][0]["id"]
+                return (organisation_name, organisation_registration, entity_type)
+
+    return (None, None, None)
+
+
+def findcorporate_by_name(name, logger):
+    """Find a registered corporate by name"""
+    logger.debug("findcorporate_by_name: {}".format(name))
+
+    opencorporates_reconcile = reconcile_opencorporates_entity_by_name(name, logger)
+    if opencorporates_reconcile:
+        results = opencorporates_reconcile["result"]
+        if len(results):
+            top_match = results[0]
+            if top_match["score"] > 10:
+                organisation_name = top_match["name"].upper()
+                organisation_registration = top_match["id"].split("/")[-1]
+                return (organisation_name, organisation_registration, "company")
+
+            if top_match["name"].lower() in name.lower() and len(name.split(" ")) > 1:
+                organisation_name = top_match["name"].upper()
+                organisation_registration = top_match["id"].split("/")[-1]
+                entity_type = top_match["type"][0]["id"]
+                return (organisation_name, organisation_registration, entity_type)
+
+    return (None, None, None)
+
+
+def find_organisation_by_name(name, companies_house_apikey, logger):
+    """Find a registered organisation by name"""
+
+    (
+        organisation_name,
+        organisation_registration,
+        entity_type,
+    ) = findthatcharity_by_name(name, logger)
+    if any((organisation_name, organisation_registration, entity_type)):
+        return (organisation_name, organisation_registration, entity_type)
+
+    (organisation_name, organisation_registration, entity_type) = findcorporate_by_name(
+        name, logger
+    )
+    if any((organisation_name, organisation_registration, entity_type)):
+        return (organisation_name, organisation_registration, entity_type)
+
+    # try locally in companies house
+    companies_house_search = search_companies_house(
+        name, companies_house_apikey, logger, query_type="companies"
+    )
+    if companies_house_search:
+        return companies_house_search
+
+    return (None, None, None)
+
+
+def find_organisation_by_number(companies_house_apikey, entity_number, logger):
+    """Query companies house for company name"""
+    url = COMPANIES_HOUSE_QUERY_URL.format("company", entity_number)
+    logger.debug("Companies House Query: {}".format(url))
+    request = get_request(
+        url=url, logger=logger, user=companies_house_apikey, headers=HEADERS
+    )
+    if request:
+        data = request.json()
+        return data["company_name"]
+    return None
+
+
+############################################################################
+# search functions
 def search_companies_house(
     query,
     companies_house_apikey,
@@ -280,75 +315,6 @@ def search_companies_house(
             return result
 
     return (None, None, None)
-    return (None, None)
-
-
-def find_organisation_by_number(companies_house_apikey, entity_number, logger):
-    """Query companies house for company name"""
-    url = COMPANIES_HOUSE_QUERY_URL.format("company", entity_number)
-    logger.debug("Companies House Query: {}".format(url))
-    request = get_request(
-        url=url, logger=logger, user=companies_house_apikey, headers=HEADERS
-    )
-    if request:
-        data = request.json()
-        return data["company_name"]
-    return None
-
-
-def get_zeep_client(wsdl, api_key_name, api_key_value):
-    """Get an SOAP zeep client"""
-
-    class CharitiesAuthPlugin(zeep.Plugin):
-
-        """Add an APIKey to each request."""
-
-        def __init__(self, api_key_name, api_key_value):
-            """Initialise api_key_name and api_key_value."""
-            self.api_key_name = api_key_name
-            self.api_key_value = api_key_value
-
-        def egress(self, envelope, http_headers, operation, binding_options):
-            """Auto add to the envelope (or replace) Charity api_key.
-            :param envelope: The envelope as XML node
-            :param http_headers: Dict with the HTTP headers
-            :param operation: The associated Operation instance
-            :param binding_options: Binding specific options for the operation
-            """
-            for element in operation.input.body.type.elements:
-                if (
-                    element[0] == self.api_key_name
-                    and element[1].name == self.api_key_name
-                ):
-                    key_type = element[1]
-                    key_type.render(envelope[0][0], self.api_key_value)
-            return envelope, http_headers
-
-    settings = zeep.Settings(strict=False, xml_huge_tree=True, raw_response=False)
-    plugins = [CharitiesAuthPlugin(api_key_name, api_key_value)]
-    return zeep.Client(wsdl=wsdl, settings=settings, plugins=plugins)
-
-
-def find_charity_by_number(charities_apikey, registered_number, logger):
-    """Find charity by number"""
-    logger.debug("Query charities commission: {}".format(registered_number))
-    client = get_zeep_client(CHARITY_COMMISSION_WSDL, "APIKey", charities_apikey)
-    charity = client.service.GetCharityByRegisteredCharityNumber(
-        registeredCharityNumber=str(registered_number)
-    )
-    if charity:
-        return charity["CharityName"]
-    return None
-
-
-def find_charity_by_name(charities_apikey, name, logger):
-    """Find charity by name"""
-    logger.debug("Query charities commission: {}".format(name))
-    client = get_zeep_client(CHARITY_COMMISSION_WSDL, "APIKey", charities_apikey)
-    charity = client.service.GetCharityByName(strSearch=str(name))
-    if charity:
-        return charity["CharityName"]
-    return None
 
 
 def get_list_of_trade_unions():

@@ -10,10 +10,10 @@ import re
 from ..utils import (
     colorize,
     make_entity_dict,
+    findcorporate_by_name,
+    findthatcharity_by_name,
     find_organisation_by_name,
     find_organisation_by_number,
-    find_charity_by_name,
-    find_company_by_name
 )
 from ..patterns import RECURRING_INDICATORS, SINGLE_INDICATORS
 from ..text import extract_company_registration_number_from_text
@@ -159,12 +159,17 @@ class BaseRelationship:
             if entity[1] in ["MONEY"]:
                 pounds = entity[0].split(".")[0]
                 amounts.append(re.sub("[^0-9]", "", pounds))
+            elif entity[1] in ["CARDINAL"]:
+                if "£{}".format(entity[0]) in text:
+                    pounds = entity[0].split(".")[0]
+                    amounts.append(re.sub("[^0-9]", "", pounds))
         if amounts:
             return max(amounts)
         return 0
 
     def find_single_payment_from_text(self, text):
         """Find a single payment within text"""
+
         if self.amount:
             # search for single payment
             if self.single_payment_regex.search(text.lower()):
@@ -283,7 +288,7 @@ class BaseRelationship:
         return None
 
     def find_organisation_from_text(self, text):
-        """Find organistation from text"""
+        """Find any organistation from text"""
         (
             organisation_name,
             organisation_registration,
@@ -298,18 +303,18 @@ class BaseRelationship:
                 aliases=list(set([text, organisation_name])),
             )
             self.logger.debug(
-                "Company Found: {}".format(colorize(organisation_name, "magenta"))
+                "Organisation Found: {}".format(colorize(organisation_name, "magenta"))
             )
             return entity
         return None
 
     def find_company_from_text(self, text):
-        """Find organistation from text"""
+        """Find company from text"""
         (
             organisation_name,
             organisation_registration,
             entity_type,
-        ) = find_company_by_name(text, self.companies_house_apikey, self.logger)
+        ) = findcorporate_by_name(text, self.logger)
 
         if organisation_name:
             entity = make_entity_dict(
@@ -325,12 +330,12 @@ class BaseRelationship:
         return None
 
     def find_charity_from_text(self, text):
-        """Find organistation from text"""
+        """Find charity from text"""
         (
             organisation_name,
             organisation_registration,
             entity_type,
-        ) = find_charity_by_name(text, self.companies_house_apikey, self.logger)
+        ) = findthatcharity_by_name(text, self.logger, "registered-charity")
 
         if organisation_name:
             entity = make_entity_dict(
@@ -340,7 +345,137 @@ class BaseRelationship:
                 aliases=list(set([text, organisation_name])),
             )
             self.logger.debug(
-                "Company Found: {}".format(colorize(organisation_name, "magenta"))
+                "Charity Found: {}".format(colorize(organisation_name, "magenta"))
+            )
+            return entity
+        return None
+
+    def find_health_from_text(self, text):
+        """Find health from text"""
+        (
+            organisation_name,
+            organisation_registration,
+            entity_type,
+        ) = findthatcharity_by_name(text, self.logger, "health")
+
+        if organisation_name:
+            entity = make_entity_dict(
+                entity_type=entity_type,
+                name=organisation_name,
+                company_registration=organisation_registration,
+                aliases=list(set([text, organisation_name])),
+            )
+            self.logger.debug(
+                "Health Found: {}".format(colorize(organisation_name, "magenta"))
+            )
+            return entity
+        return None
+
+    def find_university_from_text(self, text):
+        """Find university from text"""
+        (
+            organisation_name,
+            organisation_registration,
+            entity_type,
+        ) = findthatcharity_by_name(text, self.logger, "university")
+
+        if organisation_name:
+            entity = make_entity_dict(
+                entity_type=entity_type,
+                name=organisation_name,
+                company_registration=organisation_registration,
+                aliases=list(set([text, organisation_name])),
+            )
+            self.logger.debug(
+                "University Found: {}".format(colorize(organisation_name, "magenta"))
+            )
+            return entity
+        return None
+
+    def find_education_from_text(self, text):
+        """Find education from text"""
+        (
+            organisation_name,
+            organisation_registration,
+            entity_type,
+        ) = findthatcharity_by_name(text, self.logger, "education")
+
+        if organisation_name:
+            entity = make_entity_dict(
+                entity_type=entity_type,
+                name=organisation_name,
+                company_registration=organisation_registration,
+                aliases=list(set([text, organisation_name])),
+            )
+            self.logger.debug(
+                "Education Found: {}".format(colorize(organisation_name, "magenta"))
+            )
+            return entity
+        return None
+
+    def find_government_organisation_from_text(self, text):
+        """Find government organisation from text"""
+        (
+            organisation_name,
+            organisation_registration,
+            entity_type,
+        ) = findthatcharity_by_name(text, self.logger, "government-organisation")
+
+        if organisation_name:
+            entity = make_entity_dict(
+                entity_type=entity_type,
+                name=organisation_name,
+                company_registration=organisation_registration,
+                aliases=list(set([text, organisation_name])),
+            )
+            self.logger.debug(
+                "Government Organisation Found: {}".format(
+                    colorize(organisation_name, "magenta")
+                )
+            )
+            return entity
+        return None
+
+    def find_local_authority_from_text(self, text):
+        """Find local authority from text"""
+        (
+            organisation_name,
+            organisation_registration,
+            entity_type,
+        ) = findthatcharity_by_name(text, self.logger, "local_authority")
+
+        if organisation_name:
+            entity = make_entity_dict(
+                entity_type=entity_type,
+                name=organisation_name,
+                company_registration=organisation_registration,
+                aliases=list(set([text, organisation_name])),
+            )
+            self.logger.debug(
+                "Local Authority Found: {}".format(
+                    colorize(organisation_name, "magenta")
+                )
+            )
+            return entity
+        return None
+
+    def findthatcharity_from_text(self, text):
+        """Find charitable from text"""
+        (
+            organisation_name,
+            organisation_registration,
+            entity_type,
+        ) = findthatcharity_by_name(text, self.logger)
+
+        if organisation_name:
+            entity = make_entity_dict(
+                entity_type=entity_type,
+                name=organisation_name,
+                company_registration=organisation_registration,
+                aliases=list(set([text, organisation_name])),
+            )
+            self.logger.debug(
+                "Charitable Found: {}".format(colorize(organisation_name, "magenta"))
             )
             return entity
         return None
@@ -351,6 +486,8 @@ class BaseRelationship:
             text, self.logger
         )
         if organisation_registration:
+            self.logger.debug("Registration: {}".format(organisation_registration))
+
             organisation_name = find_organisation_by_number(
                 self.companies_house_apikey,
                 organisation_registration,
@@ -369,10 +506,18 @@ class BaseRelationship:
                 return entity
         return None
 
-    def find_alias_from_text(self, text, alias_entity_types=None, prefered_entity_types=None):
+    def find_alias_from_text(
+        self, text, alias_entity_types=None, prefered_entity_types=None
+    ):
         """Find alias from text"""
-        alias_entity_types = alias_entity_types if alias_entity_types else self.ALIAS_ENTITY_TYPES
-        prefered_entity_types = prefered_entity_types if prefered_entity_types else self.PREFERRED_ALIAS_ENTITY_TYPES
+        alias_entity_types = (
+            alias_entity_types if alias_entity_types else self.ALIAS_ENTITY_TYPES
+        )
+        prefered_entity_types = (
+            prefered_entity_types
+            if prefered_entity_types
+            else self.PREFERRED_ALIAS_ENTITY_TYPES
+        )
 
         alias = self._check_aliases(
             entity_types=alias_entity_types,
@@ -422,6 +567,21 @@ class BaseRelationship:
             return _aliases[0][1]
 
         return None
+
+    def get_nlp_entities_from_text(self, text, entity_types=None):
+        """"""
+        if not entity_types:
+            entity_types = self.NER_TYPES
+
+        result = self.nlp(text=text)
+        entities = [(X.text, X.label_) for X in result.ents]
+        nlp_names = []
+        for entity in entities:
+            if entity[1] in entity_types:
+                _name = entity[0]
+                if len(_name.split(" ")) > 1:
+                    nlp_names.append(_name)
+        return nlp_names
 
 
 def get_relationship_solver(*args, **kwargs):

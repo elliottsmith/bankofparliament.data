@@ -20,9 +20,6 @@ DATA_PARLIAMENT_QUERY_URL = (
 DATA_PARLIAMENT_LINK_URL = "https://members.parliament.uk/member/{}/{}"
 SPADS_URL = "https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/854554/Annual_Report_on_Special_Advisers.pdf"
 
-# charities
-CHARITY_COMMISSION_WSDL = "https://apps.charitycommission.gov.uk/Showcharity/API/SearchCharitiesV1/SearchCharitiesV1.asmx?wsdl"
-
 # theyworkforyou
 THEYWORKFORYOU_QUERY_URL = "https://www.theyworkforyou.com/api"
 THEYWORKFORYOU_LINK_URL = "https://www.theyworkforyou.com/mp/25916/{}/{}#register"
@@ -157,7 +154,9 @@ OTHER_ENTITIES = [
     "media",
     "misc",
     "sport",
+    "education",
 ]
+
 NON_HUMAN_ENTITIES = POLLITICAL_ENTITIES + OTHER_ENTITIES
 ENTITY_TYPES = HUMAN_ENTITIES + POLLITICAL_ENTITIES + OTHER_ENTITIES
 

@@ -58,6 +58,8 @@ class CompoundRelationship(BaseRelationship):
 
     NER_TYPES = []
     ALIAS_ENTITY_TYPES = []
+    _entries = []
+    entity_type = "misc"
 
     def evaluate(self):
         """Find key/value info from list of texts"""
@@ -165,7 +167,9 @@ class CompoundRelationship(BaseRelationship):
 
             if self.entity_type == "company":
 
-                entity = self.find_alias_from_text(text=entry, alias_entity_types=["company"])
+                entity = self.find_alias_from_text(
+                    text=entry, alias_entity_types=["company"]
+                )
                 if entity:
                     self.extracted_entities.append(entity)
                     continue
@@ -183,13 +187,17 @@ class CompoundRelationship(BaseRelationship):
                     return
 
             elif self.entity_type == "person":
-                entity = self.find_alias_from_text(text=entry, alias_entity_types=["person", "politician", "advisor"])
+                entity = self.find_alias_from_text(
+                    text=entry, alias_entity_types=["person", "politician", "advisor"]
+                )
                 if entity:
                     self.extracted_entities.append(entity)
                     continue
 
             elif self.entity_type == "charity":
-                entity = self.find_alias_from_text(text=entry, alias_entity_types=["charity"])
+                entity = self.find_alias_from_text(
+                    text=entry, alias_entity_types=["charity"]
+                )
                 if entity:
                     self.extracted_entities.append(entity)
                     continue
@@ -200,13 +208,24 @@ class CompoundRelationship(BaseRelationship):
                     return
 
             elif self.entity_type == "union":
-                entity = self.find_alias_from_text(text=entry, alias_entity_types=["union"])
+                entity = self.find_alias_from_text(
+                    text=entry, alias_entity_types=["union"]
+                )
                 if entity:
                     self.extracted_entities.append(entity)
                     continue
 
             elif self.entity_type == "association":
-                entity = self.find_alias_from_text(text=entry, alias_entity_types=["association", "university", "political"])
+                entity = self.find_alias_from_text(
+                    text=entry,
+                    alias_entity_types=[
+                        "association",
+                        "university",
+                        "political",
+                        "company",
+                        "think_lobby",
+                    ],
+                )
                 if entity:
                     self.extracted_entities.append(entity)
                     continue
@@ -217,7 +236,16 @@ class CompoundRelationship(BaseRelationship):
                     return
 
             elif self.entity_type == "misc":
-                entity = self.find_alias_from_text(text=entry, alias_entity_types=ENTITY_TYPES, prefered_entity_types=["university", "company", "association", "charity"])
+                entity = self.find_alias_from_text(
+                    text=entry,
+                    alias_entity_types=ENTITY_TYPES,
+                    prefered_entity_types=[
+                        "university",
+                        "company",
+                        "association",
+                        "charity",
+                    ],
+                )
                 if entity:
                     self.extracted_entities.append(entity)
                     continue

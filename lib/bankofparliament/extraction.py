@@ -18,11 +18,10 @@ from .utils import (
     colorize,
     make_entity_dict,
     make_relationship_dict,
-    find_organisation_by_number,
-    find_charity_by_number,
     reconcile_opencorporates_entity_by_id,
+    # reconcile_findthatcharity_entity_by_id
 )
-from .constants import NER_BASE_MODEL, ENTITY_TEMPLATE, RELATIONSHIP_TEMPLATE
+from .constants import NER_BASE_MODEL
 from .relationships.base import get_relationship_solver
 from .text import get_registration_number_from_link
 
@@ -338,9 +337,9 @@ class NamedEntityExtract:
                     registered_number,
                     entity_type,
                 ) = get_registration_number_from_link(registered_link)
+
                 if "service.gov.uk" in registered_link:
-                    entity_name = find_organisation_by_number(
-                        self.companies_house_apikey,
+                    entity_name = reconcile_opencorporates_entity_by_id(
                         registered_number,
                         self.logger,
                     )
@@ -349,10 +348,10 @@ class NamedEntityExtract:
                         registered_link.split("opencorporates.com")[-1], self.logger
                     )
 
-                elif "charitycommission" in registered_link:
-                    entity_name = find_charity_by_number(
-                        self.charities_apikey, registered_number, self.logger
-                    )
+                # elif "findthatcharity.uk" in registered_link:
+                #     entity_name = reconcile_findthatcharity_entity_by_id(
+                #         registered_number, self.logger
+                #     )
 
                 entity_type = input("NEW ENTITY TYPE: ")
 

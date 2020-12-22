@@ -304,3 +304,93 @@ SINGLE_INDICATORS = [
     "royalties of",
     "expected for a survey",
 ]
+
+# constitutional state powers indentifiers
+CROWN_IDENTIFIERS = [
+    "The Crown",
+    "The Queen",
+    "HM The Queen",
+    "Queen's Bodyguard",
+]
+
+JURDICARY_IDENTIFIERS = [
+    "Bench",
+    "The Bar",
+]
+
+CHURCH_OF_ENGLAND_IDENTIFIERS = [
+    "Church Council",
+    "Mucknell Abbey",
+    "Malling Abbey",
+    "Archbishop of Canterbury’s Examination in Theology",
+    "episcopal stipend",
+    "Episcopal",
+    "Anglican",
+    "Ecclesiastical",
+    "Evangelists",
+    "Preachers",
+    "church pension",
+]
+
+ARMED_FORCES_IDENTIFIERS = [
+    "reservist",
+    "reserve army",
+    "territorial army",
+    "TA Regiment",
+    "Colonel Commandant",
+    "601 Squadron",
+]
+
+GOVERNMENT_IDENTIFIERS = [
+    "Lieutenant of",
+    "Lord-Lieutenant",
+    "Her Majesty's Government",
+    "Government Whip",
+    "Leader of the House of Lords",
+    "Lord Privy Seal",
+    "Special Envoy",
+    "Trade Envoy",
+]
+
+LOCAL_GOVERNMENT_IDENTIFIERS = ["council", "borough"]
+
+STATE_POWERS_IDENTIFIERS = (
+    CROWN_IDENTIFIERS
+    + JURDICARY_IDENTIFIERS
+    + ARMED_FORCES_IDENTIFIERS
+    + GOVERNMENT_IDENTIFIERS
+)
+
+# non constitutional identifiers
+CHARITY_IDENTIFIERS = [
+    "charity",
+    "charitable",
+    "foundation",
+]
+
+EDUCATION_IDENTIFIERS = [
+    "college",
+    "school",
+    "secondary",
+    "primary",
+    "academy",
+    "trust",
+]
+
+HEALTH_IDENTIFIERS = ["hospital", "health", "healthcare"]
+
+COMPANY_IDENTIFIERS = ["company", "limited", "ltd", "plc"]
+
+UNIVERSITY_IDENTIFIERS = [
+    "college",
+    "university",
+]
+
+MISC_IDENTIFIERS = [
+    "Fund",
+    "Trust",
+    "blind trust",
+    "association",
+    "society",
+    "club",
+]
