@@ -21,9 +21,7 @@ if __name__ == "__main__":
         default=False,
     )
 
-    parser.add_argument(
-        "--output", help="Output file", action="store", default=None
-    )
+    parser.add_argument("--output", help="Output file", action="store", default=None)
 
     args = parser.parse_args()
 
