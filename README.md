@@ -13,8 +13,11 @@ You will need a Neo4j database. Instances can be run locally, in a service such 
 Create and add your Neo4J information to this file: `$HOME/.apikeys/apikeys.py`
 
 NEO4J_HOST = 'localhost'
+
 NEO4J_PASSWORD = 'password'
+
 NEO4J_USER = 'neo4j'
+
 NEO4J_BOLT_PORT = 7687
 
 ### Api Keys
@@ -27,6 +30,7 @@ You will need the following api keys in order to run all tools contained in this
 Create and add your keys to this file: `$HOME/.apikeys/apikeys.py`
 
 THEYWORKFORYOU_APIKEY = 'your_theyworkforyou_api_key'
+
 COMPANIES_HOUSE_APIKEY = 'your_companies_house_api_key'
 
 ### Python 3 Packages
