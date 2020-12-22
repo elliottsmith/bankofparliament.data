@@ -129,4 +129,6 @@ dmypy.json
 .pyre/
 
 # custom
-data
+data/offline
+data/generated
+custom
