@@ -275,7 +275,9 @@ class NamedEntityExtract:
 
             if updated_aliases != existing_aliases:
                 self.logger.debug(
-                    "Updating custom entity [{}] aliases: {}".format(entity_name, new_aliases)
+                    "Updating custom entity [{}] aliases: {}".format(
+                        entity_name, new_aliases
+                    )
                 )
                 self._extracted_custom_entities.loc[filt, "aliases"] = ";".join(
                     updated_aliases

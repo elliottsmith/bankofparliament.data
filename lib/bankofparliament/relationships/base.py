@@ -545,7 +545,11 @@ class BaseRelationship:
         except:
             text = text.lower()
 
-        self.logger.debug("Checking Alias: ({}) {} ({})".format(text, entity_types, prefered_entity_types))
+        self.logger.debug(
+            "Checking Alias: ({}) {} ({})".format(
+                text, entity_types, prefered_entity_types
+            )
+        )
         dataframe = self.entities
         filt = dataframe["entity_type"].isin(entity_types)
         dataframe = dataframe[filt]
@@ -581,7 +585,18 @@ class BaseRelationship:
                         else:
                             return name.upper()
 
-                    in_patterns = [" {} ", " {},", " {}.", " {};", " {}'", " {}’", "{})", "{};", "{}.", "{},"]
+                    in_patterns = [
+                        " {} ",
+                        " {},",
+                        " {}.",
+                        " {};",
+                        " {}'",
+                        " {}’",
+                        "{})",
+                        "{};",
+                        "{}.",
+                        "{},",
+                    ]
                     # does the pattern exist in the text
                     for _pattern in in_patterns:
                         pattern = _pattern.format(alias)

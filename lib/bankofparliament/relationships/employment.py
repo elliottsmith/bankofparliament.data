@@ -28,7 +28,7 @@ from ..patterns import (
     JURDICARY_IDENTIFIERS,
     CROWN_IDENTIFIERS,
     MISC_IDENTIFIERS,
-    POSITIONS
+    POSITIONS,
 )
 
 
@@ -113,7 +113,7 @@ class Employment(TextRelationship):
             ARMED_FORCES_IDENTIFIERS,
             CHURCH_OF_ENGLAND_IDENTIFIERS,
             JURDICARY_IDENTIFIERS,
-            CROWN_IDENTIFIERS
+            CROWN_IDENTIFIERS,
         ]
 
         _guess_types = []
@@ -225,7 +225,11 @@ class Employment(TextRelationship):
                 )
                 if entity:
                     self.extracted_entities.append(entity)
-                    self.logger.debug("State Power Found: {}".format(colorize(organisation_name, "magenta")))
+                    self.logger.debug(
+                        "State Power Found: {}".format(
+                            colorize(organisation_name, "magenta")
+                        )
+                    )
                     return entity
 
         if self.text.lower() not in self.EXCLUDE_FROM_SEARCHING:

@@ -209,7 +209,7 @@ POSITIONS = [
     "Co-founder",
     "Co-owner and Chairman of Advisory Board",
     "Member of the",
-    "Speaking engagement"
+    "Speaking engagement",
 ]
 
 RECURRING_INDICATORS = [
@@ -397,7 +397,6 @@ GOVERNMENT_IDENTIFIERS = [
     "Health Honours Committee",
     "Foreign Secretary's Initiative",
     "Independent Oversight Panel to review the use of seclusion and segregation",
-
 ]
 
 LOCAL_GOVERNMENT_IDENTIFIERS = ["council", "borough", "councillor"]

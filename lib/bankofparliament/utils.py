@@ -105,7 +105,9 @@ def get_request(url, logger, user=None, headers=None, params=None):
 
 ############################################################################
 # reconcile functions
-def reconcile_opencorporates_entity_by_name(name, logger, jurisdiction="gb", limit=QUERY_LIMIT):
+def reconcile_opencorporates_entity_by_name(
+    name, logger, jurisdiction="gb", limit=QUERY_LIMIT
+):
     """Reconcile a company name to an opencorporates record"""
     logger.debug("reconcile_opencorporates_entity_by_name: {}".format(name))
     query = {"q0": {"query": name, "limit": limit}}
@@ -121,7 +123,10 @@ def reconcile_opencorporates_entity_by_name(name, logger, jurisdiction="gb", lim
             return data["q0"]
     return {"result": []}
 
-def reconcile_findthatcharity_entity_by_name(name, logger, end_point="all", limit=QUERY_LIMIT):
+
+def reconcile_findthatcharity_entity_by_name(
+    name, logger, end_point="all", limit=QUERY_LIMIT
+):
     """Reconcile a name to an findthatcharity record"""
     logger.debug("reconcile_findthatcharity_entity_by_name: {}".format(name))
     query = {"q0": {"query": name, "limit": limit}}
@@ -140,6 +145,7 @@ def reconcile_findthatcharity_entity_by_name(name, logger, end_point="all", limi
         if "q0" in data:
             return data["q0"]
     return {"result": []}
+
 
 def reconcile_opencorporates_entity_by_id(_id, logger):
     """Reconcile a company id to an opencorporates record"""
@@ -208,31 +214,51 @@ def findthatcharity_by_name(name, logger, end_point="all"):
                 entity_type = result["type"][0]["id"]
 
                 # EXACT MATCH, EQUAL TO OR GREATER THAN - MIN_WORD_LENGTH
-                if _name.lower() == name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
+                if (
+                    _name.lower() == name.lower()
+                    and len(name.split()) >= MIN_WORD_LENGTH
+                ):
                     return (organisation_name, organisation_registration, entity_type)
 
                 # ALPHANUMERIC MATCH,
                 _alpha_name = ALPHANUMERIC.sub("", name)
                 _alpha_result = ALPHANUMERIC.sub("", _name)
-                if _alpha_name.lower() == _alpha_result.lower() and len(name.split()) >= MIN_WORD_LENGTH:
+                if (
+                    _alpha_name.lower() == _alpha_result.lower()
+                    and len(name.split()) >= MIN_WORD_LENGTH
+                ):
                     return (organisation_name, organisation_registration, entity_type)
 
                 # EXACT MATCH, BUT LESS THAN - MIN_WORD_LENGTH
                 elif _name.lower() == name.lower():
                     if name.lower() in ["care"]:
-                        return (organisation_name, organisation_registration, entity_type)
+                        return (
+                            organisation_name,
+                            organisation_registration,
+                            entity_type,
+                        )
                     else:
                         possibles.insert(0, result)
 
                 # SUBSTRING MATCH, GREATER THAN - MIN_WORD_LENGTH
-                elif _name.lower() in name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
+                elif (
+                    _name.lower() in name.lower()
+                    and len(name.split()) >= MIN_WORD_LENGTH
+                ):
                     possibles.append(result)
 
         if possibles:
             for poss in possibles:
-                logger.warning("{}".format(colorize("Possible Charity: {}".format(poss["name"]), "light red")))
+                logger.warning(
+                    "{}".format(
+                        colorize(
+                            "Possible Charity: {}".format(poss["name"]), "light red"
+                        )
+                    )
+                )
 
     return (None, None, None)
+
 
 def findcorporate_by_name(name, logger):
     """Find a registered corporate by name"""
@@ -255,23 +281,47 @@ def findcorporate_by_name(name, logger):
                 organisation_registration = result["id"].split("/")[-1]
 
                 # EXACT MATCH, EQUAL TO OR GREATER THAN - MIN_WORD_LENGTH
-                if result["name"].lower() == name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
+                if (
+                    result["name"].lower() == name.lower()
+                    and len(name.split()) >= MIN_WORD_LENGTH
+                ):
                     return (organisation_name, organisation_registration, entity_type)
 
                 # LTD NOT LIMITED
                 if " limited" in name.lower():
-                    if result["name"].lower() in name.lower().replace(" limited", " ltd") and len(result["name"].split()) >= MIN_WORD_LENGTH and len(name.split()) >= MIN_WORD_LENGTH:
-                        return (organisation_name, organisation_registration, entity_type)
+                    if (
+                        result["name"].lower()
+                        in name.lower().replace(" limited", " ltd")
+                        and len(result["name"].split()) >= MIN_WORD_LENGTH
+                        and len(name.split()) >= MIN_WORD_LENGTH
+                    ):
+                        return (
+                            organisation_name,
+                            organisation_registration,
+                            entity_type,
+                        )
 
                 # LIMITED NOT LTD
                 elif " ltd" in name.lower():
-                    if result["name"].lower() in name.lower().replace(" ltd", " limited") and len(result["name"].split()) >= MIN_WORD_LENGTH and len(name.split()) >= MIN_WORD_LENGTH:
-                        return (organisation_name, organisation_registration, entity_type)
+                    if (
+                        result["name"].lower()
+                        in name.lower().replace(" ltd", " limited")
+                        and len(result["name"].split()) >= MIN_WORD_LENGTH
+                        and len(name.split()) >= MIN_WORD_LENGTH
+                    ):
+                        return (
+                            organisation_name,
+                            organisation_registration,
+                            entity_type,
+                        )
 
                 # ALPHANUMERIC MATCH,
                 _alpha_name = ALPHANUMERIC.sub("", name)
                 _alpha_result = ALPHANUMERIC.sub("", result["name"])
-                if _alpha_name.lower() == _alpha_result.lower() and len(name.split()) >= MIN_WORD_LENGTH:
+                if (
+                    _alpha_name.lower() == _alpha_result.lower()
+                    and len(name.split()) >= MIN_WORD_LENGTH
+                ):
                     return (organisation_name, organisation_registration, entity_type)
 
                 # EXACT MATCH, BUT LESS THAN - MIN_WORD_LENGTH
@@ -279,12 +329,21 @@ def findcorporate_by_name(name, logger):
                     possibles.insert(0, result)
 
                 # SUBSTRING MATCH, GREATER THAN - MIN_WORD_LENGTH
-                elif result["name"].lower() in name.lower() and len(name.split()) > MIN_WORD_LENGTH:
+                elif (
+                    result["name"].lower() in name.lower()
+                    and len(name.split()) > MIN_WORD_LENGTH
+                ):
                     possibles.append(result)
 
         if possibles:
             for poss in possibles:
-                logger.warning("{}".format(colorize("Possible Company: {}".format(poss["name"]), "light red")))
+                logger.warning(
+                    "{}".format(
+                        colorize(
+                            "Possible Company: {}".format(poss["name"]), "light red"
+                        )
+                    )
+                )
 
     return (None, None, None)
 
@@ -357,7 +416,11 @@ def search_companies_house(
     for i in data["items"]:
         title = i["title"].lower().strip()
         snippet = i["snippet"].lower().strip() if "snippet" in i else None
-        logger.debug("COMPANIES HOUSE: {}, {} [{}]".format(i["title"], i["links"]["self"].split("/")[-1], snippet))
+        logger.debug(
+            "COMPANIES HOUSE: {}, {} [{}]".format(
+                i["title"], i["links"]["self"].split("/")[-1], snippet
+            )
+        )
 
         if (
             title in query

@@ -26,7 +26,7 @@ from ..patterns import (
     JURDICARY_IDENTIFIERS,
     CROWN_IDENTIFIERS,
     MISC_IDENTIFIERS,
-    POSITIONS
+    POSITIONS,
 )
 from ..utils import colorize, make_entity_dict
 
@@ -210,7 +210,11 @@ class Miscellaneous(TextRelationship):
                 )
                 if entity:
                     self.extracted_entities.append(entity)
-                    self.logger.debug("State Power Found: {}".format(colorize(organisation_name, "magenta")))
+                    self.logger.debug(
+                        "State Power Found: {}".format(
+                            colorize(organisation_name, "magenta")
+                        )
+                    )
                     return entity
 
         if self.text.lower() not in self.EXCLUDE_FROM_SEARCHING:
