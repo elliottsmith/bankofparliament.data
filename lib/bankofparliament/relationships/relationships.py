@@ -224,6 +224,7 @@ class CompoundRelationship(BaseRelationship):
                         "political",
                         "company",
                         "think_lobby",
+                        "education"
                     ],
                 )
                 if entity:
@@ -244,6 +245,7 @@ class CompoundRelationship(BaseRelationship):
                         "company",
                         "association",
                         "charity",
+                        "misc"
                     ],
                 )
                 if entity:
