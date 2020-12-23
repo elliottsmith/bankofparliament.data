@@ -26,8 +26,9 @@ from ..patterns import (
     JURDICARY_IDENTIFIERS,
     CROWN_IDENTIFIERS,
     MISC_IDENTIFIERS,
+    POSITIONS
 )
-from ..utils import make_entity_dict
+from ..utils import colorize, make_entity_dict
 
 
 class Miscellaneous(TextRelationship):
@@ -65,18 +66,23 @@ class Miscellaneous(TextRelationship):
         self.date = self.extract_date_from_text(self.relationship["text"])
         self.amount = self.extract_amount_from_text(self.relationship["text"])
 
+        entity = self.find_alias_from_text(text=self.relationship["text"])
+        if entity:
+            self.extracted_entities.append(entity)
+            return
+
         identifier_types = [
             "university",
             "education",
             "charity",
-            "government_organisation",
             "local_authority",
             "health",
             "company",
-            "state_power",
-            "state_power",
-            "state_power",
-            "state_power",
+            "government",
+            "armed_forces",
+            "church",
+            "judicary",
+            "crown",
             "misc",
         ]
 
@@ -84,10 +90,10 @@ class Miscellaneous(TextRelationship):
             UNIVERSITY_IDENTIFIERS,
             EDUCATION_IDENTIFIERS,
             CHARITY_IDENTIFIERS,
-            GOVERNMENT_IDENTIFIERS,
             LOCAL_GOVERNMENT_IDENTIFIERS,
             HEALTH_IDENTIFIERS,
             COMPANY_IDENTIFIERS,
+            GOVERNMENT_IDENTIFIERS,
             ARMED_FORCES_IDENTIFIERS,
             CHURCH_OF_ENGLAND_IDENTIFIERS,
             JURDICARY_IDENTIFIERS,
@@ -102,14 +108,20 @@ class Miscellaneous(TextRelationship):
                     _guess_types.append(_type)
 
         guess_types = list(set(_guess_types))
-        # print("Guess types: {}".format(guess_types))
-
         nlp_names = self.get_nlp_entities_from_text(
             text=self.relationship["text"], entity_types=["ORG"]
         )
-        nlp_names.insert(0, self.text)
-        names_to_try = list(set(nlp_names))
-        # print("Nlp names: {}".format(names_to_try))
+
+        names_to_try = []
+        for nlp in nlp_names + [self.text]:
+            if not nlp in POSITIONS and len(nlp.split()) > 1:
+                names_to_try.append(nlp)
+
+        names_to_try = sorted(list(set(names_to_try)), reverse=False)
+
+        self.logger.debug("Guesses: {}".format(guess_types))
+        for name in names_to_try:
+            self.logger.debug("Name: {}".format(name))
 
         for guess in guess_types:
 
@@ -176,10 +188,30 @@ class Miscellaneous(TextRelationship):
                         self.extracted_entities.append(entity)
                         return
 
-        entity = self.find_alias_from_text(text=self.relationship["text"])
-        if entity:
-            self.extracted_entities.append(entity)
-            return
+            # non queryable entities
+            if guess in ["armed_forces", "church", "judicary", "crown", "government"]:
+
+                entity_type = "state_power"
+                if guess == "armed_forces":
+                    organisation_name = "BRITISH ARMED FORCES"
+                elif guess == "church":
+                    organisation_name = "CHURCH OF ENGLAND"
+                elif guess == "judicary":
+                    organisation_name = "JUDICARY"
+                elif guess == "crown":
+                    organisation_name = "THE CROWN"
+                elif guess == "government":
+                    organisation_name = "HER MAJESTY'S GOVERNMENT"
+
+                entity = make_entity_dict(
+                    entity_type=entity_type,
+                    name=organisation_name,
+                    aliases=list(set([self.text, organisation_name])),
+                )
+                if entity:
+                    self.extracted_entities.append(entity)
+                    self.logger.debug("State Power Found: {}".format(colorize(organisation_name, "magenta")))
+                    return entity
 
         if self.text.lower() not in self.EXCLUDE_FROM_SEARCHING:
             for name in names_to_try:
