@@ -33,6 +33,7 @@ class NamedEntityExtract:
     CUSTOM_ENTITY_CSV_TEMPLATE = "{}/custom.csv"
     RELATIONSHIPS_ENTITY_CSV_TEMPLATE = "{}/relationships.csv"
 
+    # START = 6385 # lord's start
     START = 0
     END = -1
 
@@ -274,7 +275,7 @@ class NamedEntityExtract:
 
             if updated_aliases != existing_aliases:
                 self.logger.debug(
-                    "Updating entity [{}] aliases: {}".format(entity_name, new_aliases)
+                    "Updating custom entity [{}] aliases: {}".format(entity_name, new_aliases)
                 )
                 self._extracted_custom_entities.loc[filt, "aliases"] = ";".join(
                     updated_aliases
@@ -293,7 +294,6 @@ class NamedEntityExtract:
         filt = self.entities["name"].str.lower() == name.lower()
         entity = self.entities.loc[filt]
         if len(entity):
-            self.logger.debug("Entity exists: {}".format(name))
             return True
         return False
 
@@ -302,7 +302,6 @@ class NamedEntityExtract:
         filt = self._extracted_custom_entities["name"].str.lower() == name.lower()
         entity = self._extracted_custom_entities.loc[filt]
         if len(entity):
-            self.logger.debug("Custom entity exists: {}".format(name))
             return True
         return False
 
@@ -312,7 +311,6 @@ class NamedEntityExtract:
         entity = self.entities.loc[filt]
 
         if len(entity):
-            self.logger.debug("Entity exists: {}".format(name))
             return entity.iloc[0]["entity_type"]
         return None
 

@@ -174,7 +174,6 @@ POSITIONS = [
     "Shareholder",
     "Member of Council",
     "Member of Court (Trustee)",
-    "Episcopal",
     "Elector",
     "Dual President",
     "Board of Trustees",
@@ -209,6 +208,8 @@ POSITIONS = [
     "Advice on sustainability and planning to",
     "Co-founder",
     "Co-owner and Chairman of Advisory Board",
+    "Member of the",
+    "Speaking engagement"
 ]
 
 RECURRING_INDICATORS = [
@@ -225,6 +226,7 @@ RECURRING_INDICATORS = [
     "payments from ",
     "payments received from ",
     "fees from ",
+    "for surveys",
     "payments for speeches received ",
     "payments received for my ",
     "solicitor ",
@@ -305,6 +307,7 @@ SINGLE_INDICATORS = [
     "expected for ",
     "paid direct to community group",
     "payment of ",
+    "payment of £",
     "payment received ",
     "payments for",
     "article",
@@ -358,6 +361,14 @@ CHURCH_OF_ENGLAND_IDENTIFIERS = [
     "Evangelists",
     "Preachers",
     "church pension",
+    "receipt of stipend",
+    "diocesan",
+    "archiepiscopal stipend",
+    "Church Commissioners",
+    "Bishops' Standing Committee",
+    "Church Commissioners",
+    "Prelate",
+    "Westminster Abbey",
 ]
 
 ARMED_FORCES_IDENTIFIERS = [
@@ -367,6 +378,8 @@ ARMED_FORCES_IDENTIFIERS = [
     "TA Regiment",
     "Colonel Commandant",
     "601 Squadron",
+    "RAF Regiment",
+    "Honorary Colonel",
 ]
 
 GOVERNMENT_IDENTIFIERS = [
@@ -378,9 +391,16 @@ GOVERNMENT_IDENTIFIERS = [
     "Lord Privy Seal",
     "Special Envoy",
     "Trade Envoy",
+    "Task and Finish Group",
+    "Iraq Fatality Investigations",
+    "Foreign Office Honours Committee",
+    "Health Honours Committee",
+    "Foreign Secretary's Initiative",
+    "Independent Oversight Panel to review the use of seclusion and segregation",
+
 ]
 
-LOCAL_GOVERNMENT_IDENTIFIERS = ["council", "borough"]
+LOCAL_GOVERNMENT_IDENTIFIERS = ["council", "borough", "councillor"]
 
 STATE_POWERS_IDENTIFIERS = (
     CROWN_IDENTIFIERS
@@ -405,9 +425,9 @@ EDUCATION_IDENTIFIERS = [
     "trust",
 ]
 
-HEALTH_IDENTIFIERS = ["hospital", "health", "healthcare"]
+HEALTH_IDENTIFIERS = ["hospital", "health", "healthcare", "surgery", "NHS"]
 
-COMPANY_IDENTIFIERS = ["company", "limited", "ltd", "plc"]
+COMPANY_IDENTIFIERS = ["company", "limited", "ltd", "plc", "corporation"]
 
 UNIVERSITY_IDENTIFIERS = [
     "college",
