@@ -32,7 +32,7 @@ OPENCORPORATES_RECONCILE_FLYOUT_URL = "https://opencorporates.com/reconcile/flyo
 FINDTHATCHARITY_RECONCILE_URL = "https://findthatcharity.uk/reconcile/{}"
 
 # companies house
-COMPANIES_HOUSE_QUERY_LIMIT = 10
+QUERY_LIMIT = 5
 COMPANIES_HOUSE_QUERY_URL = "https://api.companieshouse.gov.uk/{}/{}"
 COMPANIES_HOUSE_SEARCH_URL = (
     "https://api.companieshouse.gov.uk/search/{}?q={}&items_per_page={}"
