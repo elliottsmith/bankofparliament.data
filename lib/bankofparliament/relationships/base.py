@@ -16,7 +16,7 @@ from ..utils import (
     find_organisation_by_number,
 )
 from ..patterns import RECURRING_INDICATORS, SINGLE_INDICATORS
-from ..text import extract_company_registration_number_from_text
+from ..text import extract_company_registration_number_from_text, eval_string_as_list
 
 
 class BaseRelationship:
@@ -540,6 +540,12 @@ class BaseRelationship:
 
     def _check_aliases(self, entity_types, prefered_entity_types, text):
         """Check entity aliases for occurances of query string"""
+        try:
+            text = eval_string_as_list(text)[0].lower()
+        except:
+            text = text.lower()
+
+        self.logger.debug("Checking Alias: ({}) {} ({})".format(text, entity_types, prefered_entity_types))
         dataframe = self.entities
         filt = dataframe["entity_type"].isin(entity_types)
         dataframe = dataframe[filt]
@@ -549,13 +555,41 @@ class BaseRelationship:
             dataframe["name"], dataframe["aliases"], dataframe["entity_type"]
         ):
             for alias in aliases.split(";"):
+                alias = alias.strip().lower()
                 if len(alias.split()) > 1 or etype in self.ACCEPTED_SINGLE_MATCHES:
-                    clean_alias = "{}".format(alias.strip().lower())
-                    if clean_alias in text.lower():
+
+                    # does the word match exactly
+                    if text == alias:
                         if prefered_entity_types:
                             _aliases.append((etype, name.upper()))
                         else:
                             return name.upper()
+
+                    # does the word exist at the start of the string, with a space following
+                    start_alias = "{} ".format(alias)
+                    if text.startswith(start_alias):
+                        if prefered_entity_types:
+                            _aliases.append((etype, name.upper()))
+                        else:
+                            return name.upper()
+
+                    # does the word exist at the end of the string, precedding with a space
+                    end_alias = " {}".format(alias)
+                    if text.endswith(end_alias):
+                        if prefered_entity_types:
+                            _aliases.append((etype, name.upper()))
+                        else:
+                            return name.upper()
+
+                    in_patterns = [" {} ", " {},", " {}.", " {};", " {}'", " {}’", "{})", "{};", "{}.", "{},"]
+                    # does the pattern exist in the text
+                    for _pattern in in_patterns:
+                        pattern = _pattern.format(alias)
+                        if pattern in text:
+                            if prefered_entity_types:
+                                _aliases.append((etype, name.upper()))
+                            else:
+                                return name.upper()
 
         if prefered_entity_types and _aliases:
             best_match = None
