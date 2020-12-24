@@ -121,7 +121,7 @@ class NamedEntityExtract:
             solver = get_relationship_solver(
                 index=index,
                 relationship=relationship,
-                entities=self.entities,
+                entities=self._extracted_entities,
                 nlp=self.nlp,
                 companies_house_apikey=self.companies_house_apikey,
                 opencorporates_apikey=self.opencorporates_apikey,
@@ -290,8 +290,8 @@ class NamedEntityExtract:
 
     def get_entity_name_exists(self, name):
         """Check if entity name already exists"""
-        filt = self.entities["name"].str.lower() == name.lower()
-        entity = self.entities.loc[filt]
+        filt = self._extracted_entities["name"].str.lower() == name.lower()
+        entity = self._extracted_entities.loc[filt]
         if len(entity):
             return True
         return False
@@ -306,8 +306,8 @@ class NamedEntityExtract:
 
     def get_entity_type_from_name(self, name):
         """Get the entity type from the name"""
-        filt = self.entities["name"].str.lower() == name.lower()
-        entity = self.entities.loc[filt]
+        filt = self._extracted_entities["name"].str.lower() == name.lower()
+        entity = self._extracted_entities.loc[filt]
 
         if len(entity):
             return entity.iloc[0]["entity_type"]
