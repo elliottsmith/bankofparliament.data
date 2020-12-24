@@ -82,7 +82,8 @@ TRADE_UNIONS_URL = "https://www.gov.uk/government/publications/public-list-of-ac
 ENTITY_TEMPLATE = [
     "entity_type",
     "name",
-    "company_registration",
+    "opencorporates_registration",
+    "findthatcharity_registration",
     "address",
     "date_of_birth",
     "email",

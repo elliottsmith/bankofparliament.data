@@ -438,7 +438,8 @@ class Convert:
         email = None
         twitter = None
         facebook = None
-        company_registration = None
+        opencorporates_registration = None
+        findthatcharity_registration = None
         address_line = ""
         for address in addresses:
 
@@ -479,7 +480,8 @@ class Convert:
         self.add_entity(
             entity_type="politician",
             name=member["DisplayAs"],
-            company_registration=company_registration,
+            opencorporates_registration=opencorporates_registration,
+            findthatcharity_registration=findthatcharity_registration,
             address=address_line,
             gender=gender,
             email=email,

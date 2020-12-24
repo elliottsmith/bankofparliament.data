@@ -211,7 +211,14 @@ def findthatcharity_by_name(name, logger, end_point="all"):
 
                 organisation_name = _name.upper()
                 organisation_registration = result["id"]
-                entity_type = result["type"][0]["id"]
+                _entity_type = result["type"][0]["id"]
+
+                if "charity" in _entity_type:
+                    entity_type = "charity"
+                elif "company" in _entity_type:
+                    entity_type = "company"
+                else:
+                    entity_type = _entity_type
 
                 # EXACT MATCH, EQUAL TO OR GREATER THAN - MIN_WORD_LENGTH
                 if (
@@ -428,11 +435,11 @@ def search_companies_house(
             or title.replace(".", "") in query.replace(".", "")
             and len(snippet) > 2
         ):
-            result = (i["title"].upper(), i["links"]["self"], "company")
+            result = (i["title"].upper(), i["links"]["self"].split("/")[-1], "company")
             return result
 
         if snippet and snippet in query and len(snippet) > 2:
-            result = (i["title"].upper(), i["links"]["self"], "company")
+            result = (i["title"].upper(), i["links"]["self"].split("/")[-1], "company")
             return result
 
     return (None, None, None)

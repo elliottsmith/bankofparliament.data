@@ -329,18 +329,19 @@ class NamedEntityExtract:
         if isolated_entity:
             entity_name = None
             entity_type = None
-            registered_number = None
+            opencorporates_registration = None
+            findthatcharity_registration = None
 
             registered_link = input("COMPANY URL: ")
             if registered_link:
                 (
-                    registered_number,
+                    opencorporates_registration,
                     entity_type,
                 ) = get_registration_number_from_link(registered_link)
 
                 if "service.gov.uk" in registered_link:
                     entity_name = reconcile_opencorporates_entity_by_id(
-                        registered_number,
+                        opencorporates_registration,
                         self.logger,
                     )
                 elif "opencorporates" in registered_link:
@@ -365,7 +366,8 @@ class NamedEntityExtract:
             entity = make_entity_dict(
                 entity_type=entity_type,
                 name=entity_name,
-                company_registration=registered_number,
+                opencorporates_registration=opencorporates_registration,
+                findthatcharity_registration=findthatcharity_registration,
                 aliases=list(set([isolated_entity, entity_name])),
             )
             return entity

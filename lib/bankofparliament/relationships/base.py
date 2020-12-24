@@ -296,10 +296,19 @@ class BaseRelationship:
         ) = find_organisation_by_name(text, self.companies_house_apikey, self.logger)
 
         if organisation_name:
+
+            if entity_type == "company":
+                opencorporates_registration = organisation_registration
+                findthatcharity_registration = None
+            else:
+                opencorporates_registration = None
+                findthatcharity_registration = organisation_registration
+
             entity = make_entity_dict(
                 entity_type=entity_type,
                 name=organisation_name,
-                company_registration=organisation_registration,
+                opencorporates_registration=opencorporates_registration,
+                findthatcharity_registration=findthatcharity_registration,
                 aliases=list(set([text, organisation_name])),
             )
             self.logger.debug(
@@ -320,7 +329,7 @@ class BaseRelationship:
             entity = make_entity_dict(
                 entity_type=entity_type,
                 name=organisation_name,
-                company_registration=organisation_registration,
+                opencorporates_registration=organisation_registration,
                 aliases=list(set([text, organisation_name])),
             )
             self.logger.debug(
@@ -341,7 +350,7 @@ class BaseRelationship:
             entity = make_entity_dict(
                 entity_type=entity_type,
                 name=organisation_name,
-                company_registration=organisation_registration,
+                findthatcharity_registration=organisation_registration,
                 aliases=list(set([text, organisation_name])),
             )
             self.logger.debug(
@@ -362,7 +371,7 @@ class BaseRelationship:
             entity = make_entity_dict(
                 entity_type=entity_type,
                 name=organisation_name,
-                company_registration=organisation_registration,
+                findthatcharity_registration=organisation_registration,
                 aliases=list(set([text, organisation_name])),
             )
             self.logger.debug(
@@ -383,7 +392,7 @@ class BaseRelationship:
             entity = make_entity_dict(
                 entity_type=entity_type,
                 name=organisation_name,
-                company_registration=organisation_registration,
+                findthatcharity_registration=organisation_registration,
                 aliases=list(set([text, organisation_name])),
             )
             self.logger.debug(
@@ -404,7 +413,7 @@ class BaseRelationship:
             entity = make_entity_dict(
                 entity_type=entity_type,
                 name=organisation_name,
-                company_registration=organisation_registration,
+                findthatcharity_registration=organisation_registration,
                 aliases=list(set([text, organisation_name])),
             )
             self.logger.debug(
@@ -425,7 +434,7 @@ class BaseRelationship:
             entity = make_entity_dict(
                 entity_type=entity_type,
                 name=organisation_name,
-                company_registration=organisation_registration,
+                findthatcharity_registration=organisation_registration,
                 aliases=list(set([text, organisation_name])),
             )
             self.logger.debug(
@@ -448,7 +457,7 @@ class BaseRelationship:
             entity = make_entity_dict(
                 entity_type=entity_type,
                 name=organisation_name,
-                company_registration=organisation_registration,
+                findthatcharity_registration=organisation_registration,
                 aliases=list(set([text, organisation_name])),
             )
             self.logger.debug(
@@ -471,7 +480,7 @@ class BaseRelationship:
             entity = make_entity_dict(
                 entity_type=entity_type,
                 name=organisation_name,
-                company_registration=organisation_registration,
+                findthatcharity_registration=organisation_registration,
                 aliases=list(set([text, organisation_name])),
             )
             self.logger.debug(
@@ -497,7 +506,7 @@ class BaseRelationship:
                 entity = make_entity_dict(
                     entity_type="company",
                     name=organisation_name,
-                    company_registration=organisation_registration,
+                    opencorporates_registration=organisation_registration,
                     aliases=list(set([text, organisation_name])),
                 )
                 self.logger.debug(
