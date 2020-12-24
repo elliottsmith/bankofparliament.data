@@ -289,6 +289,9 @@ RECURRING_INDICATORS = [
     "2023-28 regulatory period",
     "for legal services",
     "in 2020-21",
+    "received allowances as",
+    "will be listed below",
+    "event speaker",
 ]
 
 SINGLE_INDICATORS = [
@@ -334,6 +337,7 @@ SINGLE_INDICATORS = [
     "for consultancy work",
     "royalties of",
     "expected for a survey",
+    "I drew £",
 ]
 
 # constitutional state powers indentifiers
@@ -347,6 +351,7 @@ CROWN_IDENTIFIERS = [
 JURDICARY_IDENTIFIERS = [
     "Bench",
     "The Bar",
+    "Queen’s Counsel"
 ]
 
 CHURCH_OF_ENGLAND_IDENTIFIERS = [
