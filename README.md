@@ -132,3 +132,5 @@ Create Neo4J database from extracted entities and relationship csv data
 - spacy model for recurring and single payments
 
 - spacy model for custom / known entities
+
+- convert pattern identifiers to custom entities
