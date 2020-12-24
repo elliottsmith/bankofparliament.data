@@ -10,6 +10,7 @@ import pandas
 
 # local libs
 
+
 class CrawlEntities:
     """Crawls for more entity info"""
 

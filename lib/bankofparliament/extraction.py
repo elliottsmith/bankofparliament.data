@@ -248,7 +248,9 @@ class NamedEntityExtract:
                 self.logger.debug(
                     "Updating entity [{}] aliases: {}".format(entity_name, new_aliases)
                 )
-                self._extracted_entities.loc[filt, "aliases"] = ";".join(updated_aliases)
+                self._extracted_entities.loc[filt, "aliases"] = ";".join(
+                    updated_aliases
+                )
 
     def add_custom_entity(self, entity):
         """Add to custom entities"""
@@ -456,12 +458,20 @@ class NamedEntityExtract:
             self.RELATIONSHIPS_ENTITY_CSV_TEMPLATE.format(self.output_dir),
             index_label="id",
         )
-        self.logger.info("Saved Relationships: {}".format(self.RELATIONSHIPS_ENTITY_CSV_TEMPLATE.format(self.output_dir)))
+        self.logger.info(
+            "Saved Relationships: {}".format(
+                self.RELATIONSHIPS_ENTITY_CSV_TEMPLATE.format(self.output_dir)
+            )
+        )
 
         self._extracted_entities.to_csv(
             self.ENTITY_CSV_TEMPLATE.format(self.output_dir), index_label="id"
         )
-        self.logger.info("Saved Entities: {}".format(self.ENTITY_CSV_TEMPLATE.format(self.output_dir)))
+        self.logger.info(
+            "Saved Entities: {}".format(
+                self.ENTITY_CSV_TEMPLATE.format(self.output_dir)
+            )
+        )
 
     def save_custom(self):
         """Dump the rows to csv"""

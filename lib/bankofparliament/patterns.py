@@ -348,11 +348,7 @@ CROWN_IDENTIFIERS = [
     "Queen's Bodyguard",
 ]
 
-JURDICARY_IDENTIFIERS = [
-    "Bench",
-    "The Bar",
-    "Queen’s Counsel"
-]
+JURDICARY_IDENTIFIERS = ["Bench", "The Bar", "Queen’s Counsel"]
 
 CHURCH_OF_ENGLAND_IDENTIFIERS = [
     "Church Council",
