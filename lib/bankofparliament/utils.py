@@ -246,6 +246,34 @@ def findthatcharity_by_name(name, logger, end_point="all"):
                 ):
                     return (organisation_name, organisation_registration, entity_type)
 
+                # AND NOT AMPERSAND
+                elif " & " in name.lower():
+                    if (
+                        result["name"].lower()
+                        in name.lower().replace(" & ", " and ")
+                        and len(result["name"].split()) >= MIN_WORD_LENGTH
+                        and len(name.split()) >= MIN_WORD_LENGTH
+                    ):
+                        return (
+                            organisation_name,
+                            organisation_registration,
+                            entity_type,
+                        )
+
+                # AMPERSAND NOT AND
+                elif " and " in name.lower():
+                    if (
+                        result["name"].lower()
+                        in name.lower().replace(" and ", " & ")
+                        and len(result["name"].split()) >= MIN_WORD_LENGTH
+                        and len(name.split()) >= MIN_WORD_LENGTH
+                    ):
+                        return (
+                            organisation_name,
+                            organisation_registration,
+                            entity_type,
+                        )
+
                 # ALPHANUMERIC MATCH,
                 _alpha_name = ALPHANUMERIC.sub("", name)
                 _alpha_result = ALPHANUMERIC.sub("", _name)
@@ -254,6 +282,16 @@ def findthatcharity_by_name(name, logger, end_point="all"):
                     and len(name.split()) >= MIN_WORD_LENGTH
                 ):
                     return (organisation_name, organisation_registration, entity_type)
+
+                # STARTSWITH THE
+                elif result["name"].lower().startswith("the "):
+                    if result["name"].lower()[4:] == name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
+                        return (organisation_name, organisation_registration, entity_type)
+
+                # ENDSWITH (THE)
+                elif result["name"].lower().endswith("(the)"):
+                    if result["name"].lower()[:-5] == name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
+                        return (organisation_name, organisation_registration, entity_type)
 
                 # EXACT MATCH, BUT LESS THAN - MIN_WORD_LENGTH
                 elif _name.lower() == name.lower():
@@ -341,6 +379,34 @@ def findcorporate_by_name(name, logger):
                             entity_type,
                         )
 
+                # AND NOT AMPERSAND
+                elif " & " in name.lower():
+                    if (
+                        result["name"].lower()
+                        in name.lower().replace(" & ", " and ")
+                        and len(result["name"].split()) >= MIN_WORD_LENGTH
+                        and len(name.split()) >= MIN_WORD_LENGTH
+                    ):
+                        return (
+                            organisation_name,
+                            organisation_registration,
+                            entity_type,
+                        )
+
+                # AMPERSAND NOT AND
+                elif " and " in name.lower():
+                    if (
+                        result["name"].lower()
+                        in name.lower().replace(" and ", " & ")
+                        and len(result["name"].split()) >= MIN_WORD_LENGTH
+                        and len(name.split()) >= MIN_WORD_LENGTH
+                    ):
+                        return (
+                            organisation_name,
+                            organisation_registration,
+                            entity_type,
+                        )
+
                 # ALPHANUMERIC MATCH,
                 _alpha_name = ALPHANUMERIC.sub("", name)
                 _alpha_result = ALPHANUMERIC.sub("", result["name"])
@@ -349,6 +415,16 @@ def findcorporate_by_name(name, logger):
                     and len(name.split()) >= MIN_WORD_LENGTH
                 ):
                     return (organisation_name, organisation_registration, entity_type)
+
+                # STARTSWITH THE
+                elif result["name"].lower().startswith("the "):
+                    if result["name"].lower()[4:] == name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
+                        return (organisation_name, organisation_registration, entity_type)
+
+                # ENDSWITH (THE)
+                elif result["name"].lower().endswith("(the)"):
+                    if result["name"].lower()[:-5] == name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
+                        return (organisation_name, organisation_registration, entity_type)
 
                 # EXACT MATCH, BUT LESS THAN - MIN_WORD_LENGTH
                 elif result["name"].lower() == name.lower():
