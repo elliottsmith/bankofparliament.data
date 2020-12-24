@@ -5,17 +5,21 @@ Script to extract entity data from csv data
 # -*- coding: utf-8 -*-
 
 # sys libs
+import os
 import sys
 import argparse
 
 # local libs
 from bankofparliament.extraction import NamedEntityExtract
 from bankofparliament.utils import get_logger
-from apikeys import (
-    COMPANIES_HOUSE_APIKEY,
-    OPENCORPORATES_APIKEY,
-    CHARITIES_COMMISION_APIKEY,
-)
+
+# third party libs
+from dotenv import load_dotenv
+
+load_dotenv()
+COMPANIES_HOUSE_APIKEY = os.getenv("COMPANIES_HOUSE_APIKEY")
+OPENCORPORATES_APIKEY = os.getenv("OPENCORPORATES_APIKEY")
+CHARITIES_COMMISION_APIKEY = os.getenv("CHARITIES_COMMISION_APIKEY")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

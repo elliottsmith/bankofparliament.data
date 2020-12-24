@@ -5,13 +5,23 @@ Script to create neo4j database from entities and relationship
 # -*- coding: utf-8 -*-
 
 # sys libs
+import os
 import sys
 import argparse
 
 # local libs
 from bankofparliament.graphdb import GraphDB
 from bankofparliament.utils import get_logger
-from apikeys import NEO4J_HOST, NEO4J_BOLT_PORT, NEO4J_PASSWORD, NEO4J_USER
+
+# third party libs
+from dotenv import load_dotenv
+
+load_dotenv()
+NEO4J_HOST = os.getenv("NEO4J_HOST")
+NEO4J_BOLT_PORT = os.getenv("NEO4J_BOLT_PORT")
+NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
+NEO4J_USER = os.getenv("NEO4J_USER")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

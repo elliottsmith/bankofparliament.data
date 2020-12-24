@@ -12,8 +12,12 @@ import argparse
 # local libs
 from bankofparliament.download import Download
 from bankofparliament.utils import get_logger
-from apikeys import THEYWORKFORYOU_APIKEY
 
+# third party libs
+from dotenv import load_dotenv
+
+load_dotenv()
+THEYWORKFORYOU_APIKEY = os.getenv("THEYWORKFORYOU_APIKEY")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
