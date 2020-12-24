@@ -46,7 +46,7 @@ class GraphDB:
             _source = row["source"]
             _target = row["target"]
 
-            source_filter = entities["name"] == _source
+            source_filter = entities["name"].str.lower() == _source.lower()
             source_match = entities.loc[source_filter]
             if len(source_match):
                 source = source_match.to_dict(orient="records")[0]
@@ -161,6 +161,6 @@ class GraphDB:
         """Convert dictionary to cypher query arguments"""
         node_string = ""
         for key, value in data.items():
-            if key not in ["relationship_type", "entity_type"]:
+            if key not in ["relationship_type", "entity_type", "aliases"]:
                 node_string += '{}: "{}", '.format(key, value)
         return "{" + node_string[:-2] + "}"
