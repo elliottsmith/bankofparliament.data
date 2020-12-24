@@ -30,7 +30,6 @@ class NamedEntityExtract:
     """Class to extract entities from raw data"""
 
     ENTITY_CSV_TEMPLATE = "{}/entities.csv"
-    CUSTOM_ENTITY_CSV_TEMPLATE = "{}/custom.csv"
     RELATIONSHIPS_ENTITY_CSV_TEMPLATE = "{}/relationships.csv"
 
     # START = 6385 # lord's start
@@ -57,19 +56,18 @@ class NamedEntityExtract:
 
         self.prompt = prompt
         self.logger = logger
-        self.output_dir = (
-            os.path.dirname(entities)
-            if update
-            else os.path.join(os.path.dirname(entities), "extracted")
-        )
+        self.output_dir = os.path.join(os.path.dirname(entities), "extracted")
 
         # read in data
         _entities = read_csv_as_dataframe(entities)
         _relationships = read_csv_as_dataframe(relationships)
-        _custom_entities = read_csv_as_dataframe(custom_entities)
 
-        if not len(_custom_entities):
+        if custom_entities:
+            _custom_entities = read_csv_as_dataframe(custom_entities)
+            self.custom_path = custom_entities
+        else:
             _custom_entities = pandas.DataFrame(columns=_entities.columns)
+            self.custom_path = os.path.join(self.output_dir, "custom.csv")
 
         # dataframes
         self._entities = pandas.concat([_entities, _custom_entities], ignore_index=True)
@@ -99,8 +97,6 @@ class NamedEntityExtract:
 
     def execute(self):
         """Execute"""
-        self.backup_csv_files()
-        self.save_custom()
         self.extract_entities_from_relationships()
         self.save()
         self.log_output()
@@ -233,14 +229,15 @@ class NamedEntityExtract:
     def add_entity(self, entity):
         """Add entity data"""
         entity_name = entity["name"]
+
         if not self.get_entity_name_exists(entity_name):
             new_entity = pandas.DataFrame([entity])
-            self._entities = pandas.concat(
-                [self._entities, new_entity], ignore_index=True
+            self._extracted_entities = pandas.concat(
+                [self._extracted_entities, new_entity], ignore_index=True
             )
         else:
-            filt = self.entities["name"].str.lower() == entity_name.lower()
-            existing_entity = self.entities.loc[filt]
+            filt = self._extracted_entities["name"].str.lower() == entity_name.lower()
+            existing_entity = self._extracted_entities.loc[filt]
 
             existing_aliases = existing_entity["aliases"].to_list()[0].split(";")
 
@@ -251,7 +248,7 @@ class NamedEntityExtract:
                 self.logger.debug(
                     "Updating entity [{}] aliases: {}".format(entity_name, new_aliases)
                 )
-                self.entities.loc[filt, "aliases"] = ";".join(updated_aliases)
+                self._extracted_entities.loc[filt, "aliases"] = ";".join(updated_aliases)
 
     def add_custom_entity(self, entity):
         """Add to custom entities"""
@@ -450,21 +447,28 @@ class NamedEntityExtract:
     def save(self):
         """Dump the rows to csv"""
         # save out dataframes
+        self.save_custom()
+
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir)
+
         self._extracted_relationships.to_csv(
             self.RELATIONSHIPS_ENTITY_CSV_TEMPLATE.format(self.output_dir),
             index_label="id",
         )
+        self.logger.info("Saved Relationships: {}".format(self.RELATIONSHIPS_ENTITY_CSV_TEMPLATE.format(self.output_dir)))
+
         self._extracted_entities.to_csv(
             self.ENTITY_CSV_TEMPLATE.format(self.output_dir), index_label="id"
         )
-
-        self.save_custom()
-        self.logger.debug("Saved: {}".format(self.output_dir))
+        self.logger.info("Saved Entities: {}".format(self.ENTITY_CSV_TEMPLATE.format(self.output_dir)))
 
     def save_custom(self):
         """Dump the rows to csv"""
         # save out dataframes
-        self._extracted_custom_entities.to_csv(
-            self.CUSTOM_ENTITY_CSV_TEMPLATE.format(self.output_dir), index_label="id"
-        )
-        self.logger.debug("Saved: {}".format(self.output_dir))
+
+        if not os.path.dirname(self.custom_path):
+            os.makedirs(os.path.dirname(self.custom_path))
+
+        self._extracted_custom_entities.to_csv(self.custom_path, index_label="id")
+        self.logger.info("Saved Custom: {}".format(self.custom_path))
