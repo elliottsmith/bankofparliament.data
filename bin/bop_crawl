@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+"""
+Script to extract entity data from csv data
+"""
+# -*- coding: utf-8 -*-
+
+# sys libs
+import sys
+import argparse
+
+# local libs
+from bankofparliament.crawl import CrawlEntities
+from bankofparliament.utils import get_logger
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--debug",
+        help="Debug prints",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "--entities", help="Entities file", action="store", default=None
+    )
+
+    args = parser.parse_args()
+    if not args.entities:
+        sys.exit()
+
+    extract = CrawlEntities(
+        entities=args.entities,
+        logger=get_logger("crawl", args.debug),
+    )
+    extract.execute()
