@@ -213,12 +213,31 @@ def findthatcharity_by_name(name, logger, end_point="all"):
                 organisation_registration = result["id"]
                 _entity_type = result["type"][0]["id"]
 
-                if "charity" in _entity_type:
-                    entity_type = "charity"
-                elif "company" in _entity_type:
-                    entity_type = "company"
-                else:
-                    entity_type = _entity_type
+                entity_type = _entity_type
+
+                for i in ["charity", "charitable"]:
+                    if i in _entity_type:
+                        entity_type = "charity"
+
+                for i in ["company", "nonprofit"]:
+                    if i in _entity_type:
+                        entity_type = "company"
+
+                for i in ["education", "school", "academy", "college"]:
+                    if i in _entity_type:
+                        entity_type = "education"
+
+                for i in ["sports-club"]:
+                    if i in _entity_type:
+                        entity_type = "sport"
+
+                for i in ["building-society", "facility", "other", "archive", "social-housing"]:
+                    if i in _entity_type:
+                        entity_type = "misc"
+
+                for i in ["health-society"]:
+                    if i in _entity_type:
+                        entity_type = "health"
 
                 # EXACT MATCH, EQUAL TO OR GREATER THAN - MIN_WORD_LENGTH
                 if (
