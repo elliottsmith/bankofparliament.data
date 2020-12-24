@@ -324,14 +324,14 @@ def findthatcharity_by_name(name, logger, end_point="all"):
     return (None, None, None)
 
 
-def findcorporate_by_name(name, logger):
+def findcorporate_by_name(name, logger, jurisdiction="gb"):
     """Find a registered corporate by name"""
     MIN_WORD_LENGTH = 2
     ALPHANUMERIC = re.compile(r"[\W_]+")
     ELASTIC_MIN_SCORE = 9
 
     entity_type = "company"
-    opencorporates_reconcile = reconcile_opencorporates_entity_by_name(name, logger)
+    opencorporates_reconcile = reconcile_opencorporates_entity_by_name(name, logger, jurisdiction=jurisdiction)
     if opencorporates_reconcile:
         results = opencorporates_reconcile["result"]
 
@@ -461,7 +461,7 @@ def find_organisation_by_name(name, companies_house_apikey, logger):
         return (organisation_name, organisation_registration, entity_type)
 
     (organisation_name, organisation_registration, entity_type) = findcorporate_by_name(
-        name, logger
+        name, logger, jurisdiction="all"
     )
     if any((organisation_name, organisation_registration, entity_type)):
         return (organisation_name, organisation_registration, entity_type)
