@@ -337,7 +337,7 @@ SINGLE_INDICATORS = [
     "for consultancy work",
     "royalties of",
     "expected for a survey",
-    "I drew £",
+    "i drew £",
 ]
 
 # constitutional state powers indentifiers
@@ -370,6 +370,8 @@ CHURCH_OF_ENGLAND_IDENTIFIERS = [
     "Church Commissioners",
     "Prelate",
     "Westminster Abbey",
+    "Church Commissioner",
+    "Guild of Vergers",
 ]
 
 ARMED_FORCES_IDENTIFIERS = [
