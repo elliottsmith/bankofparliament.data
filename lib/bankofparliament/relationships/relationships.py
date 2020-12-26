@@ -3,6 +3,9 @@ Module for relationships
 """
 # -*- coding: utf-8 -*-
 
+# sys libs
+import string
+
 # local libs
 from .base import BaseRelationship
 from ..text import eval_string_as_list
@@ -41,8 +44,9 @@ class TextRelationship(BaseRelationship):
     def strip_endswith(self, text):
         """Strip vaules from end of text"""
         for ender in sorted(self.ENDERS, key=len, reverse=True):
-            ender = " {}".format(ender)
-            if text.endswith(ender):
+            if not ender in string.punctuation:
+                ender = " {}".format(ender)
+            if text.lower().endswith(ender.lower()):
                 text = text[: -len(ender)]
         return text.strip()
 
