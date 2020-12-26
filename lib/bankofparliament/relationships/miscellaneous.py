@@ -37,7 +37,7 @@ class Miscellaneous(TextRelationship):
     SPLITTERS = ["trading as ", "investee companies", ";"]
     STARTERS = ["and", "of", "of the", "member of the"]
     ENDERS = ["."]
-    REPLACE = [("  ", " "), (" & ", " and "), ("unpaid", "")]
+    REPLACE = [("  ", " "), ("unpaid", "")]
     NER_TYPES = ["ORG", "PERSON"]
     ALIAS_ENTITY_TYPES = ENTITY_TYPES
     PREFERRED_ALIAS_ENTITY_TYPES = ["company", "pollster"]

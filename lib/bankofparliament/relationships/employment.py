@@ -42,7 +42,7 @@ class Employment(TextRelationship):
     SPLITTERS = ["speaker", "engagement", "speaking"]
     STARTERS = ["and ", ",", "of ", "in ", "group"]
     ENDERS = ["."]
-    REPLACE = [("  ", " "), (" & ", " and ")]
+    REPLACE = [("  ", " "), ("unpaid", "")]
     NER_TYPES = ["ORG"]
     EXCLUDE_FROM_SEARCHING = ["solicitor"]
     EXCLUDE_FROM_NLP = ["house limited", "group limited", "house ltd"]

@@ -15,7 +15,7 @@ class TextRelationship(BaseRelationship):
     SPLITTERS = []
     STARTERS = []
     ENDERS = []
-    REPLACE = [("  ", " "), (" & ", " and ")]
+    REPLACE = [("  ", " ")]
     NER_TYPES = []
     ALIAS_ENTITY_TYPES = []
 

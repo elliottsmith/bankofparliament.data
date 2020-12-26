@@ -22,7 +22,6 @@ class Directorship(TextRelationship):
     SPLITTERS = ["trading as ", "investee companies", ";"]
     STARTERS = ["and ", ", ", "of "]
     ENDERS = ["."]
-    REPLACE = [("  ", " "), (" & ", " and "), ("unpaid", "")]
     NER_TYPES = ["ORG"]
     ALIAS_ENTITY_TYPES = POLLITICAL_ENTITIES + OTHER_ENTITIES
 

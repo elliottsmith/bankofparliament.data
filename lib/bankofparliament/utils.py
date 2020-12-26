@@ -196,7 +196,7 @@ def get_universities(logger):
 def findthatcharity_by_name(name, logger, end_point="all"):
     """Find a registered charity/university/local authority etc by name"""
     MIN_WORD_LENGTH = 2
-    ALPHANUMERIC = re.compile(r"[\W_]+")
+    ALPHANUMERIC = re.compile(r"[\W_ ]+")
     ELASTIC_MIN_SCORE = 999
 
     findthatcharity_reconcile = reconcile_findthatcharity_entity_by_name(
@@ -287,13 +287,24 @@ def findthatcharity_by_name(name, logger, end_point="all"):
                     return (organisation_name, organisation_registration, entity_type)
 
                 # STARTSWITH THE
-                elif result["name"].lower().startswith("the "):
-                    if result["name"].lower()[4:] == name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
+                elif _name.lower().startswith("the "):
+                    print(_name.lower()[4:])
+                    print(name.lower())
+                    if _name.lower()[4:] == name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
                         return (organisation_name, organisation_registration, entity_type)
+                    if _name.lower()[4:] in name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
+                        possibles.append(result)
 
                 # ENDSWITH (THE)
-                elif result["name"].lower().endswith("(the)"):
-                    if result["name"].lower()[:-5] == name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
+                elif _name.lower().endswith("(the)"):
+                    if _name.lower()[:-5] == name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
+                        return (organisation_name, organisation_registration, entity_type)
+                    if _name.lower()[:-5] in name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
+                        possibles.append(result)
+
+                # ENDSWITH DOT
+                elif _name.lower().endswith("."):
+                    if _name.lower()[:-1] == name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
                         return (organisation_name, organisation_registration, entity_type)
 
                 # EXACT MATCH, BUT LESS THAN - MIN_WORD_LENGTH
@@ -330,7 +341,7 @@ def findthatcharity_by_name(name, logger, end_point="all"):
 def findcorporate_by_name(name, logger, jurisdiction="gb"):
     """Find a registered corporate by name"""
     MIN_WORD_LENGTH = 2
-    ALPHANUMERIC = re.compile(r"[\W_]+")
+    ALPHANUMERIC = re.compile(r"[\W_ ]+")
     ELASTIC_MIN_SCORE = 9
 
     entity_type = "company"
@@ -423,11 +434,20 @@ def findcorporate_by_name(name, logger, jurisdiction="gb"):
                 elif result["name"].lower().startswith("the "):
                     if result["name"].lower()[4:] == name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
                         return (organisation_name, organisation_registration, entity_type)
+                    if result["name"].lower()[4:] in name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
+                        possibles.append(result)
 
                 # ENDSWITH (THE)
                 elif result["name"].lower().endswith("(the)"):
                     if result["name"].lower()[:-5] == name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
                         return (organisation_name, organisation_registration, entity_type)
+                    if result["name"].lower()[:-5] in name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
+                        possibles.append(result)
+
+                # # ENDSWITH DOT
+                # elif result["name"].lower().endswith("."):
+                #     if result["name"].lower()[:-1] == name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
+                #         return (organisation_name, organisation_registration, entity_type)
 
                 # EXACT MATCH, BUT LESS THAN - MIN_WORD_LENGTH
                 elif result["name"].lower() == name.lower():
