@@ -49,7 +49,6 @@ class BaseRelationship:
         entities,
         nlp,
         companies_house_apikey,
-        opencorporates_apikey,
         prompt,
         logger,
         parent,
@@ -62,7 +61,6 @@ class BaseRelationship:
         self.entities = entities
         self.nlp = nlp
         self.companies_house_apikey = companies_house_apikey
-        self.opencorporates_apikey = opencorporates_apikey
         self.prompt = prompt
         self.logger = logger
         self.parent = parent
@@ -165,11 +163,16 @@ class BaseRelationship:
                     amounts.append(re.sub("[^0-9]", "", pounds))
         if amounts:
             return max(amounts)
+
+        match = re.search("(£[0-9,.]+)|([0-9]+.[0-9][0-9])", text)
+        if match:
+            _amount = match.group().split(".")[0]
+            _amount = re.sub("[^0-9]", "", _amount)
+            return(_amount)
         return 0
 
     def find_single_payment_from_text(self, text):
         """Find a single payment within text"""
-
         if self.amount:
             # search for single payment
             if self.single_payment_regex.search(text.lower()):
@@ -289,6 +292,13 @@ class BaseRelationship:
 
     def find_organisation_from_text(self, text):
         """Find any organistation from text"""
+
+        try:
+            text = eval_string_as_list(text)[0]
+        except:
+            text = text
+
+
         (
             organisation_name,
             organisation_registration,
@@ -569,51 +579,53 @@ class BaseRelationship:
         ):
             for alias in aliases.split(";"):
                 alias = alias.strip().lower()
-                if len(alias.split()) > 1 or etype in self.ACCEPTED_SINGLE_MATCHES:
+                # if len(alias.split()) > 1 or etype in self.ACCEPTED_SINGLE_MATCHES:
+                #     pass
 
-                    # does the word match exactly
-                    if text == alias:
+                # does the word match exactly
+                if text == alias:
+                    if prefered_entity_types:
+                        _aliases.append((etype, name.upper()))
+                    else:
+                        return name.upper()
+
+                # does the word exist at the start of the string, with a space following
+                start_alias = "{} ".format(alias)
+                if text.startswith(start_alias):
+                    if prefered_entity_types:
+                        _aliases.append((etype, name.upper()))
+                    else:
+                        return name.upper()
+
+                # does the word exist at the end of the string, precedding with a space
+                end_alias = " {}".format(alias)
+                if text.endswith(end_alias):
+                    if prefered_entity_types:
+                        _aliases.append((etype, name.upper()))
+                    else:
+                        return name.upper()
+
+                in_patterns = [
+                    " {} ",
+                    " {},",
+                    " {}.",
+                    " {};",
+                    " {}'",
+                    " {}’",
+                    "{})",
+                    "{};",
+                    "{}.",
+                    "{},",
+                    '{}"',
+                ]
+                # does the pattern exist in the text
+                for _pattern in in_patterns:
+                    pattern = _pattern.format(alias)
+                    if pattern in text:
                         if prefered_entity_types:
                             _aliases.append((etype, name.upper()))
                         else:
                             return name.upper()
-
-                    # does the word exist at the start of the string, with a space following
-                    start_alias = "{} ".format(alias)
-                    if text.startswith(start_alias):
-                        if prefered_entity_types:
-                            _aliases.append((etype, name.upper()))
-                        else:
-                            return name.upper()
-
-                    # does the word exist at the end of the string, precedding with a space
-                    end_alias = " {}".format(alias)
-                    if text.endswith(end_alias):
-                        if prefered_entity_types:
-                            _aliases.append((etype, name.upper()))
-                        else:
-                            return name.upper()
-
-                    in_patterns = [
-                        " {} ",
-                        " {},",
-                        " {}.",
-                        " {};",
-                        " {}'",
-                        " {}’",
-                        "{})",
-                        "{};",
-                        "{}.",
-                        "{},",
-                    ]
-                    # does the pattern exist in the text
-                    for _pattern in in_patterns:
-                        pattern = _pattern.format(alias)
-                        if pattern in text:
-                            if prefered_entity_types:
-                                _aliases.append((etype, name.upper()))
-                            else:
-                                return name.upper()
 
         if prefered_entity_types and _aliases:
             best_match = None
