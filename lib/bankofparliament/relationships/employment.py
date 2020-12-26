@@ -45,6 +45,7 @@ class Employment(TextRelationship):
     REPLACE = [("  ", " "), (" & ", " and ")]
     NER_TYPES = ["ORG"]
     EXCLUDE_FROM_SEARCHING = ["solicitor"]
+    EXCLUDE_FROM_NLP = ["house limited", "group limited", "house ltd"]
 
     def cleanup(self):
         """Clean the text prior to solving"""
@@ -129,7 +130,7 @@ class Employment(TextRelationship):
 
         names_to_try = []
         for nlp in nlp_names + [self.text]:
-            if not nlp in POSITIONS and len(nlp.split()) > 1:
+            if not nlp in POSITIONS and len(nlp.split()) > 1 and nlp.lower() not in self.EXCLUDE_FROM_NLP:
                 names_to_try.append(nlp)
 
         names_to_try = sorted(list(set(names_to_try)), reverse=True)

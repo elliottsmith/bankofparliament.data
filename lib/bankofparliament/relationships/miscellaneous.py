@@ -42,6 +42,7 @@ class Miscellaneous(TextRelationship):
     ALIAS_ENTITY_TYPES = ENTITY_TYPES
     PREFERRED_ALIAS_ENTITY_TYPES = ["company", "pollster"]
     EXCLUDE_FROM_SEARCHING = ["solicitor"]
+    EXCLUDE_FROM_NLP = ["house limited", "group limited", "house ltd"]
 
     def cleanup(self):
         """Clean the text prior to solving"""
@@ -113,8 +114,8 @@ class Miscellaneous(TextRelationship):
         )
 
         names_to_try = []
-        for nlp in nlp_names + [self.text]:
-            if not nlp in POSITIONS and len(nlp.split()) > 1:
+        for nlp in nlp_names + [self.text, self.relationship["text"]]:
+            if not nlp in POSITIONS and len(nlp.split()) > 1 and nlp.lower() not in self.EXCLUDE_FROM_NLP:
                 names_to_try.append(nlp)
 
         names_to_try = sorted(list(set(names_to_try)), reverse=False)
