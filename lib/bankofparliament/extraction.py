@@ -323,29 +323,39 @@ class NamedEntityExtract:
             opencorporates_registration = None
             findthatcharity_registration = None
 
-            registered_link = input("COMPANY URL: ")
+            registered_link = input("LINK: ")
             if registered_link:
-                (
-                    opencorporates_registration,
-                    entity_type,
-                ) = get_registration_number_from_link(registered_link)
+
+                _guess_type = None
 
                 if "service.gov.uk" in registered_link:
+                    opencorporates_registration = registered_link.split("/")[-1]
                     entity_name = reconcile_opencorporates_entity_by_id(
                         opencorporates_registration,
                         self.logger,
                     )
+                    _guess_type = "company"
+
                 elif "opencorporates" in registered_link:
+                    opencorporates_registration = registered_link.split("/")[-1]
                     entity_name = reconcile_opencorporates_entity_by_id(
                         registered_link.split("opencorporates.com")[-1], self.logger
                     )
+                    _guess_type = "company"
 
-                # elif "findthatcharity.uk" in registered_link:
-                #     entity_name = reconcile_findthatcharity_entity_by_id(
-                #         registered_number, self.logger
-                #     )
+                elif "findthatcharity.uk" in registered_link:
 
-                entity_type = input("NEW ENTITY TYPE: ")
+                    findthatcharity_registration = registered_link.split("/")[-1]
+                    entity_name = reconcile_findthatcharity_entity_by_id(
+                        findthatcharity_registration, self.logger
+                    )
+                    _guess_type = "charity"
+
+                _entity_type = input("NEW ENTITY TYPE ({}): ".format(_guess_type))
+                if _entity_type == "y":
+                    entity_type = _guess_type
+                else:
+                    entity_type = _entity_type
 
             else:
                 entity_name = input("NEW ENTITY: ")

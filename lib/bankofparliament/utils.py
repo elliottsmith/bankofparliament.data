@@ -161,13 +161,22 @@ def reconcile_opencorporates_entity_by_id(_id, logger):
         soup = BeautifulSoup(html, features="lxml")
         title = soup.find(id="oc-flyout-title")
         if title:
-            return title.text
+            return title.text.strip()
     return None
 
 
-def reconcile_findthatcharity_entity_by_id(_id, logger):
+def reconcile_findthatcharity_entity_by_id(_id, logger, end_point="all"):
     """Reconcile a findthatcharity id to an findthatcharity record"""
-    raise NotImplementedError
+    logger.debug("reconcile_findthatcharity_entity_by_id: {}".format(_id))
+
+    url = "https://findthatcharity.uk/orgid/{}".format(_id)
+    html = scraperwiki.scrape(url)
+    soup = BeautifulSoup(html, features="lxml")
+
+    _name = soup.find("h2")
+    if _name:
+        return _name.text.strip()
+    return None
 
 
 def get_government_organisations(logger):
