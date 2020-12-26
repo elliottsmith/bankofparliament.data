@@ -210,6 +210,7 @@ POSITIONS = [
     "Co-owner and Chairman of Advisory Board",
     "Member of the",
     "Speaking engagement",
+    "Trustee of"
 ]
 
 RECURRING_INDICATORS = [
@@ -338,6 +339,7 @@ SINGLE_INDICATORS = [
     "royalties of",
     "expected for a survey",
     "i drew £",
+    "received:",
 ]
 
 # constitutional state powers indentifiers
@@ -402,16 +404,17 @@ GOVERNMENT_IDENTIFIERS = [
     "Independent Oversight Panel to review the use of seclusion and segregation",
 ]
 
-LOCAL_GOVERNMENT_IDENTIFIERS = ["council", "borough", "councillor"]
-
 STATE_POWERS_IDENTIFIERS = (
     CROWN_IDENTIFIERS
     + JURDICARY_IDENTIFIERS
+    + CHURCH_OF_ENGLAND_IDENTIFIERS
     + ARMED_FORCES_IDENTIFIERS
     + GOVERNMENT_IDENTIFIERS
 )
 
 # non constitutional identifiers
+LOCAL_GOVERNMENT_IDENTIFIERS = ["council", "borough", "councillor"]
+
 CHARITY_IDENTIFIERS = [
     "charity",
     "charitable",
