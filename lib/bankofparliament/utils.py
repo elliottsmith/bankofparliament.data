@@ -241,7 +241,13 @@ def findthatcharity_by_name(name, logger, end_point="all"):
                     if i in _entity_type:
                         entity_type = "sport"
 
-                for i in ["building-society", "facility", "other", "archive", "social-housing"]:
+                for i in [
+                    "building-society",
+                    "facility",
+                    "other",
+                    "archive",
+                    "social-housing",
+                ]:
                     if i in _entity_type:
                         entity_type = "misc"
 
@@ -249,7 +255,7 @@ def findthatcharity_by_name(name, logger, end_point="all"):
                     if i in _entity_type:
                         entity_type = "health"
 
-                matched_corporate = result_matches_query(_name , name, logger)
+                matched_corporate = result_matches_query(_name, name, logger)
                 if matched_corporate:
                     return (matched_corporate, organisation_registration, entity_type)
 
@@ -261,7 +267,9 @@ def findcorporate_by_name(name, logger, jurisdiction="gb"):
     ELASTIC_MIN_SCORE = 9
 
     entity_type = "company"
-    opencorporates_reconcile = reconcile_opencorporates_entity_by_name(name, logger, jurisdiction=jurisdiction)
+    opencorporates_reconcile = reconcile_opencorporates_entity_by_name(
+        name, logger, jurisdiction=jurisdiction
+    )
     if opencorporates_reconcile:
         results = opencorporates_reconcile["result"]
 
@@ -343,9 +351,7 @@ def search_companies_house(
         _id = item["links"]["self"].split("/")[-1]
         _snippet = item["snippet"] if "snippet" in i else None
 
-        logger.debug(
-            "COMPANIES HOUSE: {}, {} [{}]".format(_name, _id, _snippet)
-        )
+        logger.debug("COMPANIES HOUSE: {}, {} [{}]".format(_name, _id, _snippet))
 
         matched_corporate = result_matches_query(_name, query, logger)
         if matched_corporate:

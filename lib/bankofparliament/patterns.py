@@ -210,7 +210,7 @@ POSITIONS = [
     "Co-owner and Chairman of Advisory Board",
     "Member of the",
     "Speaking engagement",
-    "Trustee of"
+    "Trustee of",
 ]
 
 RECURRING_INDICATORS = [

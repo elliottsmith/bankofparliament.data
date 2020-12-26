@@ -13,6 +13,7 @@ from bankofparliament.crawl import CrawlEntities
 from bankofparliament.utils import get_logger
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 if __name__ == "__main__":

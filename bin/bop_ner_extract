@@ -30,23 +30,27 @@ if __name__ == "__main__":
         action="store_true",
         default=False,
     )
-    parser.add_argument("-e",
-        "--entities", help="Entities file", action="store", default=None
+    parser.add_argument(
+        "-e", "--entities", help="Entities file", action="store", default=None
     )
-    parser.add_argument("-r",
-        "--relationships", help="Relationships file", action="store", default=None
+    parser.add_argument(
+        "-r", "--relationships", help="Relationships file", action="store", default=None
     )
-    parser.add_argument("-c",
-        "--custom_entities", help="Custom entities file", action="store", default=None
+    parser.add_argument(
+        "-c",
+        "--custom_entities",
+        help="Custom entities file",
+        action="store",
+        default=None,
     )
-    parser.add_argument("-p",
-        "--prompt", help="Prompt input", action="store_true", default=False
+    parser.add_argument(
+        "-p", "--prompt", help="Prompt input", action="store_true", default=False
     )
-    parser.add_argument("-f",
-        "--from_index", help="From index", action="store", default=0, type=int
+    parser.add_argument(
+        "-f", "--from_index", help="From index", action="store", default=0, type=int
     )
-    parser.add_argument("-t",
-        "--to_index", help="To index", action="store", default=-1, type=int
+    parser.add_argument(
+        "-t", "--to_index", help="To index", action="store", default=-1, type=int
     )
 
     args = parser.parse_args()

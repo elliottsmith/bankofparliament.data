@@ -168,7 +168,7 @@ class BaseRelationship:
         if match:
             _amount = match.group().split(".")[0]
             _amount = re.sub("[^0-9]", "", _amount)
-            return(_amount)
+            return _amount
         return 0
 
     def find_single_payment_from_text(self, text):
@@ -297,7 +297,6 @@ class BaseRelationship:
             text = eval_string_as_list(text)[0]
         except:
             text = text
-
 
         (
             organisation_name,

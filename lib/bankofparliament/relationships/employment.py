@@ -103,7 +103,11 @@ class Employment(TextRelationship):
 
         # nlp names
         for nlp in nlp_names:
-            if not nlp in POSITIONS and len(nlp.split()) > 1 and nlp.lower() not in self.EXCLUDE_FROM_NLP:
+            if (
+                not nlp in POSITIONS
+                and len(nlp.split()) > 1
+                and nlp.lower() not in self.EXCLUDE_FROM_NLP
+            ):
                 names_to_try.append(nlp)
 
         # original text - last

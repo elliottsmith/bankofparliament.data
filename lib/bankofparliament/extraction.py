@@ -63,7 +63,7 @@ class NamedEntityExtract:
 
         # dataframes
         self._entities = pandas.concat([_entities, _custom_entities], ignore_index=True)
-        self._relationships = _relationships[from_index : to_index]
+        self._relationships = _relationships[from_index:to_index]
 
         # output dataframes
         self._extracted_entities = self._entities
