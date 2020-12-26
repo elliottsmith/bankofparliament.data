@@ -112,7 +112,10 @@ def reconcile_opencorporates_entity_by_name(
     logger.debug("reconcile_opencorporates_entity_by_name: {}".format(name))
     query = {"q0": {"query": name, "limit": limit}}
     _query = json.dumps(query)
-    params = {"queries": [_query], "jurisdiction_code": jurisdiction}
+    if jurisdiction:
+        params = {"queries": [_query], "jurisdiction_code": jurisdiction}
+    else:
+        params = {"queries": [_query]}
 
     request = get_request(
         OPENCORPORATES_RECONCILE_URL, logger, user=None, headers=HEADERS, params=params
@@ -461,7 +464,7 @@ def find_organisation_by_name(name, companies_house_apikey, logger):
         return (organisation_name, organisation_registration, entity_type)
 
     (organisation_name, organisation_registration, entity_type) = findcorporate_by_name(
-        name, logger, jurisdiction="all"
+        name, logger, jurisdiction=None
     )
     if any((organisation_name, organisation_registration, entity_type)):
         return (organisation_name, organisation_registration, entity_type)
