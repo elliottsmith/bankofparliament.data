@@ -35,6 +35,8 @@ from .constants import (
     RELATIONSHIP_TEMPLATE,
 )
 
+from .text import result_matches_query
+
 # global requests session
 session = requests.Session()
 
@@ -204,8 +206,6 @@ def get_universities(logger):
 # finder functions
 def findthatcharity_by_name(name, logger, end_point="all"):
     """Find a registered charity/university/local authority etc by name"""
-    MIN_WORD_LENGTH = 2
-    ALPHANUMERIC = re.compile(r"[\W_ ]+")
     ELASTIC_MIN_SCORE = 999
 
     findthatcharity_reconcile = reconcile_findthatcharity_entity_by_name(
@@ -214,14 +214,12 @@ def findthatcharity_by_name(name, logger, end_point="all"):
     if findthatcharity_reconcile:
         results = findthatcharity_reconcile["result"]
 
-        possibles = []
         for result in sorted(results, key=operator.itemgetter("score"), reverse=True):
             logger.debug("CHARITY: {} {}".format(result["name"], result["score"]))
 
             if result["score"] > ELASTIC_MIN_SCORE:
                 _name = result["name"].split("({})".format(result["id"]))[0].strip()
 
-                organisation_name = _name.upper()
                 organisation_registration = result["id"]
                 _entity_type = result["type"][0]["id"]
 
@@ -251,106 +249,15 @@ def findthatcharity_by_name(name, logger, end_point="all"):
                     if i in _entity_type:
                         entity_type = "health"
 
-                # EXACT MATCH, EQUAL TO OR GREATER THAN - MIN_WORD_LENGTH
-                if (
-                    _name.lower() == name.lower()
-                    and len(name.split()) >= MIN_WORD_LENGTH
-                ):
-                    return (organisation_name, organisation_registration, entity_type)
-
-                # AND NOT AMPERSAND
-                elif " & " in name.lower():
-                    if (
-                        result["name"].lower()
-                        in name.lower().replace(" & ", " and ")
-                        and len(result["name"].split()) >= MIN_WORD_LENGTH
-                        and len(name.split()) >= MIN_WORD_LENGTH
-                    ):
-                        return (
-                            organisation_name,
-                            organisation_registration,
-                            entity_type,
-                        )
-
-                # AMPERSAND NOT AND
-                elif " and " in name.lower():
-                    if (
-                        result["name"].lower()
-                        in name.lower().replace(" and ", " & ")
-                        and len(result["name"].split()) >= MIN_WORD_LENGTH
-                        and len(name.split()) >= MIN_WORD_LENGTH
-                    ):
-                        return (
-                            organisation_name,
-                            organisation_registration,
-                            entity_type,
-                        )
-
-                # ALPHANUMERIC MATCH,
-                _alpha_name = ALPHANUMERIC.sub("", name)
-                _alpha_result = ALPHANUMERIC.sub("", _name)
-                if (
-                    _alpha_name.lower() == _alpha_result.lower()
-                    and len(name.split()) >= MIN_WORD_LENGTH
-                ):
-                    return (organisation_name, organisation_registration, entity_type)
-
-                # STARTSWITH THE
-                elif _name.lower().startswith("the "):
-                    print(_name.lower()[4:])
-                    print(name.lower())
-                    if _name.lower()[4:] == name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
-                        return (organisation_name, organisation_registration, entity_type)
-                    if _name.lower()[4:] in name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
-                        possibles.append(result)
-
-                # ENDSWITH (THE)
-                elif _name.lower().endswith("(the)"):
-                    if _name.lower()[:-5] == name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
-                        return (organisation_name, organisation_registration, entity_type)
-                    if _name.lower()[:-5] in name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
-                        possibles.append(result)
-
-                # ENDSWITH DOT
-                elif _name.lower().endswith("."):
-                    if _name.lower()[:-1] == name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
-                        return (organisation_name, organisation_registration, entity_type)
-
-                # EXACT MATCH, BUT LESS THAN - MIN_WORD_LENGTH
-                elif _name.lower() == name.lower():
-                    if name.lower() in ["care"]:
-                        return (
-                            organisation_name,
-                            organisation_registration,
-                            entity_type,
-                        )
-                    else:
-                        possibles.insert(0, result)
-
-                # SUBSTRING MATCH, GREATER THAN - MIN_WORD_LENGTH
-                elif (
-                    _name.lower() in name.lower()
-                    and len(name.split()) >= MIN_WORD_LENGTH
-                ):
-                    possibles.append(result)
-
-        if possibles:
-            for poss in possibles:
-                logger.warning(
-                    "{}".format(
-                        colorize(
-                            "Possible Charity: {}".format(poss["name"]), "light red"
-                        )
-                    )
-                )
+                matched_corporate = result_matches_query(result["name"], name, logger)
+                if matched_corporate:
+                    return (matched_corporate, organisation_registration, entity_type)
 
     return (None, None, None)
 
 
 def findcorporate_by_name(name, logger, jurisdiction="gb"):
     """Find a registered corporate by name"""
-    MIN_WORD_LENGTH = 2
-    ALPHANUMERIC = re.compile(r"[\W_ ]+")
     ELASTIC_MIN_SCORE = 9
 
     entity_type = "company"
@@ -358,126 +265,16 @@ def findcorporate_by_name(name, logger, jurisdiction="gb"):
     if opencorporates_reconcile:
         results = opencorporates_reconcile["result"]
 
-        possibles = []
         for result in sorted(results, key=operator.itemgetter("score"), reverse=True):
             logger.debug("CORPORATE: {} {}".format(result["name"], result["score"]))
 
             if result["score"] > ELASTIC_MIN_SCORE:
 
-                organisation_name = result["name"].upper()
                 organisation_registration = result["id"].split("/")[-1]
 
-                # EXACT MATCH, EQUAL TO OR GREATER THAN - MIN_WORD_LENGTH
-                if (
-                    result["name"].lower() == name.lower()
-                    and len(name.split()) >= MIN_WORD_LENGTH
-                ):
-                    return (organisation_name, organisation_registration, entity_type)
-
-                # LTD NOT LIMITED
-                if " limited" in name.lower():
-                    if (
-                        result["name"].lower()
-                        in name.lower().replace(" limited", " ltd")
-                        and len(result["name"].split()) >= MIN_WORD_LENGTH
-                        and len(name.split()) >= MIN_WORD_LENGTH
-                    ):
-                        return (
-                            organisation_name,
-                            organisation_registration,
-                            entity_type,
-                        )
-
-                # LIMITED NOT LTD
-                elif " ltd" in name.lower():
-                    if (
-                        result["name"].lower()
-                        in name.lower().replace(" ltd", " limited")
-                        and len(result["name"].split()) >= MIN_WORD_LENGTH
-                        and len(name.split()) >= MIN_WORD_LENGTH
-                    ):
-                        return (
-                            organisation_name,
-                            organisation_registration,
-                            entity_type,
-                        )
-
-                # AND NOT AMPERSAND
-                elif " & " in name.lower():
-                    if (
-                        result["name"].lower()
-                        in name.lower().replace(" & ", " and ")
-                        and len(result["name"].split()) >= MIN_WORD_LENGTH
-                        and len(name.split()) >= MIN_WORD_LENGTH
-                    ):
-                        return (
-                            organisation_name,
-                            organisation_registration,
-                            entity_type,
-                        )
-
-                # AMPERSAND NOT AND
-                elif " and " in name.lower():
-                    if (
-                        result["name"].lower()
-                        in name.lower().replace(" and ", " & ")
-                        and len(result["name"].split()) >= MIN_WORD_LENGTH
-                        and len(name.split()) >= MIN_WORD_LENGTH
-                    ):
-                        return (
-                            organisation_name,
-                            organisation_registration,
-                            entity_type,
-                        )
-
-                # ALPHANUMERIC MATCH,
-                _alpha_name = ALPHANUMERIC.sub("", name)
-                _alpha_result = ALPHANUMERIC.sub("", result["name"])
-                if (
-                    _alpha_name.lower() == _alpha_result.lower()
-                    and len(name.split()) >= MIN_WORD_LENGTH
-                ):
-                    return (organisation_name, organisation_registration, entity_type)
-
-                # STARTSWITH THE
-                elif result["name"].lower().startswith("the "):
-                    if result["name"].lower()[4:] == name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
-                        return (organisation_name, organisation_registration, entity_type)
-                    if result["name"].lower()[4:] in name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
-                        possibles.append(result)
-
-                # ENDSWITH (THE)
-                elif result["name"].lower().endswith("(the)"):
-                    if result["name"].lower()[:-5] == name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
-                        return (organisation_name, organisation_registration, entity_type)
-                    if result["name"].lower()[:-5] in name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
-                        possibles.append(result)
-
-                # # ENDSWITH DOT
-                # elif result["name"].lower().endswith("."):
-                #     if result["name"].lower()[:-1] == name.lower() and len(name.split()) >= MIN_WORD_LENGTH:
-                #         return (organisation_name, organisation_registration, entity_type)
-
-                # EXACT MATCH, BUT LESS THAN - MIN_WORD_LENGTH
-                elif result["name"].lower() == name.lower():
-                    possibles.insert(0, result)
-
-                # SUBSTRING MATCH, GREATER THAN - MIN_WORD_LENGTH
-                elif (
-                    result["name"].lower() in name.lower()
-                    and len(name.split()) > MIN_WORD_LENGTH
-                ):
-                    possibles.append(result)
-
-        if possibles:
-            for poss in possibles:
-                logger.warning(
-                    "{}".format(
-                        colorize(
-                            "Possible Company: {}".format(poss["name"]), "light red"
-                        )
-                    )
-                )
+                matched_corporate = result_matches_query(result["name"], name, logger)
+                if matched_corporate:
+                    return (matched_corporate, organisation_registration, entity_type)
 
     return (None, None, None)
 
@@ -497,13 +294,6 @@ def find_organisation_by_name(name, companies_house_apikey, logger):
     )
     if any((organisation_name, organisation_registration, entity_type)):
         return (organisation_name, organisation_registration, entity_type)
-
-    # try locally in companies house
-    companies_house_search = search_companies_house(
-        name, companies_house_apikey, logger, query_type="companies"
-    )
-    if companies_house_search:
-        return companies_house_search
 
     return (None, None, None)
 
@@ -547,27 +337,24 @@ def search_companies_house(
         return (None, None, None)
 
     data = request.json()
-    for i in data["items"]:
-        title = i["title"].lower().strip()
-        snippet = i["snippet"].lower().strip() if "snippet" in i else None
+    for item in data["items"]:
+
+        _name = item["title"]
+        _id = item["links"]["self"].split("/")[-1]
+        _snippet = item["snippet"] if "snippet" in i else None
+
         logger.debug(
-            "COMPANIES HOUSE: {}, {} [{}]".format(
-                i["title"], i["links"]["self"].split("/")[-1], snippet
-            )
+            "COMPANIES HOUSE: {}, {} [{}]".format(_name, _id, _snippet)
         )
 
-        if (
-            title in query
-            or title.replace("ltd", "limited") in query.replace("ltd", "limited")
-            or title.replace(".", "") in query.replace(".", "")
-            and len(snippet) > 2
-        ):
-            result = (i["title"].upper(), i["links"]["self"].split("/")[-1], "company")
-            return result
+        matched_corporate = result_matches_query(_name, query, logger)
+        if matched_corporate:
+            return (matched_corporate.upper(), _id, "company")
 
-        if snippet and snippet in query and len(snippet) > 2:
-            result = (i["title"].upper(), i["links"]["self"].split("/")[-1], "company")
-            return result
+        if _snippet:
+            snippet_matched = result_matches_query(_snippet, query, logger)
+            if snippet_matched:
+                return (snippet_matched.upper(), _id, "company")
 
     return (None, None, None)
 

@@ -6,11 +6,18 @@ Text cleanup
 # sys libs
 import re
 import ast
+import string
 
 # local libs
 from .patterns import IN_PARENTHESIS, POSITIONS
 from .constants import COMPANIES_HOUSE_PREFIXES
 
+# third party
+from cleanco import prepare_terms, basename
+from nltk.corpus import stopwords
+from nltk import word_tokenize
+
+terms = prepare_terms()
 
 def eval_string_as_list(string_list):
     """Eval the string to list"""
@@ -263,3 +270,58 @@ def get_property_multiplier(text):
             if "{} ".format(identifier).lower() in text.lower():
                 return multiplier
     return 1
+
+def normalise_organisation_name(_name):
+    """Normalise organisation name"""
+    _name = strip_organisation_type(_name)
+    _name = strip_punctuation(_name)
+    _name = strip_stopwords(_name)
+    return _name
+
+def strip_punctuation(text):
+    """Remove punctuation from text"""
+    return text.translate(str.maketrans('', '', string.punctuation))
+
+def strip_organisation_type(text):
+    """Remove organisation types, ltd, plc, inc etc from text"""
+    return basename(text, terms, prefix=False, middle=False, suffix=True)
+
+def strip_stopwords(text):
+    """Remove nltk stopwords from text"""
+    _tokens = word_tokenize(text)
+    _tokens = [t.lower() for t in _tokens]
+    _tokens = [t for t in _tokens if t not in stopwords.words('english')]
+    return " ".join(_tokens)
+
+def result_matches_query(name, query, logger, min_word_length=2):
+    """Evaluate if a query matches an organisation name"""
+    possibles = []
+
+    _name = name.lower()
+    _query = query.lower()
+
+    if strip_punctuation(_name) == strip_punctuation(_query) and len(query.split()) >= min_word_length:
+        logger.info("Matched: {} ---> {}".format(query, name))
+        return name.upper()
+
+    normalised_name = normalise_organisation_name(_name)
+    normalised_query = normalise_organisation_name(_query)
+
+    if normalised_name == normalised_query:
+        if len(query.split()) >= min_word_length:
+            logger.info("Matched: {} ---> {}".format(query, name))
+            return name.upper()
+        else:
+            possibles.append(name)
+
+    if normalised_name in normalised_query:
+        possibles.append(name)
+    elif normalised_query in normalised_name:
+        possibles.append(name)
+
+    if possibles:
+        for poss in possibles:
+            logger.warning(
+                "{}".format("Possible Company: {}".format(poss))
+            )
+    return None
