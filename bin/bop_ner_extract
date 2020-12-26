@@ -24,25 +24,29 @@ CHARITIES_COMMISION_APIKEY = os.getenv("CHARITIES_COMMISION_APIKEY")
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "-d",
         "--debug",
         help="Debug prints",
         action="store_true",
         default=False,
     )
-    parser.add_argument(
+    parser.add_argument("-e",
         "--entities", help="Entities file", action="store", default=None
     )
-    parser.add_argument(
+    parser.add_argument("-r",
         "--relationships", help="Relationships file", action="store", default=None
     )
-    parser.add_argument(
+    parser.add_argument("-c",
         "--custom_entities", help="Custom entities file", action="store", default=None
     )
-    parser.add_argument(
+    parser.add_argument("-p",
         "--prompt", help="Prompt input", action="store_true", default=False
     )
-    parser.add_argument(
-        "--update", help="Update input files", action="store_true", default=False
+    parser.add_argument("-f",
+        "--from_index", help="From index", action="store", default=0, type=int
+    )
+    parser.add_argument("-t",
+        "--to_index", help="To index", action="store", default=-1, type=int
     )
 
     args = parser.parse_args()
@@ -54,10 +58,9 @@ if __name__ == "__main__":
         custom_entities=args.custom_entities,
         relationships=args.relationships,
         companies_house_apikey=COMPANIES_HOUSE_APIKEY,
-        opencorporates_apikey=OPENCORPORATES_APIKEY,
-        charities_apikey=CHARITIES_COMMISION_APIKEY,
         prompt=args.prompt,
-        update=args.update,
+        from_index=args.from_index,
+        to_index=args.to_index,
         logger=get_logger("extract", args.debug),
     )
     extract.execute()

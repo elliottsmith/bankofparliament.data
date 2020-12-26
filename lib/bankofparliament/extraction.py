@@ -19,7 +19,7 @@ from .utils import (
     make_entity_dict,
     make_relationship_dict,
     reconcile_opencorporates_entity_by_id,
-    # reconcile_findthatcharity_entity_by_id
+    reconcile_findthatcharity_entity_by_id,
 )
 from .constants import NER_BASE_MODEL
 from .relationships.base import get_relationship_solver
@@ -32,27 +32,20 @@ class NamedEntityExtract:
     ENTITY_CSV_TEMPLATE = "{}/entities.csv"
     RELATIONSHIPS_ENTITY_CSV_TEMPLATE = "{}/relationships.csv"
 
-    # START = 6385 # lord's start
-    START = 0
-    END = -1
-
     def __init__(
         self,
         entities,
         custom_entities,
         relationships,
         companies_house_apikey,
-        opencorporates_apikey,
-        charities_apikey,
         prompt,
-        update,
+        from_index,
+        to_index,
         logger,
     ):
         """Read all passed in data files"""
         self._time_start = time.time()
         self.companies_house_apikey = companies_house_apikey
-        self.opencorporates_apikey = opencorporates_apikey
-        self.charities_apikey = charities_apikey
 
         self.prompt = prompt
         self.logger = logger
@@ -71,7 +64,7 @@ class NamedEntityExtract:
 
         # dataframes
         self._entities = pandas.concat([_entities, _custom_entities], ignore_index=True)
-        self._relationships = _relationships[self.START : self.END]
+        self._relationships = _relationships[from_index : to_index]
 
         # output dataframes
         self._extracted_entities = self._entities
@@ -124,7 +117,6 @@ class NamedEntityExtract:
                 entities=self._extracted_entities,
                 nlp=self.nlp,
                 companies_house_apikey=self.companies_house_apikey,
-                opencorporates_apikey=self.opencorporates_apikey,
                 prompt=self.prompt,
                 logger=self.logger,
                 parent=self,
