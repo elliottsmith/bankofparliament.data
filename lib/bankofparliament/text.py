@@ -241,24 +241,6 @@ def extract_company_registration_number_from_text(text, logger):
     return None
 
 
-def get_registration_number_from_link(url):
-    """"""
-    registration_number = None
-    if "service.gov.uk" in url:
-        registration_number = url.split("/")[-1]
-        entity_type = "company"
-
-    elif "charitycommission.gov.uk" in url:
-        registration_number = url.split("/")[-1]
-        entity_type = "charity"
-
-    elif "opencorporates.com" in url:
-        registration_number = url.split("/")[-1]
-        entity_type = "company"
-
-    return (registration_number, entity_type)
-
-
 def get_property_multiplier(text):
     """Get multiplier from text"""
     property_multipliers = {

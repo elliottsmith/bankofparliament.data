@@ -23,7 +23,6 @@ from .utils import (
 )
 from .constants import NER_BASE_MODEL
 from .relationships.base import get_relationship_solver
-from .text import get_registration_number_from_link
 
 
 class NamedEntityExtract:
