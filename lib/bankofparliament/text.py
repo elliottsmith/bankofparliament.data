@@ -301,7 +301,7 @@ def result_matches_query(name, query, logger, min_word_length=2):
     _query = query.lower()
 
     if strip_punctuation(_name) == strip_punctuation(_query) and len(query.split()) >= min_word_length:
-        logger.info("Matched: {} ---> {}".format(query, name))
+        logger.debug("Matched: {} ---> {}".format(query, name))
         return name.upper()
 
     normalised_name = normalise_organisation_name(_name)
@@ -309,19 +309,25 @@ def result_matches_query(name, query, logger, min_word_length=2):
 
     if normalised_name == normalised_query:
         if len(query.split()) >= min_word_length:
-            logger.info("Matched: {} ---> {}".format(query, name))
+            logger.debug("Matched: {} ---> {}".format(query, name))
             return name.upper()
-        else:
-            possibles.append(name)
+        possibles.append(name)
 
     if normalised_name in normalised_query:
+        if len(normalised_name.split()) > min_word_length:
+            logger.debug("Matched: {} ---> {}".format(query, name))
+            return name.upper()
         possibles.append(name)
+
     elif normalised_query in normalised_name:
+        if len(normalised_query.split()) > min_word_length:
+            logger.debug("Matched: {} ---> {}".format(query, name))
+            return name.upper()
         possibles.append(name)
 
     if possibles:
         for poss in possibles:
-            logger.warning(
-                "{}".format("Possible Company: {}".format(poss))
+            logger.info(
+                "{}".format("Possible Match: {} ---> {}".format(query, poss))
             )
     return None

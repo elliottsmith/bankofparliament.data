@@ -249,7 +249,7 @@ def findthatcharity_by_name(name, logger, end_point="all"):
                     if i in _entity_type:
                         entity_type = "health"
 
-                matched_corporate = result_matches_query(result["name"], name, logger)
+                matched_corporate = result_matches_query(_name , name, logger)
                 if matched_corporate:
                     return (matched_corporate, organisation_registration, entity_type)
 

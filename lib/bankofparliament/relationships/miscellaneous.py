@@ -11,6 +11,7 @@ from ..text import (
     strip_positions_text,
     strip_from_dates_text,
     strip_parenthesis_text,
+    strip_punctuation,
 )
 from ..constants import ENTITY_TYPES
 from ..patterns import (
@@ -36,13 +37,43 @@ class Miscellaneous(TextRelationship):
 
     SPLITTERS = ["trading as ", "investee companies", ";"]
     STARTERS = ["and", "of", "of the", "member of the"]
-    ENDERS = ["."]
+    ENDERS = [".", "board"]
     REPLACE = [("  ", " "), ("unpaid", "")]
     NER_TYPES = ["ORG", "PERSON"]
     ALIAS_ENTITY_TYPES = ENTITY_TYPES
     PREFERRED_ALIAS_ENTITY_TYPES = ["company", "pollster"]
     EXCLUDE_FROM_SEARCHING = ["solicitor"]
     EXCLUDE_FROM_NLP = ["house limited", "group limited", "house ltd"]
+
+    IDENTIFIER_TYPES = [
+        "university",
+        "education",
+        "charity",
+        "local_authority",
+        "health",
+        "company",
+        "government",
+        "armed_forces",
+        "church",
+        "judicary",
+        "crown",
+        "misc",
+    ]
+
+    IDENTIFIERS = [
+        UNIVERSITY_IDENTIFIERS,
+        EDUCATION_IDENTIFIERS,
+        CHARITY_IDENTIFIERS,
+        LOCAL_GOVERNMENT_IDENTIFIERS,
+        HEALTH_IDENTIFIERS,
+        COMPANY_IDENTIFIERS,
+        GOVERNMENT_IDENTIFIERS,
+        ARMED_FORCES_IDENTIFIERS,
+        CHURCH_OF_ENGLAND_IDENTIFIERS,
+        JURDICARY_IDENTIFIERS,
+        CROWN_IDENTIFIERS,
+        MISC_IDENTIFIERS,
+    ]
 
     def cleanup(self):
         """Clean the text prior to solving"""
@@ -60,6 +91,33 @@ class Miscellaneous(TextRelationship):
         text = self.strip_startwswith(text)
         text = self.strip_endswith(text)
 
+        # build texts to query
+        nlp_names = self.get_nlp_entities_from_text(
+            text=self.text, entity_types=["ORG", "PERSON"]
+        )
+
+        # clean name
+        names_to_try = [text]
+
+        # nlp names
+        for nlp in nlp_names:
+            if not nlp in POSITIONS and len(nlp.split()) > 1 and nlp.lower() not in self.EXCLUDE_FROM_NLP:
+                names_to_try.append(nlp)
+
+        # original text - last
+        names_to_try.append(self.text)
+        names_to_try = list(set([strip_punctuation(n.lower()) for n in names_to_try]))
+        self.names_to_try = names_to_try
+
+        # guess the most apporopiate entity type for query
+        _guess_types = []
+        for (_type, _identifier) in zip(self.IDENTIFIER_TYPES, self.IDENTIFIERS):
+            for _id in _identifier:
+                if _id.lower() in self.relationship["text"].lower():
+                    _guess_types.append(_type)
+        self.guess_types = list(set(_guess_types))
+
+        # set the cleaned name as text
         self.text = text
 
     def solve(self):
@@ -72,59 +130,10 @@ class Miscellaneous(TextRelationship):
             self.extracted_entities.append(entity)
             return
 
-        identifier_types = [
-            "university",
-            "education",
-            "charity",
-            "local_authority",
-            "health",
-            "company",
-            "government",
-            "armed_forces",
-            "church",
-            "judicary",
-            "crown",
-            "misc",
-        ]
+        self.logger.debug("Guesses: {}".format(self.guess_types))
+        self.logger.debug("Name: {}".format(self.names_to_try))
 
-        identifiers = [
-            UNIVERSITY_IDENTIFIERS,
-            EDUCATION_IDENTIFIERS,
-            CHARITY_IDENTIFIERS,
-            LOCAL_GOVERNMENT_IDENTIFIERS,
-            HEALTH_IDENTIFIERS,
-            COMPANY_IDENTIFIERS,
-            GOVERNMENT_IDENTIFIERS,
-            ARMED_FORCES_IDENTIFIERS,
-            CHURCH_OF_ENGLAND_IDENTIFIERS,
-            JURDICARY_IDENTIFIERS,
-            CROWN_IDENTIFIERS,
-            MISC_IDENTIFIERS,
-        ]
-
-        _guess_types = []
-        for (_type, _identifier) in zip(identifier_types, identifiers):
-            for _id in _identifier:
-                if _id.lower() in self.relationship["text"].lower():
-                    _guess_types.append(_type)
-
-        guess_types = list(set(_guess_types))
-        nlp_names = self.get_nlp_entities_from_text(
-            text=self.relationship["text"], entity_types=["ORG"]
-        )
-
-        names_to_try = []
-        for nlp in nlp_names + [self.text, self.relationship["text"]]:
-            if not nlp in POSITIONS and len(nlp.split()) > 1 and nlp.lower() not in self.EXCLUDE_FROM_NLP:
-                names_to_try.append(nlp)
-
-        names_to_try = sorted(list(set(names_to_try)), reverse=False)
-
-        self.logger.debug("Guesses: {}".format(guess_types))
-        for name in names_to_try:
-            self.logger.debug("Name: {}".format(name))
-
-        for guess in guess_types:
+        for guess in self.guess_types:
 
             entity = self.find_alias_from_text(
                 text=self.relationship["text"], alias_entity_types=[guess]
@@ -134,57 +143,50 @@ class Miscellaneous(TextRelationship):
                 return
 
             if guess == "company":
-                for name in names_to_try:
+                for name in self.names_to_try:
                     entity = self.find_company_from_text(text=name)
                     if entity:
                         self.extracted_entities.append(entity)
                         return
 
-            if guess == "university":
-                for name in names_to_try:
+            elif guess == "university":
+                for name in self.names_to_try:
                     entity = self.find_university_from_text(text=name)
                     if entity:
                         self.extracted_entities.append(entity)
                         return
 
-            if guess == "education":
-                for name in names_to_try:
+            elif guess == "education":
+                for name in self.names_to_try:
                     entity = self.find_education_from_text(text=name)
                     if entity:
                         self.extracted_entities.append(entity)
                         return
 
-            if guess == "health":
-                for name in names_to_try:
+            elif guess == "health":
+                for name in self.names_to_try:
                     entity = self.find_health_from_text(text=name)
                     if entity:
                         self.extracted_entities.append(entity)
                         return
 
-            if guess == "charity":
-                for name in names_to_try:
+            elif guess == "charity":
+                for name in self.names_to_try:
                     entity = self.find_charity_from_text(text=name)
                     if entity:
                         self.extracted_entities.append(entity)
                         return
 
-            if guess == "government_organisation":
-                for name in names_to_try:
+            elif guess == "government_organisation":
+                for name in self.names_to_try:
                     entity = self.find_government_organisation_from_text(text=name)
                     if entity:
                         self.extracted_entities.append(entity)
                         return
 
-            if guess == "local_authority":
-                for name in names_to_try:
+            elif guess == "local_authority":
+                for name in self.names_to_try:
                     entity = self.find_local_authority_from_text(text=name)
-                    if entity:
-                        self.extracted_entities.append(entity)
-                        return
-
-            if guess == "misc":
-                for name in names_to_try:
-                    entity = self.findthatcharity_from_text(text=name)
                     if entity:
                         self.extracted_entities.append(entity)
                         return
@@ -219,7 +221,7 @@ class Miscellaneous(TextRelationship):
                     return entity
 
         if self.text.lower() not in self.EXCLUDE_FROM_SEARCHING:
-            for name in names_to_try:
+            for name in self.names_to_try:
                 entity = self.find_organisation_from_text(text=name)
                 if entity:
                     self.extracted_entities.append(entity)
