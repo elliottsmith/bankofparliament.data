@@ -124,7 +124,10 @@ class Convert:
         """Add all parties to entities"""
         for member in self.members:
             party = self.cleanup_party_affliation(member["Party"]["#text"])
-            aliases = list(set([party, member["Party"]["#text"]]))
+            _aliases = [party]
+            if len(member["Party"]["#text"].split()) > 1:
+                _aliases.append(member["Party"]["#text"])
+            aliases = list(set(_aliases))
             if party.upper() not in [entity["name"] for entity in self.entities]:
                 self.add_entity(
                     entity_type="political_party", name=party, aliases=aliases
