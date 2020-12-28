@@ -229,6 +229,7 @@ class CompoundRelationship(BaseRelationship):
                         "company",
                         "think_lobby",
                         "education",
+                        "sport",
                     ],
                 )
                 if entity:

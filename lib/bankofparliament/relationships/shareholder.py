@@ -11,6 +11,7 @@ from ..text import (
     strip_positions_text,
     strip_from_dates_text,
     strip_parenthesis_text,
+    strip_share_class,
 )
 from ..constants import OTHER_ENTITIES, POLLITICAL_ENTITIES
 
@@ -47,6 +48,7 @@ class Shareholder(TextRelationship):
     def cleanup(self):
         """Clean the text prior to solving"""
         text = self.text
+        text = strip_share_class(self.nlp, text)
         text = strip_category_text(text)
         text = strip_registered_text(text)
         text = strip_positions_text(text)

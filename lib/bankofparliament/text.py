@@ -9,10 +9,11 @@ import ast
 import string
 
 # local libs
-from .patterns import IN_PARENTHESIS, POSITIONS
+from .patterns import IN_PARENTHESIS, POSITIONS, FINANCIAL_SUFFIXES
 from .constants import COMPANIES_HOUSE_PREFIXES
 
 # third party
+import pyap
 from cleanco import prepare_terms, basename
 from nltk.corpus import stopwords
 from nltk import word_tokenize
@@ -149,7 +150,7 @@ def strip_category_text(text):
          '(see category 1)'
          '(see category 4(a))'
     """
-    patterns = [r"\(see category [0-9]+\)", r"\(see category [0-9]+\([a-z]\)\)"]
+    patterns = [r"(\(?see category [0-9]+\(?[a-z]?\)?\))"]
     for pattern in patterns:
         match = re.search(pattern, text, flags=re.IGNORECASE)
         if match:
@@ -194,6 +195,16 @@ def strip_from_dates_text(text):
                 text = text.replace(grp, "")
     return text
 
+def strip_dates_text(nlp, text):
+    """"""
+    result = nlp(text=text)
+    entities = [(X.text, X.label_) for X in result.ents]
+
+    for entity in entities:
+        if entity[1] in ["DATE", "TIME", "MONEY", "QUANTITY"]:
+            _name = entity[0]
+            text = text.replace(_name, " ")
+    return text
 
 def strip_parenthesis_text(text):
     """Remove text within parenthesis from text"""
@@ -204,6 +215,27 @@ def strip_parenthesis_text(text):
                 text = text.replace(match, "")
     return text
 
+def strip_share_class(nlp, text):
+    """"""
+    patterns = [r"(Ord[inary]?[ 0-9a-zA-Z]+Shares? ?[0-9\(.,:;%\)]+)", r"({}).+".format("|".join(FINANCIAL_SUFFIXES))]
+
+    for pattern in patterns:
+        match = re.search(pattern, text, flags=re.IGNORECASE)
+        if match:
+            grps = match.groups()
+            for grp in grps:
+                if grp:
+                    text = text.replace(grp, "")
+
+    result = nlp(text=text)
+    entities = [(X.text, X.label_) for X in result.ents]
+
+    for entity in entities:
+        if entity[1] in ["MONEY", "QUANTITY", "ORD"]:
+            _name = entity[0]
+            text = text.replace(_name, " ")
+
+    return text
 
 def has_consecutive_capital_letters_within_parenthesis(text):
     """
@@ -225,7 +257,7 @@ def find_text_within_parenthesis_excluding_other_parenthesis(text):
     Examples:
         'Director, The Big Issue Cymru Limited (Wales edition of Big Issue magazine)
     """
-    pattern = r"(\([^(^)]+\))"
+    pattern = r"(\([^(^)]+\)?)"
     match = re.findall(pattern, text)
     return match
 
@@ -272,6 +304,18 @@ def get_property_multiplier(text):
                 return multiplier
     return 1
 
+def strip_address_text(text):
+    """"""
+    try:
+        text = eval_string_as_list(text)[0]
+    except:
+        text = text
+
+    addresses = pyap.parse(text, country='GB')
+    if addresses:
+        for addr in addresses:
+            text = text.replace(addr.full_address, " ")
+    return text
 
 def normalise_organisation_name(_name):
     """Normalise organisation name"""
@@ -283,7 +327,9 @@ def normalise_organisation_name(_name):
 
 def strip_punctuation(text):
     """Remove punctuation from text"""
-    return text.translate(str.maketrans("", "", string.punctuation))
+    table = str.maketrans(string.punctuation + "’", " "*33)
+    text = text.translate(table)
+    return text.replace("  ", " ")
 
 
 def strip_organisation_type(text):
@@ -297,6 +343,10 @@ def strip_stopwords(text):
     _tokens = [t.lower() for t in _tokens]
     _tokens = [t for t in _tokens if t not in stopwords.words("english")]
     return " ".join(_tokens)
+
+def strip_non_alphanumeric(text):
+    """"""
+    return re.sub("[\W_]", "", text)
 
 
 def result_matches_query(name, query, logger, min_word_length=2):
@@ -315,6 +365,8 @@ def result_matches_query(name, query, logger, min_word_length=2):
 
     normalised_name = normalise_organisation_name(_name)
     normalised_query = normalise_organisation_name(_query)
+    logger.debug(normalised_name)
+    logger.debug(normalised_query)
 
     if normalised_name == normalised_query:
         if len(query.split()) >= min_word_length:
@@ -333,6 +385,11 @@ def result_matches_query(name, query, logger, min_word_length=2):
             logger.debug("Matched: {} ---> {}".format(query, name))
             return name.upper()
         possibles.append(name)
+
+    if strip_non_alphanumeric(normalised_name) == strip_non_alphanumeric(normalised_query):
+        if len(query.split()) >= min_word_length:
+            logger.debug("Matched: {} ---> {}".format(query, name))
+            return name.upper()
 
     if possibles:
         for poss in possibles:

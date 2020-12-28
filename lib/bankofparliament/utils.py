@@ -206,7 +206,7 @@ def get_universities(logger):
 # finder functions
 def findthatcharity_by_name(name, logger, end_point="all"):
     """Find a registered charity/university/local authority etc by name"""
-    ELASTIC_MIN_SCORE = 999
+    ELASTIC_MIN_SCORE = 99
 
     findthatcharity_reconcile = reconcile_findthatcharity_entity_by_name(
         name, logger, end_point
@@ -215,7 +215,7 @@ def findthatcharity_by_name(name, logger, end_point="all"):
         results = findthatcharity_reconcile["result"]
 
         for result in sorted(results, key=operator.itemgetter("score"), reverse=True):
-            logger.debug("CHARITY: {} {}".format(result["name"], result["score"]))
+            logger.debug("CHARITY: {} [score {}]".format(result["name"], result["score"]))
 
             if result["score"] > ELASTIC_MIN_SCORE:
                 _name = result["name"].split("({})".format(result["id"]))[0].strip()
@@ -223,7 +223,7 @@ def findthatcharity_by_name(name, logger, end_point="all"):
                 organisation_registration = result["id"]
                 _entity_type = result["type"][0]["id"]
 
-                entity_type = _entity_type
+                entity_type = None
 
                 for i in ["charity", "charitable"]:
                     if i in _entity_type:
@@ -241,19 +241,16 @@ def findthatcharity_by_name(name, logger, end_point="all"):
                     if i in _entity_type:
                         entity_type = "sport"
 
-                for i in [
-                    "building-society",
-                    "facility",
-                    "other",
-                    "archive",
-                    "social-housing",
-                ]:
+                for i in ["registered-society", "working-mens-club"]:
                     if i in _entity_type:
-                        entity_type = "misc"
+                        entity_type = "association"
 
                 for i in ["health-society"]:
                     if i in _entity_type:
                         entity_type = "health"
+
+                if not entity_type:
+                    entity_type = "misc"
 
                 matched_corporate = result_matches_query(_name, name, logger)
                 if matched_corporate:
@@ -274,7 +271,7 @@ def findcorporate_by_name(name, logger, jurisdiction="gb"):
         results = opencorporates_reconcile["result"]
 
         for result in sorted(results, key=operator.itemgetter("score"), reverse=True):
-            logger.debug("CORPORATE: {} {}".format(result["name"], result["score"]))
+            logger.debug("CORPORATE: {} [score {}]".format(result["name"], result["score"]))
 
             if result["score"] > ELASTIC_MIN_SCORE:
 
@@ -299,6 +296,12 @@ def find_organisation_by_name(name, companies_house_apikey, logger):
 
     (organisation_name, organisation_registration, entity_type) = findcorporate_by_name(
         name, logger, jurisdiction=None
+    )
+    if any((organisation_name, organisation_registration, entity_type)):
+        return (organisation_name, organisation_registration, entity_type)
+
+    (organisation_name, organisation_registration, entity_type) = search_companies_house(
+        name, companies_house_apikey, logger
     )
     if any((organisation_name, organisation_registration, entity_type)):
         return (organisation_name, organisation_registration, entity_type)
@@ -349,9 +352,8 @@ def search_companies_house(
 
         _name = item["title"]
         _id = item["links"]["self"].split("/")[-1]
-        _snippet = item["snippet"] if "snippet" in i else None
-
-        logger.debug("COMPANIES HOUSE: {}, {} [{}]".format(_name, _id, _snippet))
+        _snippet = item["snippet"] if "snippet" in item else None
+        logger.debug("COMPANIES HOUSE: {}, {}".format(_name, _id))
 
         matched_corporate = result_matches_query(_name, query, logger)
         if matched_corporate:

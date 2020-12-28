@@ -353,77 +353,7 @@ SINGLE_INDICATORS = [
     "received:",
 ]
 
-# constitutional state powers indentifiers
-CROWN_IDENTIFIERS = [
-    "The Crown",
-    "The Queen",
-    "HM The Queen",
-    "Queen's Bodyguard",
-]
-
-JURDICARY_IDENTIFIERS = ["Bench", "The Bar", "Queen’s Counsel"]
-
-CHURCH_OF_ENGLAND_IDENTIFIERS = [
-    "Church Council",
-    "Mucknell Abbey",
-    "Malling Abbey",
-    "Archbishop of Canterbury’s Examination in Theology",
-    "episcopal stipend",
-    "Episcopal",
-    "Anglican",
-    "Ecclesiastical",
-    "Evangelists",
-    "Preachers",
-    "church pension",
-    "receipt of stipend",
-    "diocesan",
-    "archiepiscopal stipend",
-    "Church Commissioners",
-    "Bishops' Standing Committee",
-    "Church Commissioners",
-    "Prelate",
-    "Westminster Abbey",
-    "Church Commissioner",
-    "Guild of Vergers",
-]
-
-ARMED_FORCES_IDENTIFIERS = [
-    "reservist",
-    "reserve army",
-    "territorial army",
-    "TA Regiment",
-    "Colonel Commandant",
-    "601 Squadron",
-    "RAF Regiment",
-    "Honorary Colonel",
-]
-
-GOVERNMENT_IDENTIFIERS = [
-    "Lieutenant of",
-    "Lord-Lieutenant",
-    "Her Majesty's Government",
-    "Government Whip",
-    "Leader of the House of Lords",
-    "Lord Privy Seal",
-    "Special Envoy",
-    "Trade Envoy",
-    "Task and Finish Group",
-    "Iraq Fatality Investigations",
-    "Foreign Office Honours Committee",
-    "Health Honours Committee",
-    "Foreign Secretary's Initiative",
-    "Independent Oversight Panel to review the use of seclusion and segregation",
-]
-
-STATE_POWERS_IDENTIFIERS = (
-    CROWN_IDENTIFIERS
-    + JURDICARY_IDENTIFIERS
-    + CHURCH_OF_ENGLAND_IDENTIFIERS
-    + ARMED_FORCES_IDENTIFIERS
-    + GOVERNMENT_IDENTIFIERS
-)
-
-# non constitutional identifiers
+# identifiers
 LOCAL_GOVERNMENT_IDENTIFIERS = ["council", "borough", "councillor"]
 
 CHARITY_IDENTIFIERS = [
@@ -450,11 +380,7 @@ UNIVERSITY_IDENTIFIERS = [
     "university",
 ]
 
-MISC_IDENTIFIERS = [
-    "Fund",
-    "Trust",
-    "blind trust",
-    "association",
-    "society",
-    "club",
+FINANCIAL_SUFFIXES = [
+    "-GBP-Inc",
+    "Est. Fin.GBP",
 ]

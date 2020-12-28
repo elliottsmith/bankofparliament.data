@@ -34,6 +34,8 @@ class BaseRelationship:
         "government_organisation",
         "property",
     ]
+    EXCLUDE_FROM_NLP = ["house limited", "group limited", "house ltd", "bank street", "county hall", "carmelite house", "steering committee"]
+    EXCLUDE_FROM_SEARCHING = ["solicitor"]
 
     recurring_payment_regex = re.compile(
         r"({}).+".format("|".join(RECURRING_INDICATORS).lower())
@@ -648,7 +650,7 @@ class BaseRelationship:
         for entity in entities:
             if entity[1] in entity_types:
                 _name = entity[0]
-                if len(_name.split(" ")) > 1:
+                if len(_name.split()) > 1:
                     nlp_names.append(_name)
         return nlp_names
 

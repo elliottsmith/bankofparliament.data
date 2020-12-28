@@ -12,6 +12,9 @@ from ..text import (
     strip_from_dates_text,
     strip_parenthesis_text,
     strip_punctuation,
+    strip_address_text,
+    strip_dates_text,
+    strip_share_class,
 )
 from ..utils import colorize, make_entity_dict
 from ..constants import ENTITY_TYPES
@@ -20,15 +23,9 @@ from ..patterns import (
     UNIVERSITY_IDENTIFIERS,
     EDUCATION_IDENTIFIERS,
     CHARITY_IDENTIFIERS,
-    GOVERNMENT_IDENTIFIERS,
     LOCAL_GOVERNMENT_IDENTIFIERS,
     HEALTH_IDENTIFIERS,
     COMPANY_IDENTIFIERS,
-    ARMED_FORCES_IDENTIFIERS,
-    CHURCH_OF_ENGLAND_IDENTIFIERS,
-    JURDICARY_IDENTIFIERS,
-    CROWN_IDENTIFIERS,
-    MISC_IDENTIFIERS,
     POSITIONS,
 )
 
@@ -45,8 +42,6 @@ class Employment(TextRelationship):
     ENDERS = [".", "board"]
     REPLACE = [("  ", " "), ("unpaid", "")]
     NER_TYPES = ["ORG"]
-    EXCLUDE_FROM_SEARCHING = ["solicitor"]
-    EXCLUDE_FROM_NLP = ["house limited", "group limited", "house ltd"]
 
     IDENTIFIER_TYPES = [
         "university",
@@ -55,12 +50,6 @@ class Employment(TextRelationship):
         "local_authority",
         "health",
         "company",
-        "government",
-        "armed_forces",
-        "church",
-        "judicary",
-        "crown",
-        "misc",
     ]
 
     IDENTIFIERS = [
@@ -70,12 +59,6 @@ class Employment(TextRelationship):
         LOCAL_GOVERNMENT_IDENTIFIERS,
         HEALTH_IDENTIFIERS,
         COMPANY_IDENTIFIERS,
-        GOVERNMENT_IDENTIFIERS,
-        ARMED_FORCES_IDENTIFIERS,
-        CHURCH_OF_ENGLAND_IDENTIFIERS,
-        JURDICARY_IDENTIFIERS,
-        CROWN_IDENTIFIERS,
-        MISC_IDENTIFIERS,
     ]
 
     def cleanup(self):
@@ -86,6 +69,7 @@ class Employment(TextRelationship):
         text = strip_from_dates_text(text)
         text = strip_parenthesis_text(text)
         text = strip_positions_text(text)
+        text = strip_address_text(text)
 
         text = self.strip_startwswith(text)
         text = self.strip_endswith(text)
@@ -108,11 +92,10 @@ class Employment(TextRelationship):
                 and len(nlp.split()) > 1
                 and nlp.lower() not in self.EXCLUDE_FROM_NLP
             ):
-                names_to_try.append(nlp)
+                names_to_try.append(strip_punctuation(nlp.lower()))
+                names_to_try.append(nlp.lower())
 
-        # original text - last
-        names_to_try.append(self.text)
-        names_to_try = list(set([strip_punctuation(n.lower()) for n in names_to_try]))
+        names_to_try = list(set(names_to_try))
         self.names_to_try = names_to_try
 
         # guess the most apporopiate entity type for query
@@ -125,6 +108,8 @@ class Employment(TextRelationship):
 
         # set the cleaned name as text
         self.text = text
+        self.logger.debug("Guesses: {}".format(self.guess_types))
+        self.logger.debug("Names: {}".format(self.names_to_try))
 
     def solve(self):
         """Find entity in text"""
@@ -144,125 +129,63 @@ class Employment(TextRelationship):
             )
             self.amount = "recurring"
 
-        if len(self.names_to_try) < 3:
-            # no nouns
+        if len(self.names_to_try) < 2:
+            # no nouns - let's check for single payment, will save on query time
             entity = self.find_single_payment_from_text(text=self.relationship["text"])
             if entity:
                 self.extracted_entities.append(entity)
                 return
 
+        # check the raw text against all alias entities
         entity = self.find_alias_from_text(text=self.relationship["text"])
         if entity:
             self.extracted_entities.append(entity)
             return
 
-        self.logger.debug("Guesses: {}".format(self.guess_types))
-        self.logger.debug("Name: {}".format(self.names_to_try))
-
+        # for every guess type, do a targeted reconcile query, per name_to_try
         for guess in self.guess_types:
-
-            entity = self.find_alias_from_text(
-                text=self.relationship["text"], alias_entity_types=[guess]
-            )
-            if entity:
-                self.extracted_entities.append(entity)
-                return
-
-            if guess == "company":
-                for name in self.names_to_try:
+            for name in self.names_to_try:
+                if guess == "company":
                     entity = self.find_company_from_text(text=name)
-                    if entity:
-                        self.extracted_entities.append(entity)
-                        return
-
-            if guess == "university":
-                for name in self.names_to_try:
+                elif guess == "university":
                     entity = self.find_university_from_text(text=name)
-                    if entity:
-                        self.extracted_entities.append(entity)
-                        return
-
-            if guess == "education":
-                for name in self.names_to_try:
+                elif guess == "education":
                     entity = self.find_education_from_text(text=name)
-                    if entity:
-                        self.extracted_entities.append(entity)
-                        return
-
-            if guess == "health":
-                for name in self.names_to_try:
+                elif guess == "health":
                     entity = self.find_health_from_text(text=name)
-                    if entity:
-                        self.extracted_entities.append(entity)
-                        return
-
-            if guess == "charity":
-                for name in self.names_to_try:
+                elif guess == "charity":
                     entity = self.find_charity_from_text(text=name)
-                    if entity:
-                        self.extracted_entities.append(entity)
-                        return
-
-            if guess == "government_organisation":
-                for name in self.names_to_try:
-                    entity = self.find_government_organisation_from_text(text=name)
-                    if entity:
-                        self.extracted_entities.append(entity)
-                        return
-
-            if guess == "local_authority":
-                for name in self.names_to_try:
+                elif guess == "local_authority":
                     entity = self.find_local_authority_from_text(text=name)
-                    if entity:
-                        self.extracted_entities.append(entity)
-                        return
+                else:
+                    entity = None
 
-            # non queryable entities
-            if guess in ["armed_forces", "church", "judicary", "crown", "government"]:
-
-                entity_type = "state_power"
-                if guess == "armed_forces":
-                    organisation_name = "BRITISH ARMED FORCES"
-                elif guess == "church":
-                    organisation_name = "CHURCH OF ENGLAND"
-                elif guess == "judicary":
-                    organisation_name = "JUDICARY"
-                elif guess == "crown":
-                    organisation_name = "THE CROWN"
-                elif guess == "government":
-                    organisation_name = "HER MAJESTY'S GOVERNMENT"
-
-                entity = make_entity_dict(
-                    entity_type=entity_type,
-                    name=organisation_name,
-                    aliases=list(set([self.text, organisation_name])),
-                )
                 if entity:
                     self.extracted_entities.append(entity)
-                    self.logger.debug(
-                        "State Power Found: {}".format(
-                            colorize(organisation_name, "magenta")
-                        )
-                    )
-                    return entity
+                    return
 
-        if self.text.lower() not in self.EXCLUDE_FROM_SEARCHING:
-            for name in self.names_to_try:
+        # do a much wider search, across all jurisdictions for both
+        # corporates and charities, schools etc
+        for name in self.names_to_try:
+            if name.lower() not in self.EXCLUDE_FROM_SEARCHING:
                 entity = self.find_organisation_from_text(text=name)
                 if entity:
                     self.extracted_entities.append(entity)
                     return
 
+        # check for single payment
         entity = self.find_single_payment_from_text(text=self.relationship["text"])
         if entity:
             self.extracted_entities.append(entity)
             return
 
+        # profession
         entity = self.find_profession_from_text(text=self.relationship["text"])
         if entity:
             self.extracted_entities.append(entity)
             return
 
+        # property
         entity = self.find_property_from_text(text=self.relationship["text"])
         if entity:
             self.extracted_entities.append(entity)
