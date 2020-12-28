@@ -68,7 +68,6 @@ class Miscellaneous(TextRelationship):
         text = strip_address_text(text)
         text = strip_dates_text(self.nlp, text)
 
-
         text = self.split(text)
         text = self.strip_startwswith(text)
         text = self.strip_endswith(text)

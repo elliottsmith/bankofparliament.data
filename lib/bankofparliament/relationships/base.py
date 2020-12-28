@@ -34,7 +34,15 @@ class BaseRelationship:
         "government_organisation",
         "property",
     ]
-    EXCLUDE_FROM_NLP = ["house limited", "group limited", "house ltd", "bank street", "county hall", "carmelite house", "steering committee"]
+    EXCLUDE_FROM_NLP = [
+        "house limited",
+        "group limited",
+        "house ltd",
+        "bank street",
+        "county hall",
+        "carmelite house",
+        "steering committee",
+    ]
     EXCLUDE_FROM_SEARCHING = ["solicitor"]
 
     recurring_payment_regex = re.compile(

@@ -195,6 +195,7 @@ def strip_from_dates_text(text):
                 text = text.replace(grp, "")
     return text
 
+
 def strip_dates_text(nlp, text):
     """"""
     result = nlp(text=text)
@@ -206,6 +207,7 @@ def strip_dates_text(nlp, text):
             text = text.replace(_name, " ")
     return text
 
+
 def strip_parenthesis_text(text):
     """Remove text within parenthesis from text"""
     parenthesis_match = find_text_within_parenthesis_excluding_other_parenthesis(text)
@@ -215,9 +217,13 @@ def strip_parenthesis_text(text):
                 text = text.replace(match, "")
     return text
 
+
 def strip_share_class(nlp, text):
     """"""
-    patterns = [r"(Ord[inary]?[ 0-9a-zA-Z]+Shares? ?[0-9\(.,:;%\)]+)", r"({}).+".format("|".join(FINANCIAL_SUFFIXES))]
+    patterns = [
+        r"(Ord[inary]?[ 0-9a-zA-Z]+Shares? ?[0-9\(.,:;%\)]+)",
+        r"({}).+".format("|".join(FINANCIAL_SUFFIXES)),
+    ]
 
     for pattern in patterns:
         match = re.search(pattern, text, flags=re.IGNORECASE)
@@ -236,6 +242,7 @@ def strip_share_class(nlp, text):
             text = text.replace(_name, " ")
 
     return text
+
 
 def has_consecutive_capital_letters_within_parenthesis(text):
     """
@@ -304,6 +311,7 @@ def get_property_multiplier(text):
                 return multiplier
     return 1
 
+
 def strip_address_text(text):
     """"""
     try:
@@ -311,11 +319,12 @@ def strip_address_text(text):
     except:
         text = text
 
-    addresses = pyap.parse(text, country='GB')
+    addresses = pyap.parse(text, country="GB")
     if addresses:
         for addr in addresses:
             text = text.replace(addr.full_address, " ")
     return text
+
 
 def normalise_organisation_name(_name):
     """Normalise organisation name"""
@@ -327,7 +336,7 @@ def normalise_organisation_name(_name):
 
 def strip_punctuation(text):
     """Remove punctuation from text"""
-    table = str.maketrans(string.punctuation + "’", " "*33)
+    table = str.maketrans(string.punctuation + "’", " " * 33)
     text = text.translate(table)
     return text.replace("  ", " ")
 
@@ -343,6 +352,7 @@ def strip_stopwords(text):
     _tokens = [t.lower() for t in _tokens]
     _tokens = [t for t in _tokens if t not in stopwords.words("english")]
     return " ".join(_tokens)
+
 
 def strip_non_alphanumeric(text):
     """"""
@@ -386,7 +396,9 @@ def result_matches_query(name, query, logger, min_word_length=2):
             return name.upper()
         possibles.append(name)
 
-    if strip_non_alphanumeric(normalised_name) == strip_non_alphanumeric(normalised_query):
+    if strip_non_alphanumeric(normalised_name) == strip_non_alphanumeric(
+        normalised_query
+    ):
         if len(query.split()) >= min_word_length:
             logger.debug("Matched: {} ---> {}".format(query, name))
             return name.upper()

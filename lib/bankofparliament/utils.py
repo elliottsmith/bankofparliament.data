@@ -215,7 +215,9 @@ def findthatcharity_by_name(name, logger, end_point="all"):
         results = findthatcharity_reconcile["result"]
 
         for result in sorted(results, key=operator.itemgetter("score"), reverse=True):
-            logger.debug("CHARITY: {} [score {}]".format(result["name"], result["score"]))
+            logger.debug(
+                "CHARITY: {} [score {}]".format(result["name"], result["score"])
+            )
 
             if result["score"] > ELASTIC_MIN_SCORE:
                 _name = result["name"].split("({})".format(result["id"]))[0].strip()
@@ -271,7 +273,9 @@ def findcorporate_by_name(name, logger, jurisdiction="gb"):
         results = opencorporates_reconcile["result"]
 
         for result in sorted(results, key=operator.itemgetter("score"), reverse=True):
-            logger.debug("CORPORATE: {} [score {}]".format(result["name"], result["score"]))
+            logger.debug(
+                "CORPORATE: {} [score {}]".format(result["name"], result["score"])
+            )
 
             if result["score"] > ELASTIC_MIN_SCORE:
 
@@ -300,9 +304,11 @@ def find_organisation_by_name(name, companies_house_apikey, logger):
     if any((organisation_name, organisation_registration, entity_type)):
         return (organisation_name, organisation_registration, entity_type)
 
-    (organisation_name, organisation_registration, entity_type) = search_companies_house(
-        name, companies_house_apikey, logger
-    )
+    (
+        organisation_name,
+        organisation_registration,
+        entity_type,
+    ) = search_companies_house(name, companies_house_apikey, logger)
     if any((organisation_name, organisation_registration, entity_type)):
         return (organisation_name, organisation_registration, entity_type)
 

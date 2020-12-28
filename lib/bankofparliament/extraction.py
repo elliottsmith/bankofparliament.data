@@ -132,7 +132,9 @@ class NamedEntityExtract:
                     solver.extracted_entities + solver.extracted_custom_entities
                 ):
                     if self.prompt:
-                        manual_entity = self.prompt_manual_input(relationship, str(solver.text))
+                        manual_entity = self.prompt_manual_input(
+                            relationship, str(solver.text)
+                        )
                         if manual_entity:
                             solver.extracted_custom_entities.append(manual_entity)
                         else:
