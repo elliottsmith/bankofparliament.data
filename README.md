@@ -47,15 +47,6 @@ Add these to your `.env` file.
 ### Python 3 Packages
 
 
-
-`pip install lxml, bs4, requests, numpy, pandas, tabula-py, spacy, neo4j, scraperwiki, python-dotenv`
-
-
-
-Alternatively,
-
-
-
 ```
 
 cd bankofparliament.data
@@ -90,7 +81,7 @@ To convert initial dataset to csv entities and relationship files
 
 
 
-`./bin/bop_convert_data_to_csv --members=data/generated/{date}/members.json`
+`./bin/bop_convert_data_to_csv -m data/generated/{date}/members.json`
 
 
 
@@ -98,7 +89,7 @@ Extract named entities from csv data and output to new files
 
 
 
-`./bin/bop_ner_extract --entities=data/generated/{date}/entities.csv --relationships=data/generated/{date}/relationships.csv`
+`./bin/bop_ner_extract -e data/generated/{date}/entities.csv -r data/generated/{date}/relationships.csv`
 
 
 
@@ -106,7 +97,7 @@ The `bop_ner_extract` tool also takes an optional argument `--custom_entities` w
 
 
 
-`./bin/bop_ner_extract --entities=data/generated/{date}/entities.csv --relationships=data/generated/{date}/relationships.csv --custom_entities=data/custom/default_custom_entities.csv`
+`./bin/bop_ner_extract -e data/generated/{date}/entities.csv -r data/generated/{date}/relationships.csv -c data/custom/default_custom_entities.csv`
 
 
 
@@ -114,7 +105,7 @@ Create Neo4J database from extracted entities and relationship csv data
 
 
 
-`./bin/bop_create_db --entities=data/generated/{date}/extracted/entities.csv --relationships=data/generated/{date}/extracted/relationships.csv`
+`./bin/bop_create_db -e data/generated/{date}/extracted/entities.csv -r data/generated/{date}/extracted/relationships.csv`
 
 
 
@@ -123,14 +114,8 @@ Create Neo4J database from extracted entities and relationship csv data
 
 - family lobbyists - need relationship to gov not back to relation
 
-- 'reconcile_findthatcharity_entity_by_id' util function
-
 - reconcile human entities to records in opencorporates
-
-- add ability to enter findthatcharity url when in prompt mode
 
 - spacy model for recurring and single payments
 
 - spacy model for custom / known entities
-
-- convert pattern identifiers to custom entities
