@@ -132,7 +132,7 @@ class NamedEntityExtract:
                     solver.extracted_entities + solver.extracted_custom_entities
                 ):
                     if self.prompt:
-                        manual_entity = self.prompt_manual_input(relationship)
+                        manual_entity = self.prompt_manual_input(relationship, str(solver.text))
                         if manual_entity:
                             solver.extracted_custom_entities.append(manual_entity)
                         else:
@@ -306,13 +306,14 @@ class NamedEntityExtract:
             return entity.iloc[0]["entity_type"]
         return None
 
-    def prompt_manual_input(self, relationship):
+    def prompt_manual_input(self, relationship, text):
         """Enter overrides for missing entities"""
         self.logger.info(
-            "[{}] {}: {}".format(
+            "[{}] {}: RAW: {} | CLEAN: {}".format(
                 relationship["relationship_type"],
                 colorize("PROMPT", "light red"),
                 colorize(relationship["text"], "light gray"),
+                colorize(text, "light gray"),
             )
         )
         isolated_entity = input("SELECTED ENTITY: ")
