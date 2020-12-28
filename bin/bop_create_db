@@ -26,16 +26,17 @@ NEO4J_USER = os.getenv("NEO4J_USER")
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "-d",
         "--debug",
         help="Debug prints",
         action="store_true",
         default=False,
     )
     parser.add_argument(
-        "--relationships", help="Relationships file", action="store", default=None
+        "-r", "--relationships", help="Relationships file", action="store", default=None
     )
     parser.add_argument(
-        "--entities", help="Entities file", action="store", default=None
+        "-e", "--entities", help="Entities file", action="store", default=None
     )
 
     args = parser.parse_args()

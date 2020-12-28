@@ -15,13 +15,14 @@ from bankofparliament.utils import get_logger
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "-d",
         "--debug",
         help="Debug prints",
         action="store_true",
         default=False,
     )
 
-    parser.add_argument("--output", help="Output file", action="store", default=None)
+    parser.add_argument("-o", "--output", help="Output file", action="store", default=None)
 
     args = parser.parse_args()
 

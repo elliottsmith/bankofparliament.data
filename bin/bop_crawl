@@ -19,13 +19,14 @@ load_dotenv()
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "-d",
         "--debug",
         help="Debug prints",
         action="store_true",
         default=False,
     )
     parser.add_argument(
-        "--entities", help="Entities file", action="store", default=None
+        "-e", "--entities", help="Entities file", action="store", default=None
     )
 
     args = parser.parse_args()
