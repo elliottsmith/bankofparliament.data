@@ -45,6 +45,7 @@ class GraphDB:
             source, target = None, None
             _source = row["source"]
             _target = row["target"]
+            _amount = row["amount"]
 
             source_filter = entities["name"].str.lower() == _source.lower()
             source_match = entities.loc[source_filter]
@@ -56,7 +57,7 @@ class GraphDB:
             if len(target_match):
                 target = target_match.to_dict(orient="records")[0]
 
-            if source and target:
+            if source and target and _amount != "recurring":
                 source_node = self.create_node(source)
                 target_node = self.create_node(target)
 
