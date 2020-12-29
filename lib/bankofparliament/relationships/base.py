@@ -174,7 +174,7 @@ class BaseRelationship:
         if amounts:
             return max(amounts)
 
-        match = re.search("(£[0-9,.]+)|([0-9]+.[0-9][0-9])", text)
+        match = re.search(r"(£[0-9,.]+)|([0-9]+\.[0-9][0-9])", text)
         if match:
             _amount = match.group().split(".")[0]
             _amount = re.sub("[^0-9]", "", _amount)
