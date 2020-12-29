@@ -62,7 +62,7 @@ class NamedEntityExtract:
             self.custom_path = os.path.join(self.output_dir, "custom.csv")
 
         # dataframes
-        self._entities = pandas.concat([_entities, _custom_entities], ignore_index=True)
+        self._entities = self.merge_entities(_entities, _custom_entities)
         self._relationships = _relationships[from_index:to_index]
 
         # output dataframes
@@ -78,6 +78,29 @@ class NamedEntityExtract:
 
         self.processed_relationships = 0
         self.resolved_relationships = 0
+
+    def merge_entities(self, entities, new):
+        """"""
+        new_entities = []
+        for (_id, new_entity) in new.iterrows():
+
+            new_name = new_entity["name"]
+            new_aliases = new_entity["aliases"].lower().split(";")
+
+            filt = (entities["name"] == new_name)
+            existing_entities = entities.loc[filt]
+
+            if len(existing_entities):
+                for (_i, _existing) in existing_entities.iterrows():
+                    merged = list(set(_existing["aliases"].split(";") + new_aliases))
+                    entities.loc[_i, ["aliases"]] = ";".join(merged)
+            else:
+                new_entities.append(new_entity.to_dict())
+
+        if len(new_entities):
+            entities = pandas.concat([entities, pandas.DataFrame(new_entities)], ignore_index=True)
+
+        return entities
 
     @property
     def entities(self):
