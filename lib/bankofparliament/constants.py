@@ -18,7 +18,7 @@ DATA_PARLIAMENT_QUERY_URL = (
     "http://data.parliament.uk/membersdataplatform/services/mnis/members/query"
 )
 DATA_PARLIAMENT_LINK_URL = "https://members.parliament.uk/member/{}/{}"
-SPADS_URL = "https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/854554/Annual_Report_on_Special_Advisers.pdf"
+SPADS_URL = "https://www.gov.uk/government/collections/special-adviser-data-releases-numbers-and-costs"
 
 # theyworkforyou
 THEYWORKFORYOU_QUERY_URL = "https://www.theyworkforyou.com/api"

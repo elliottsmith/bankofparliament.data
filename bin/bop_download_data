@@ -39,8 +39,14 @@ if __name__ == "__main__":
 
     output_path = args.output if args.output else DEFAULT_OUTPUT_PATH
 
+    special_advisors_path = os.path.join(
+        os.path.dirname(__file__),
+        "../data/offline/special_advisors.pdf",
+    )
+
     download = Download(
         output_path=output_path,
+        spads_path=special_advisors_path,
         theyworkforyou_apikey=THEYWORKFORYOU_APIKEY,
         logger=get_logger("download", args.debug),
     )

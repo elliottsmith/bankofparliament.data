@@ -11,15 +11,20 @@ import operator
 
 # local libs
 from .utils import get_request
-from .constants import DATA_PARLIAMENT_QUERY_URL, THEYWORKFORYOU_QUERY_URL, HEADERS
+from .constants import DATA_PARLIAMENT_QUERY_URL, THEYWORKFORYOU_QUERY_URL, HEADERS, SPADS_URL
+
+# third party libs
+import scraperwiki
+from bs4 import BeautifulSoup
 
 
 class Download:
     """Downloader class. Queries for all members of the house of lords and commons and their
     register of financial interests. Serializes to json format"""
 
-    def __init__(self, output_path, theyworkforyou_apikey, logger):
+    def __init__(self, output_path, spads_path, theyworkforyou_apikey, logger):
         self.output_path = output_path
+        self.spads_path = spads_path
         self.theyworkforyou_apikey = theyworkforyou_apikey
         self.logger = logger
         self.data = {}
@@ -29,6 +34,7 @@ class Download:
     def execute(self):
         """Execute"""
         self.get_members_of_parliament()
+        self.get_spads_pdf()
         self.save()
 
     def get_members_of_parliament(self):
@@ -45,6 +51,38 @@ class Download:
         lords.sort(key=operator.itemgetter("DisplayAs"))
 
         self.data = {"lords": lords, "commons": commons}
+
+    def get_spads_pdf(self):
+        """Download special advisors pdf"""
+        if not os.path.exists(self.spads_path):
+            landing_page = scraperwiki.scrape(SPADS_URL)
+            soup = BeautifulSoup(landing_page, features="lxml")
+
+            # get the first html object matching the class
+            latest_report = soup.find("a", {"class": "gem-c-document-list__item-link"})
+            latest_report_href = "https://www.gov.uk/{}".format(latest_report["href"])
+
+            latest_report_page = scraperwiki.scrape(latest_report_href)
+            soup = BeautifulSoup(latest_report_page, features="lxml")
+
+            # find the first h3 div, where the child a div
+            # should contain the href for the pdf
+            pdf_link = soup.find("h3").find("a")
+
+            response = get_request(pdf_link["href"], self.logger)
+            if response.content:
+                if not os.path.exists(os.path.dirname(self.spads_path)):
+                    self.logger.debug(
+                        "Making directoy: {}".format(os.path.dirname(self.spads_path))
+                    )
+                    os.makedirs(os.path.dirname(self.spads_path))
+
+                with open(self.spads_path, "wb") as f:
+                    f.write(response.content)
+            else:
+                self.logger.warning("Failed to download special advisors pdf")
+        else:
+            self.logger.debug("Special advisors pdf already downloaded: {}".format(self.spads_path))
 
     def get_theyworkforyou_quota(self):
         """Log the current theyworkforyou api quota"""
