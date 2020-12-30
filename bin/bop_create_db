@@ -38,6 +38,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "-e", "--entities", help="Entities file", action="store", default=None
     )
+    parser.add_argument(
+        "-l", "--limit", help="Entities file", action="store", type=int, default=-1
+    )
 
     args = parser.parse_args()
     if not args.relationships or not args.entities:
@@ -50,6 +53,7 @@ if __name__ == "__main__":
         password=NEO4J_PASSWORD,
         entities=args.entities,
         relationships=args.relationships,
+        limit=args.limit,
         logger=get_logger("graphdb", args.debug),
     )
     graphdb.execute()
