@@ -113,18 +113,11 @@ Create Neo4J database from extracted entities and relationship csv data
 ## TODO
 
 
-- family lobbyists - need relationship to gov not back to relation
-
 - reconcile human entities to records in opencorporates
 
 - spacy model for recurring and single payments
 
 - spacy model for custom / known entities
-
-- advisors and politician types, deprecate - politicians can be infered via
-'member_of' relationship type, and will create new 'advisor_to' type
-
-- advisors - two relationships - advises minister, employed by hm gov
 
 - issue with rachel reeves relationship amount
 

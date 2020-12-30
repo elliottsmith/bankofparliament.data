@@ -32,6 +32,7 @@ class Convert:
     """Converts serialised json and pdf data to entity and relationship csv data"""
 
     MINIMUM_SOUP_LENGTH = 3
+    LOBBYISTS_REGMEM_INDEX = "10"
 
     def __init__(self, members_path, spads_path, output_dir, logger):
         """Initialise the converter instance"""
@@ -165,12 +166,14 @@ class Convert:
             # financial interests relationships
             soup = BeautifulSoup(member["Interests"], features="lxml")
             last_category = None
+            last_index = None
 
             for div in soup.find_all("div"):
                 if "regmemcategory" in div.attrs["class"]:
                     for index in COMMONS_CATEGORIES:
                         if div.text.startswith(str(index)):
                             last_category = COMMONS_CATEGORIES[index]
+                            last_index = index
 
                 elif "regmemitem" in div.attrs["class"]:
                     delimeter = "?????"
@@ -194,13 +197,37 @@ class Convert:
                             ),
                         )
 
-                    if last_category == "related_to":
+                    if last_category == "related_to" and not last_index == self.LOBBYISTS_REGMEM_INDEX:
                         # add a second relationship, from target > source - employment
                         self.add_relationship(
                             relationship_type="employed_by",
                             source="UNKNOWN",
                             target=member["DisplayAs"],
                             text=["Am employed by {}".format(member["DisplayAs"])],
+                            link=THEYWORKFORYOU_LINK_URL.format(
+                                member["DisplayAs"].lower().replace(" ", "_"),
+                                member["MemberFrom"].lower().replace(" ", "_"),
+                            ),
+                        )
+                    if last_index == self.LOBBYISTS_REGMEM_INDEX:
+                        # we have member > related_to > person
+                        # add a second relationship, from person > company - employment
+                        self.add_relationship(
+                            relationship_type="employed_by",
+                            source="UNKNOWN",
+                            target="UNKNOWN",
+                            text=texts,
+                            link=THEYWORKFORYOU_LINK_URL.format(
+                                member["DisplayAs"].lower().replace(" ", "_"),
+                                member["MemberFrom"].lower().replace(" ", "_"),
+                            ),
+                        )
+                        # add a third relationship, from company > gov - lobbying
+                        self.add_relationship(
+                            relationship_type="lobbies",
+                            source="UNKNOWN",
+                            target="Her Majesty's Government",
+                            text=texts,
                             link=THEYWORKFORYOU_LINK_URL.format(
                                 member["DisplayAs"].lower().replace(" ", "_"),
                                 member["MemberFrom"].lower().replace(" ", "_"),
@@ -302,13 +329,22 @@ class Convert:
 
                 if name and last_appointer and salary:
                     self.logger.info(name)
-                    self.add_entity(entity_type="advisor", name=name, aliases=[name])
+                    self.add_entity(entity_type="person", name=name, aliases=[name])
 
                     resolved_employer = self.get_spad_employer(last_appointer)
                     self.add_relationship(
-                        relationship_type="employed_by",
+                        relationship_type="advisor_to",
                         source=name,
                         target=resolved_employer,
+                        text=[
+                            "An advisor to {}".format(resolved_employer)
+                        ],
+                        link=SPADS_URL,
+                    )
+                    self.add_relationship(
+                        relationship_type="employed_by",
+                        source=name,
+                        target="Her Majesty's Government",
                         text=[
                             "I am employed by {} on a salary of {}".format(
                                 resolved_employer, str(salary.split("-")[0])
@@ -401,7 +437,7 @@ class Convert:
                         source=member["DisplayAs"],
                         relationship_type="member_of",
                         target="Her Majesty's Government",
-                        text=["Member of Her Majesty's Government"],
+                        text=["Employed as {} for Her Majesty's Government".format(post["Name"])],
                         amount=self.get_government_salary(post),
                         link=DATA_PARLIAMENT_LINK_URL.format(
                             member["@Member_Id"], "contact"
