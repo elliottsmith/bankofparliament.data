@@ -18,7 +18,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 COMPANIES_HOUSE_APIKEY = os.getenv("COMPANIES_HOUSE_APIKEY")
-OPENCORPORATES_APIKEY = os.getenv("OPENCORPORATES_APIKEY")
 CHARITIES_COMMISION_APIKEY = os.getenv("CHARITIES_COMMISION_APIKEY")
 
 if __name__ == "__main__":
