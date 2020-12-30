@@ -197,43 +197,28 @@ class Convert:
                             ),
                         )
 
-                    if last_category == "related_to" and not last_index == self.LOBBYISTS_REGMEM_INDEX:
-                        # add a second relationship, from target > source - employment
-                        self.add_relationship(
-                            relationship_type="employed_by",
-                            source="UNKNOWN",
-                            target=member["DisplayAs"],
-                            text=["Am employed by {}".format(member["DisplayAs"])],
-                            link=THEYWORKFORYOU_LINK_URL.format(
-                                member["DisplayAs"].lower().replace(" ", "_"),
-                                member["MemberFrom"].lower().replace(" ", "_"),
-                            ),
-                        )
-                    if last_index == self.LOBBYISTS_REGMEM_INDEX:
-                        # we have member > related_to > person
-                        # add a second relationship, from person > company - employment
-                        self.add_relationship(
-                            relationship_type="employed_by",
-                            source="UNKNOWN",
-                            target="UNKNOWN",
-                            text=texts,
-                            link=THEYWORKFORYOU_LINK_URL.format(
-                                member["DisplayAs"].lower().replace(" ", "_"),
-                                member["MemberFrom"].lower().replace(" ", "_"),
-                            ),
-                        )
-                        # add a third relationship, from company > gov - lobbying
-                        self.add_relationship(
-                            relationship_type="lobbies",
-                            source="UNKNOWN",
-                            target="Her Majesty's Government",
-                            text=texts,
-                            link=THEYWORKFORYOU_LINK_URL.format(
-                                member["DisplayAs"].lower().replace(" ", "_"),
-                                member["MemberFrom"].lower().replace(" ", "_"),
-                            ),
-                        )
+                    if last_category == "related_to":
+                        # relations are either emplyed by the member or are
+                        # employed as a lobbyist
+                        if last_index == self.LOBBYISTS_REGMEM_INDEX:
+                            _target = "UNKNOWN"
+                            _text = texts
+                        else:
+                            _target = member["DisplayAs"]
+                            _text = ["Am employed by {}".format(member["DisplayAs"])]
 
+                        # we have member > related_to > person
+                        # add secondary employment relationship
+                        self.add_relationship(
+                            relationship_type="employed_by",
+                            source="UNKNOWN",
+                            target=_target,
+                            text=_text,
+                            link=THEYWORKFORYOU_LINK_URL.format(
+                                member["DisplayAs"].lower().replace(" ", "_"),
+                                member["MemberFrom"].lower().replace(" ", "_"),
+                            ),
+                        )
                 else:
                     self.logger.warning("Unrecognised div class: {}".format(div))
 
@@ -522,7 +507,7 @@ class Convert:
         aliases = [i.strip().replace("  ", " ") for i in aliases if i]
 
         self.add_entity(
-            entity_type="politician",
+            entity_type="person",
             name=member["DisplayAs"],
             opencorporates_registration=opencorporates_registration,
             findthatcharity_registration=findthatcharity_registration,

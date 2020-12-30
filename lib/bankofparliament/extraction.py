@@ -127,7 +127,14 @@ class NamedEntityExtract:
                 )
                 continue
 
-            if relationship["source"] == "UNKNOWN":
+            if relationship["source"] == "UNKNOWN" and relationship["target"] == "UNKNOWN":
+                # family lobbyist
+                resolved_source = self.get_target_from_previous_relationship(index)
+                if resolved_source:
+                    relationship["source"] = resolved_source
+                    relationship["text"] = relationship["text"].lower().replace(resolved_source.lower(), "")
+
+            elif relationship["source"] == "UNKNOWN":
                 resolved_source = self.get_missing_source_entity(relationship)
                 if resolved_source:
                     relationship["source"] = resolved_source
@@ -220,6 +227,12 @@ class NamedEntityExtract:
         )
         self.add_relationship(relationship)
         self.log_relationship(index, relationship, debug_text, resolved)
+
+    def get_target_from_previous_relationship(self, index):
+        """"""
+        previous = self._extracted_relationships.tail(1)
+        target = str(previous["target"].item())  # this is the family member
+        return target
 
     def get_missing_source_entity(self, relationship):
         """Find the missing source entity for members relatives"""
