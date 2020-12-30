@@ -2,12 +2,13 @@
 
 
 
-Python tools to download data on members of parliament and extract entities and relationships.
-
+Python tools to download data on members of parliament and extract entities, relationships and monetary values.
 
 
 Extracted data can then be used to populate a Neo4J graph database.
 
+
+Generates the data powering [https://bankofparliament.co.uk/](https://bankofparliament.co.uk/)
 
 
 ## Prerequisites
@@ -119,3 +120,14 @@ Create Neo4J database from extracted entities and relationship csv data
 - spacy model for recurring and single payments
 
 - spacy model for custom / known entities
+
+- advisors and politician types, deprecate - politicians can be infered via
+'member_of' relationship type, and will create new 'advisor_to' type
+
+- advisors - two relationships - advises minister, employed by hm gov
+
+- issue with rachel reeves relationship amount
+
+- url link seems broken
+
+- update for new spads data
