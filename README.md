@@ -74,7 +74,7 @@ To download the initial dataset
 
 
 
-`./bin/bop_download_data`
+`bop_download_data`
 
 
 
@@ -82,7 +82,7 @@ To convert initial dataset to csv entities and relationship files
 
 
 
-`./bin/bop_convert_data_to_csv -m data/generated/{date}/members.json`
+`bop_convert_data_to_csv -m data/generated/{date}/members.json`
 
 
 
@@ -90,7 +90,7 @@ Extract named entities from csv data and output to new files
 
 
 
-`./bin/bop_ner_extract -e data/generated/{date}/entities.csv -r data/generated/{date}/relationships.csv`
+`bop_ner_extract -e data/generated/{date}/entities.csv -r data/generated/{date}/relationships.csv`
 
 
 
@@ -98,7 +98,7 @@ The `bop_ner_extract` tool also takes an optional argument `--custom_entities` w
 
 
 
-`./bin/bop_ner_extract -e data/generated/{date}/entities.csv -r data/generated/{date}/relationships.csv -c data/custom/default_custom_entities.csv`
+`bop_ner_extract -e data/generated/{date}/entities.csv -r data/generated/{date}/relationships.csv -c data/custom/default_custom_entities.csv`
 
 
 
@@ -106,7 +106,7 @@ Create Neo4J database from extracted entities and relationship csv data
 
 
 
-`./bin/bop_create_db -e data/generated/{date}/extracted/entities.csv -r data/generated/{date}/extracted/relationships.csv`
+`bop_create_db -e data/generated/{date}/extracted/entities.csv -r data/generated/{date}/extracted/relationships.csv`
 
 
 
