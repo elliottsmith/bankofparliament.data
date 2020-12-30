@@ -538,6 +538,15 @@ class BaseRelationship:
         self, text, alias_entity_types=None, prefered_entity_types=None
     ):
         """Find alias from text"""
+        if text.lower() == "community":
+            entity = make_entity_dict(
+                entity_type="union",
+                name="community union",
+                aliases=[text],
+            )
+            return entity
+
+
         alias_entity_types = (
             alias_entity_types if alias_entity_types else self.ALIAS_ENTITY_TYPES
         )
@@ -665,7 +674,6 @@ class BaseRelationship:
 
 def get_relationship_solver(*args, **kwargs):
     """Utility function to get correct relationship solver object"""
-
     relationship_type = kwargs["relationship"]["relationship_type"]
     if not relationship_type:
         return None

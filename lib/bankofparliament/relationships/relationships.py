@@ -213,7 +213,7 @@ class CompoundRelationship(BaseRelationship):
 
             elif self.entity_type == "union":
                 entity = self.find_alias_from_text(
-                    text=entry, alias_entity_types=["union"]
+                    text=entry, alias_entity_types=["union", "person"], prefered_entity_types=["union"] # accounting for bug
                 )
                 if entity:
                     self.extracted_entities.append(entity)
