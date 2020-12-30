@@ -546,7 +546,6 @@ class BaseRelationship:
             )
             return entity
 
-
         alias_entity_types = (
             alias_entity_types if alias_entity_types else self.ALIAS_ENTITY_TYPES
         )

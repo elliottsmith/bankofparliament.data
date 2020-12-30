@@ -87,7 +87,7 @@ class NamedEntityExtract:
             new_name = new_entity["name"]
             new_aliases = new_entity["aliases"].lower().split(";")
 
-            filt = (entities["name"] == new_name)
+            filt = entities["name"] == new_name
             existing_entities = entities.loc[filt]
 
             if len(existing_entities):
@@ -98,7 +98,9 @@ class NamedEntityExtract:
                 new_entities.append(new_entity.to_dict())
 
         if len(new_entities):
-            entities = pandas.concat([entities, pandas.DataFrame(new_entities)], ignore_index=True)
+            entities = pandas.concat(
+                [entities, pandas.DataFrame(new_entities)], ignore_index=True
+            )
 
         return entities
 
@@ -127,12 +129,19 @@ class NamedEntityExtract:
                 )
                 continue
 
-            if relationship["source"] == "UNKNOWN" and relationship["target"] == "UNKNOWN":
+            if (
+                relationship["source"] == "UNKNOWN"
+                and relationship["target"] == "UNKNOWN"
+            ):
                 # family lobbyist
                 resolved_source = self.get_target_from_previous_relationship(index)
                 if resolved_source:
                     relationship["source"] = resolved_source
-                    relationship["text"] = relationship["text"].lower().replace(resolved_source.lower(), "")
+                    relationship["text"] = (
+                        relationship["text"]
+                        .lower()
+                        .replace(resolved_source.lower(), "")
+                    )
 
             elif relationship["source"] == "UNKNOWN":
                 resolved_source = self.get_missing_source_entity(relationship)

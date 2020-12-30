@@ -18,7 +18,9 @@ from .text import eval_string_as_list
 class GraphDB:
     """Generates neo4j database"""
 
-    def __init__(self, host, port, user, password, entities, relationships, limit, logger):
+    def __init__(
+        self, host, port, user, password, entities, relationships, limit, logger
+    ):
         """Initialise the neo4j graphdb class"""
         self.logger = logger
         self.host = host

@@ -157,7 +157,7 @@ class Convert:
                 target="House of Commons",
                 text=["Member of the House of Commons"],
                 link=DATA_PARLIAMENT_LINK_URL.format(member["@Member_Id"], "contact"),
-                amount=self.get_house_of_commons_salary()
+                amount=self.get_house_of_commons_salary(),
             )
 
             # government relationship
@@ -245,7 +245,7 @@ class Convert:
                 target="House of Lords",
                 text=["Member of the House of Lords"],
                 link=DATA_PARLIAMENT_LINK_URL.format(member["@Member_Id"], "contact"),
-                amount=self.get_house_of_lords_salary(member)
+                amount=self.get_house_of_lords_salary(member),
             )
 
             # government relationship
@@ -321,9 +321,7 @@ class Convert:
                         relationship_type="advisor_to",
                         source=name,
                         target=resolved_employer,
-                        text=[
-                            "An advisor to {}".format(resolved_employer)
-                        ],
+                        text=["An advisor to {}".format(resolved_employer)],
                         link=SPADS_URL,
                     )
                     self.add_relationship(
@@ -422,7 +420,11 @@ class Convert:
                         source=member["DisplayAs"],
                         relationship_type="member_of",
                         target="Her Majesty's Government",
-                        text=["Employed as {} for Her Majesty's Government".format(post["Name"])],
+                        text=[
+                            "Employed as {} for Her Majesty's Government".format(
+                                post["Name"]
+                            )
+                        ],
                         amount=self.get_government_salary(post),
                         link=DATA_PARLIAMENT_LINK_URL.format(
                             member["@Member_Id"], "contact"

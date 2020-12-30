@@ -11,7 +11,12 @@ import operator
 
 # local libs
 from .utils import get_request
-from .constants import DATA_PARLIAMENT_QUERY_URL, THEYWORKFORYOU_QUERY_URL, HEADERS, SPADS_URL
+from .constants import (
+    DATA_PARLIAMENT_QUERY_URL,
+    THEYWORKFORYOU_QUERY_URL,
+    HEADERS,
+    SPADS_URL,
+)
 
 # third party libs
 import scraperwiki
@@ -82,7 +87,9 @@ class Download:
             else:
                 self.logger.warning("Failed to download special advisors pdf")
         else:
-            self.logger.debug("Special advisors pdf already downloaded: {}".format(self.spads_path))
+            self.logger.debug(
+                "Special advisors pdf already downloaded: {}".format(self.spads_path)
+            )
 
     def get_theyworkforyou_quota(self):
         """Log the current theyworkforyou api quota"""
