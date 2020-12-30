@@ -156,6 +156,7 @@ class Convert:
                 target="House of Commons",
                 text=["Member of the House of Commons"],
                 link=DATA_PARLIAMENT_LINK_URL.format(member["@Member_Id"], "contact"),
+                amount=self.get_house_of_commons_salary()
             )
 
             # government relationship
@@ -232,6 +233,7 @@ class Convert:
                 target="House of Lords",
                 text=["Member of the House of Lords"],
                 link=DATA_PARLIAMENT_LINK_URL.format(member["@Member_Id"], "contact"),
+                amount=self.get_house_of_lords_salary(member)
             )
 
             # government relationship
@@ -400,10 +402,13 @@ class Convert:
                         relationship_type="member_of",
                         target="Her Majesty's Government",
                         text=["Member of Her Majesty's Government"],
+                        amount=self.get_government_salary(post),
                         link=DATA_PARLIAMENT_LINK_URL.format(
                             member["@Member_Id"], "contact"
                         ),
                     )
+
+        # now committees? TODO
 
     def convert_donations(self):
         """Convert other political donations"""
@@ -518,6 +523,26 @@ class Convert:
             party += " Party"
 
         return party
+
+    def get_government_salary(self, post):
+        """"""
+        # TODO
+        # includes panel of chairs, committee chair, cabinet, shadow etc
+        if post["IsUnpaid"]:
+            return 0
+        return 0
+
+    def get_house_of_commons_salary(self):
+        """"""
+        # TODO
+        # https://www.theipsa.org.uk/mp-costs/mps-pay-and-pensions/
+        return 81932
+
+    def get_house_of_lords_salary(self, member):
+        """"""
+        # TODO
+        # must be data somewhere on this
+        return 0
 
     def save(self, output_dir=None):
         """Dump the entities and relationships to csv"""

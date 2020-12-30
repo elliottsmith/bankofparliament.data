@@ -130,4 +130,6 @@ Create Neo4J database from extracted entities and relationship csv data
 
 - url link seems broken
 
-- update for new spads data
+- update for new spads data - table formats have changed - need to revisit this
+
+- add mp's full salary, cabinet, shadow cab, panel of chairs, committee chairmanship and other gov roles
