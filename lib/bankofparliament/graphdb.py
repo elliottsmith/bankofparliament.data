@@ -12,6 +12,7 @@ from neo4j.exceptions import CypherSyntaxError
 # local libs
 from .constants import NEO4J_URL
 from .utils import read_csv_as_dataframe
+from .text import eval_string_as_list
 
 
 class GraphDB:
@@ -63,7 +64,17 @@ class GraphDB:
                 relationship = row.to_dict()
                 del relationship["source"]
                 del relationship["target"]
-                del relationship["text"]
+
+                try:
+                    texts = eval_string_as_list(relationship["text"])
+                    text = "</br>".join(texts)
+                except:
+                    text = relationship["text"]
+                text = text.replace('"', "'")
+                relationship["text"] = text
+
+                if relationship["amount"] == "N/A":
+                    relationship["amount"] = 0
 
                 self.create_relationship(source_node, target_node, relationship)
 
@@ -139,11 +150,11 @@ class GraphDB:
         relationship_data = self.cypher_arguments_from_dict(relationship)
 
         try:
-            cypher = "MATCH (a:{}),(b:{})".format(source_labels, target_labels)
-            cypher += 'WHERE a.name = "{}" AND b.name = "{}"'.format(
+            cypher = "MATCH (a:{}),(b:{}) ".format(source_labels, target_labels)
+            cypher += 'WHERE a.name = "{}" AND b.name = "{}" '.format(
                 source_name, target_name
             )
-            cypher += "CREATE (a)-[r:{} {}]->(b)".format(
+            cypher += "CREATE (a)-[r:{} {}]->(b) ".format(
                 relationship_type, relationship_data
             )
             cypher += "RETURN r"
