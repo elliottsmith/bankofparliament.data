@@ -112,7 +112,7 @@ class Download:
         """Query for house of commons members from data.parliament api"""
         self.logger.info("Downloading house of commons data")
 
-        search_criteria = "House=Commons|IsEligible=true"
+        search_criteria = "House=Commons"
 
         outputs = "Interests|PreferredNames|GovernmentPosts|ParliamentaryPosts"
         data = self._query_data_parlaiment(search_criteria, outputs)
