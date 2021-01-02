@@ -76,6 +76,8 @@ class GraphDB:
 
                 if relationship["amount"] == "N/A":
                     relationship["amount"] = 0
+                else:
+                    relationship["amount"] = int(float(relationship["amount"]))
 
                 self.create_relationship(source_node, target_node, relationship)
 
