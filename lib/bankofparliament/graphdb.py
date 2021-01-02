@@ -18,9 +18,7 @@ from .text import eval_string_as_list
 class GraphDB:
     """Generates neo4j database"""
 
-    def __init__(
-        self, host, port, user, password, entities, relationships, logger
-    ):
+    def __init__(self, host, port, user, password, entities, relationships, logger):
         """Initialise the neo4j graphdb class"""
         self.logger = logger
         self.host = host
@@ -104,7 +102,13 @@ class GraphDB:
             if node_type in ["politician", "advisor"]:
                 node_type = ":".join([node_type, "person"])
 
-            elif node_type not in ["person", "politician", "advisor", "property", "profession"]:
+            elif node_type not in [
+                "person",
+                "politician",
+                "advisor",
+                "property",
+                "profession",
+            ]:
                 node_type = ":".join([node_type, "organisation"])
 
             del node["entity_type"]
@@ -184,7 +188,7 @@ class GraphDB:
         for key, value in data.items():
             if key not in ["relationship_type", "entity_type", "aliases", "resolved"]:
                 if key == "amount":
-                    node_string += '{}: {}, '.format(key, value)
+                    node_string += "{}: {}, ".format(key, value)
                 else:
                     node_string += '{}: "{}", '.format(key, value)
         return "{" + node_string[:-2] + "}"

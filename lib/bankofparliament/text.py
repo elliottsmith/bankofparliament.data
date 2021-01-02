@@ -371,7 +371,7 @@ def result_matches_query(name, query, logger, min_word_length=2):
         and len(query.split()) >= min_word_length
     ):
         logger.debug("Matched: {} ---> {}".format(query, name))
-        return name.upper().replace('"', '')
+        return name.upper().replace('"', "")
 
     normalised_name = normalise_organisation_name(_name)
     normalised_query = normalise_organisation_name(_query)
@@ -381,19 +381,19 @@ def result_matches_query(name, query, logger, min_word_length=2):
     if normalised_name == normalised_query:
         if len(query.split()) >= min_word_length:
             logger.debug("Matched: {} ---> {}".format(query, name))
-            return name.upper().replace('"', '')
+            return name.upper().replace('"', "")
         possibles.append(name)
 
     if normalised_name in normalised_query:
         if len(normalised_name.split()) > min_word_length:
             logger.debug("Matched: {} ---> {}".format(query, name))
-            return name.upper().replace('"', '')
+            return name.upper().replace('"', "")
         possibles.append(name)
 
     elif normalised_query in normalised_name:
         if len(normalised_query.split()) > min_word_length:
             logger.debug("Matched: {} ---> {}".format(query, name))
-            return name.upper().replace('"', '')
+            return name.upper().replace('"', "")
         possibles.append(name)
 
     if strip_non_alphanumeric(normalised_name) == strip_non_alphanumeric(
@@ -401,7 +401,7 @@ def result_matches_query(name, query, logger, min_word_length=2):
     ):
         if len(query.split()) >= min_word_length:
             logger.debug("Matched: {} ---> {}".format(query, name))
-            return name.upper().replace('"', '')
+            return name.upper().replace('"', "")
 
     if possibles:
         for poss in possibles:
