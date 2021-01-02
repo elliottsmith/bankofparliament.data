@@ -19,7 +19,7 @@ class GraphDB:
     """Generates neo4j database"""
 
     def __init__(
-        self, host, port, user, password, entities, relationships, limit, logger
+        self, host, port, user, password, entities, relationships, logger
     ):
         """Initialise the neo4j graphdb class"""
         self.logger = logger
@@ -29,7 +29,6 @@ class GraphDB:
         self.password = password
         self.entities = entities
         self.relationships = relationships
-        self.limit = limit
         self.logger = logger
 
         graph = self.get_graphdb()
@@ -42,7 +41,7 @@ class GraphDB:
         entities = read_csv_as_dataframe(self.entities)
         relationships = read_csv_as_dataframe(self.relationships)
 
-        for (_index, row) in relationships[: self.limit].iterrows():
+        for (_index, row) in relationships.iterrows():
 
             source, target = None, None
             _source = row["source"]
