@@ -51,9 +51,9 @@ class Convert:
         self.add_constitutional_monarchy()
         self.add_parties()
         self.convert_commons_members_interests()
-        self.convert_lords_members_interests()
         if self._spads_data:
             self.convert_spads()
+        self.convert_lords_members_interests()
         self.save()
 
     @property
