@@ -105,10 +105,10 @@ RELATIONSHIP_TEMPLATE = [
 
 COMMONS_CATEGORIES = {
     "1": "employed_by",  # Employment and Earnings
-    "2": "donations_from",  # Donations
-    "3": "gifts_from",  # Gifts, Benefits and Hospitality
+    "2": "donation_from",  # Donations
+    "3": "gift_from",  # Gifts, Benefits and Hospitality
     "4": "visited",  # Overseas Visits
-    "5": "gifts_from",  # Gifts, Benefits and Hospitality Non UK
+    "5": "gift_from",  # Gifts, Benefits and Hospitality Non UK
     "6": "owner_of",  # Land and Property Portfolio
     "7": "shareholder_of",  # Shareholdings
     "8": "miscellaneous",  # Miscellaneous
@@ -124,7 +124,7 @@ LORDS_CATEGORIES = {
     "Category 5": "owner_of",  # Land and Property Portfolio
     "Category 6": "sponsored_by",  # Sponsorship
     "Category 7": "visited",  # Overseas Visits
-    "Category 8": "gifts_from",  # Gifts, Benefits and Hospitality
+    "Category 8": "gift_from",  # Gifts, Benefits and Hospitality
     "Category 9": "miscellaneous",  # Miscellaneous
     "Category 10": "miscellaneous",  # Miscellaneous
 }

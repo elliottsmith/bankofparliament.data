@@ -100,6 +100,13 @@ class GraphDB:
         existing_node = self.get_node(node)
         if not existing_node:
             node_type = node["entity_type"]
+
+            if node_type in ["politician", "advisor"]:
+                node_type = ":".join([node_type, "person"])
+
+            elif node_type not in ["person", "politician", "advisor", "property", "profession"]:
+                node_type = ":".join([node_type, "organisation"])
+
             del node["entity_type"]
             try:
                 cypher = "CREATE (n:{} {}) RETURN n, labels(n)".format(
@@ -175,6 +182,9 @@ class GraphDB:
         """Convert dictionary to cypher query arguments"""
         node_string = ""
         for key, value in data.items():
-            if key not in ["relationship_type", "entity_type", "aliases"]:
-                node_string += '{}: "{}", '.format(key, value)
+            if key not in ["relationship_type", "entity_type", "aliases", "resolved"]:
+                if key == "amount":
+                    node_string += '{}: {}, '.format(key, value)
+                else:
+                    node_string += '{}: "{}", '.format(key, value)
         return "{" + node_string[:-2] + "}"

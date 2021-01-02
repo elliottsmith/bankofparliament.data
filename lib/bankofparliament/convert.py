@@ -314,7 +314,7 @@ class Convert:
 
                 if name and last_appointer and salary:
                     self.logger.info(name)
-                    self.add_entity(entity_type="person", name=name, aliases=[name])
+                    self.add_entity(entity_type="advisor", name=name, aliases=[name])
 
                     resolved_employer = self.get_spad_employer(last_appointer)
                     self.add_relationship(
@@ -509,7 +509,7 @@ class Convert:
         aliases = [i.strip().replace("  ", " ") for i in aliases if i]
 
         self.add_entity(
-            entity_type="person",
+            entity_type="politician",
             name=member["DisplayAs"],
             opencorporates_registration=opencorporates_registration,
             findthatcharity_registration=findthatcharity_registration,

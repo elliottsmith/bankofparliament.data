@@ -722,12 +722,12 @@ def get_relationship_solver(*args, **kwargs):
 
         return Sponsorship(*args, **kwargs)
 
-    if relationship_type == "donations_from":
+    if relationship_type == "donation_from":
         from .donation import Donation
 
         return Donation(*args, **kwargs)
 
-    if relationship_type == "gifts_from":
+    if relationship_type == "gift_from":
         from .gift import Gift
 
         return Gift(*args, **kwargs)
@@ -741,5 +741,10 @@ def get_relationship_solver(*args, **kwargs):
         from .employment import Employment
 
         return Employment(*args, **kwargs)
+
+    if relationship_type == "advisor_to":
+        from .advisor import Advisor
+
+        return Advisor(*args, **kwargs)
 
     return None
