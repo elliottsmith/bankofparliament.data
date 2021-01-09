@@ -113,12 +113,12 @@ class Convert:
         self.add_entity(
             entity_type="house_of_parliament",
             name="House of Commons",
-            aliases=["The Commons"],
+            aliases=["The Commons", "Member of the House of Commons"],
         )
         self.add_entity(
             entity_type="house_of_parliament",
             name="House of Lords",
-            aliases=["The Lords"],
+            aliases=["The Lords", "Member of the House of Lords"],
         )
 
     def add_parties(self):
@@ -152,10 +152,10 @@ class Convert:
 
             # house of commons membership
             self.add_relationship(
-                relationship_type="member_of",
+                relationship_type="employed_by",
                 source=member["DisplayAs"],
                 target="House of Commons",
-                text=["Member of the House of Commons"],
+                text=["Member of the House of Commons. Salary: £{}".format(self.get_house_of_commons_salary())],
                 link=DATA_PARLIAMENT_LINK_URL.format(member["@Member_Id"], "contact"),
                 amount=self.get_house_of_commons_salary(),
             )
@@ -240,10 +240,10 @@ class Convert:
 
             # house of lords membership
             self.add_relationship(
-                relationship_type="member_of",
+                relationship_type="employed_by",
                 source=member["DisplayAs"],
                 target="House of Lords",
-                text=["Member of the House of Lords"],
+                text=["Member of the House of Lords. Salary: {}".format(self.get_house_of_lords_salary(member))],
                 link=DATA_PARLIAMENT_LINK_URL.format(member["@Member_Id"], "contact"),
                 amount=self.get_house_of_lords_salary(member),
             )
@@ -329,8 +329,8 @@ class Convert:
                         source=name,
                         target="Her Majesty's Government",
                         text=[
-                            "I am employed by {} on a salary of {}".format(
-                                resolved_employer, str(salary.split("-")[0])
+                            "Employed as advisor to Her Majesty's Government. Salary: {}".format(
+                                str(salary.split("-")[0])
                             )
                         ],
                         link=SPADS_URL,
@@ -418,7 +418,7 @@ class Convert:
                 if not post["EndDate"]:
                     self.add_relationship(
                         source=member["DisplayAs"],
-                        relationship_type="member_of",
+                        relationship_type="employed_by",
                         target="Her Majesty's Government",
                         text=[
                             "Employed as {} for Her Majesty's Government".format(

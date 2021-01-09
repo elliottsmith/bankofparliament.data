@@ -35,7 +35,7 @@ class Employment(TextRelationship):
 
     TARGET_ENTITY_TYPE = "company"
     ALIAS_ENTITY_TYPES = ENTITY_TYPES
-    PREFERRED_ALIAS_ENTITY_TYPES = ["company", "pollster"]
+    PREFERRED_ALIAS_ENTITY_TYPES = ["house_of_parliament", "company", "pollster"]
 
     SPLITTERS = ["speaker", "engagement", "speaking"]
     STARTERS = ["and ", ",", "of ", "in ", "group"]
