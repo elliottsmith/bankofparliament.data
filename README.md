@@ -90,15 +90,15 @@ Extract named entities from csv data and output to new files
 
 
 
-`bop_ner_extract -e data/generated/{date}/entities.csv -r data/generated/{date}/relationships.csv`
+`bop_extract -e data/generated/{date}/entities.csv -r data/generated/{date}/relationships.csv`
 
 
 
-The `bop_ner_extract` tool also takes an optional argument `--custom_entities` which greatly improves accuracy and coverage. A sample file is included in the data/custom directory.
+The `bop_extract` tool also takes an optional argument `--custom_entities` which greatly improves accuracy and coverage. A sample file is included in the data/custom directory.
 
 
 
-`bop_ner_extract -e data/generated/{date}/entities.csv -r data/generated/{date}/relationships.csv -c data/custom/default_custom_entities.csv`
+`bop_extract -e data/generated/{date}/entities.csv -r data/generated/{date}/relationships.csv -c data/custom/default_custom_entities.csv`
 
 
 
@@ -107,22 +107,3 @@ Create Neo4J database from extracted entities and relationship csv data
 
 
 `bop_create_db -e data/generated/{date}/extracted/entities.csv -r data/generated/{date}/extracted/relationships.csv`
-
-
-
-## TODO
-
-
-- reconcile human entities to records in opencorporates
-
-- spacy model for recurring and single payments
-
-- spacy model for custom / known entities
-
-- issue with rachel reeves relationship amount
-
-- url link seems broken
-
-- update for new spads data - table formats have changed - need to revisit this
-
-- add mp's full salary, cabinet, shadow cab, panel of chairs, committee chairmanship and other gov roles
