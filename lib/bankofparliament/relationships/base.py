@@ -522,6 +522,7 @@ class BaseRelationship:
                 self.logger,
             )
             if organisation_name:
+                organisation_registration = "/companies/gb/{}".format(organisation_registration)
                 entity = make_entity_dict(
                     entity_type="company",
                     name=organisation_name,

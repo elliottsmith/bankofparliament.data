@@ -159,11 +159,15 @@ def reconcile_opencorporates_entity_by_id(_id, logger):
         OPENCORPORATES_RECONCILE_FLYOUT_URL, logger, user=None, params=params
     )
     if request:
-        html = request.json()["html"]
-        soup = BeautifulSoup(html, features="lxml")
-        title = soup.find(id="oc-flyout-title")
-        if title:
-            return title.text.strip()
+        try:
+            html = request.json()["html"]
+            soup = BeautifulSoup(html, features="lxml")
+            title = soup.find(id="oc-flyout-title")
+            if title:
+                return title.text.strip()
+        except Exception as e:
+            return None
+
     return None
 
 
@@ -279,7 +283,7 @@ def findcorporate_by_name(name, logger, jurisdiction="gb"):
 
             if result["score"] > ELASTIC_MIN_SCORE:
 
-                organisation_registration = result["id"].split("/")[-1]
+                organisation_registration = result["id"]
 
                 matched_corporate = result_matches_query(result["name"], name, logger)
                 if matched_corporate:

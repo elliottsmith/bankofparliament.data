@@ -56,6 +56,8 @@ class NamedEntityExtract:
 
         if custom_entities:
             _custom_entities = read_csv_as_dataframe(custom_entities)
+            if "reconciled" in _custom_entities.columns:
+                _custom_entities = _custom_entities.drop("reconciled", 1)
             self.custom_path = custom_entities
         else:
             _custom_entities = pandas.DataFrame(columns=_entities.columns)
@@ -375,16 +377,8 @@ class NamedEntityExtract:
 
                 _guess_type = None
 
-                if "service.gov.uk" in registered_link:
-                    opencorporates_registration = registered_link.split("/")[-1]
-                    entity_name = reconcile_opencorporates_entity_by_id(
-                        opencorporates_registration,
-                        self.logger,
-                    )
-                    _guess_type = "company"
-
-                elif "opencorporates" in registered_link:
-                    opencorporates_registration = registered_link.split("/")[-1]
+                if "opencorporates" in registered_link:
+                    opencorporates_registration = registered_link.split("opencorporates.com")[-1]
                     entity_name = reconcile_opencorporates_entity_by_id(
                         registered_link.split("opencorporates.com")[-1], self.logger
                     )
@@ -392,7 +386,7 @@ class NamedEntityExtract:
 
                 elif "findthatcharity.uk" in registered_link:
 
-                    findthatcharity_registration = registered_link.split("/")[-1]
+                    findthatcharity_registration = registered_link.split("findthatcharity.uk/orgid/")[-1]
                     entity_name = reconcile_findthatcharity_entity_by_id(
                         findthatcharity_registration, self.logger
                     )
