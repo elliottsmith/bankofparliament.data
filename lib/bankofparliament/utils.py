@@ -208,7 +208,7 @@ def get_universities(logger):
 
 ############################################################################
 # finder functions
-def findthatcharity_by_name(name, logger, end_point="all"):
+def findthatcharity_by_name(name, logger, end_point="all", min_word_length=2):
     """Find a registered charity/university/local authority etc by name"""
     ELASTIC_MIN_SCORE = 99
 
@@ -258,7 +258,7 @@ def findthatcharity_by_name(name, logger, end_point="all"):
                 if not entity_type:
                     entity_type = "misc"
 
-                matched_corporate = result_matches_query(_name, name, logger)
+                matched_corporate = result_matches_query(_name, name, logger, min_word_length=min_word_length)
                 if matched_corporate:
                     return (matched_corporate, organisation_registration, entity_type)
 
