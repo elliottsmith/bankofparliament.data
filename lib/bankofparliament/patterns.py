@@ -304,6 +304,7 @@ RECURRING_INDICATORS = [
     "received allowances as",
     "will be listed below",
     "event speaker",
+    "for my managing director role"
 ]
 
 SINGLE_INDICATORS = [
@@ -351,6 +352,9 @@ SINGLE_INDICATORS = [
     "expected for a survey",
     "i drew £",
     "received:",
+    "received director’s fees",
+    "received a bonus",
+    "performance bonus of",
 ]
 
 # identifiers

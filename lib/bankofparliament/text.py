@@ -405,5 +405,5 @@ def result_matches_query(name, query, logger, min_word_length=2):
 
     if possibles:
         for poss in possibles:
-            logger.info("{}".format("Possible Match: {} ---> {}".format(query, poss)))
+            logger.debug("{}".format("Possible Match: {} ---> {}".format(query, poss)))
     return None
