@@ -448,5 +448,5 @@ def make_relationship_dict(**kwargs):
     data = dict.fromkeys(RELATIONSHIP_TEMPLATE, "N/A")
     for (key, value) in kwargs.items():
         if key in data:
-            data[key] = value if value else "N/A"
+            data[key] = value if value or isinstance(value, bool) else "N/A"
     return data

@@ -40,11 +40,11 @@ class GraphDB:
         relationships = read_csv_as_dataframe(self.relationships)
 
         for (_index, row) in relationships.iterrows():
-
             source, target = None, None
             _source = row["source"]
             _target = row["target"]
             _amount = row["amount"]
+            _recurring = row["recurring"]
 
             source_filter = entities["name"].str.lower() == _source.lower()
             source_match = entities.loc[source_filter]
@@ -56,13 +56,14 @@ class GraphDB:
             if len(target_match):
                 target = target_match.to_dict(orient="records")[0]
 
-            if source and target and _amount != "recurring":
+            if source and target and _recurring != "N/A":
                 source_node = self.create_node(source)
                 target_node = self.create_node(target)
 
                 relationship = row.to_dict()
                 del relationship["source"]
                 del relationship["target"]
+                del relationship["recurring"]
 
                 try:
                     texts = eval_string_as_list(relationship["text"])

@@ -81,6 +81,7 @@ class BaseRelationship:
         self.text = relationship["text"]
         self.date = None
         self.amount = None
+        self.recurring = False
 
         self.extracted_entities = []
         self.extracted_custom_entities = []
@@ -148,6 +149,7 @@ class BaseRelationship:
         self.relationship["target"] = self.target
         self.relationship["date"] = self.date
         self.relationship["amount"] = self.amount
+        self.relationship["recurring"] = self.recurring
 
     def extract_date_from_text(self, text):
         """Extract date from text"""
@@ -165,13 +167,30 @@ class BaseRelationship:
         amounts = []
         for entity in entities:
             if entity[1] in ["MONEY"]:
-                pounds = entity[0].split(".")[0]
-                amounts.append(re.sub("[^0-9]", "", pounds))
+                multiple_amounts = set()
+                if " and " in entity[0]:
+                    for each in entity[0].split(" and "):
+                        multiple_amounts.add(each)
+                if "-" in entity[0]:
+                    for each in entity[0].split("-"):
+                        multiple_amounts.add(each)
+
+                self.logger.debug("Multiple Amounts Found: {}".format(multiple_amounts))
+                if multiple_amounts:
+                    for amount in multiple_amounts:
+                        pounds = amount.split(".")[0]
+                        amounts.append(int(re.sub("[^0-9]", "", pounds)))
+                else:
+                    pounds = entity[0].split(".")[0]
+                    amounts.append(int(re.sub("[^0-9]", "", pounds) or 0))
+
             elif entity[1] in ["CARDINAL"]:
                 if "£{}".format(entity[0]) in text:
                     pounds = entity[0].split(".")[0]
-                    amounts.append(re.sub("[^0-9]", "", pounds))
+                    amounts.append(int(re.sub("[^0-9]", "", pounds)))
+
         if amounts:
+            self.logger.debug("Amounts found: {}".format(amounts))
             return max(amounts)
 
         match = re.search(r"(£[0-9,.]+)|([0-9]+\.[0-9][0-9])", text)
@@ -192,7 +211,7 @@ class BaseRelationship:
                 )
 
                 for (_index, rel) in sources_relationships.iterrows():
-                    if rel["target"] != "UNKNOWN" and rel["amount"] == "recurring":
+                    if rel["target"] != "UNKNOWN" and rel["recurring"]:
                         self.logger.debug(
                             "{}: {}".format(
                                 colorize("Recurring payment used", "light blue"),
@@ -597,8 +616,6 @@ class BaseRelationship:
         ):
             for alias in aliases.split(";"):
                 alias = alias.strip().lower()
-                # if len(alias.split()) > 1 or etype in self.ACCEPTED_SINGLE_MATCHES:
-                #     pass
 
                 # does the word match exactly
                 if text == alias:

@@ -98,6 +98,7 @@ RELATIONSHIP_TEMPLATE = [
     "target",
     "date",
     "amount",
+    "recurring",
     "text",
     "link",
     "resolved",

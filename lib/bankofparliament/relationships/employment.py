@@ -116,7 +116,7 @@ class Employment(TextRelationship):
         self.date = self.extract_date_from_text(self.relationship["text"])
         self.amount = self.extract_amount_from_text(self.relationship["text"])
 
-        # recurring payments
+        # is this a recurring payment?
         recurring = self.recurring_payment_regex.search(
             self.relationship["text"].lower()
         )
@@ -127,7 +127,7 @@ class Employment(TextRelationship):
                     self.relationship["text"],
                 )
             )
-            self.amount = "recurring"
+            self.recurring = True
 
         if len(self.names_to_try) < 2:
             # no nouns - let's check for single payment, will save on query time

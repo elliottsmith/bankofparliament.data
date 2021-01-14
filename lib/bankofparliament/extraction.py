@@ -207,6 +207,7 @@ class NamedEntityExtract:
                         text=relationship["text"],
                         link=relationship["link"],
                         resolved=True,
+                        recurring=solver.recurring,
                     )
                     self.add_relationship(relationship)
                     self.log_relationship(index, relationship)
@@ -430,10 +431,11 @@ class NamedEntityExtract:
                 color_2 = "grey" if resolved else "yellow"
 
                 self.logger.info(
-                    "[{:05d}] [{}] {} [{} ({})] {}".format(
+                    "[{:05d}] [{}] {} ({}) [{} ({})] {}".format(
                         index,
                         colorize(str(relationship["source"]), color_1),
                         relationship["relationship_type"],
+                        relationship["amount"],
                         colorize(str(relationship["target"]), color_2),
                         colorize(str(target_entity_type), color_2),
                         colorize(str(relationship["text"]), color_1),
